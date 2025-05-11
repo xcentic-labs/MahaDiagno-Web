@@ -38,6 +38,7 @@ export const getopt = async (req, res) => {
 export const updateUser = async (req, res) => {
     try {
         const id = req.params.id
+        console.log(req.body);
         const { firstName, lastName, email } = req.body;
 
         if (!firstName || !lastName || !email) return res.json({ "error": "Require All filed for Update" });
@@ -62,14 +63,20 @@ export const updateUser = async (req, res) => {
 }
 
 
-export const verifyOtp = (req,res)=>{
+export const verifyOtp = async (req,res)=>{
     try {
-        const {otp} = req.body
+        const {otp , phoneNumber} = req.body
 
-        if(!otp) return res.status(400).json({ "error": "All fields Are Required" });
+        if(!otp || !phoneNumber) return res.status(400).json({ "error": "All fields Are Required" });
+
+        const user = await prisma.user.findUnique({
+            where : {
+                phoneNumber : phoneNumber
+            }
+        })
 
         if(otp != '1234') return res.status(400).json({ "error": "Invalid OTP" });
-        return res.status(200).json({ "message": "OTP Matched" });
+        return res.status(200).json({ "message": "OTP Matched" , user : user });
     } catch (error) {
         return res.status(500).json({ "error": "Unable to process OTP internal server error" });
     }
@@ -87,8 +94,24 @@ export const getuser =async (req,res)=>{
             }
         });
 
+        console.log({
+            phoneNumber : user.phoneNumber,
+            firstName : user.first_name,
+            lastName : user.last_name,
+            email : user.email,
+            id : user.id
+            
+        })
+
         if(!user) return res.status(404).json({"error": "User Not Found" });
-        return res.status(200).json({"message": "User found"  ,  userData : user});
+        return res.status(200).json({"message": "User found"  ,  userData : {
+            phoneNumber : user.phoneNumber,
+            firstName : user.first_name,
+            lastName : user.last_name,
+            email : user.email,
+            id : user.id
+            
+        }});
     } catch (error) {
         console.log(error);
         return res.status(404).json({"error": "Unable to get user Internal server error" }); 

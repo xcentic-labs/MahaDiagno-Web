@@ -14,10 +14,11 @@ datasource db {
 }
 
 model zone {
-  id       Int    @unique @default(autoincrement())
-  pincode  String @unique
-  district String
-  state    String
+  id         Int          @unique @default(autoincrement())
+  pincode    String       @unique
+  district   String
+  state      String
+  serviceBoy serviceboy[]
 }
 
 model User {
@@ -27,6 +28,7 @@ model User {
   email       String?
   phoneNumber String        @unique
   userId      appointment[]
+  address     address[]
 }
 
 model appointment {
@@ -42,16 +44,37 @@ model appointment {
   status Status @default(SCHEDULED)
 
   // user id
-  booked_by Int
-  userId    User @relation(fields: [booked_by], references: [id])
+  userId Int
+  booked_by  User @relation(fields: [userId], references: [id])
 
   // service id 
   service_id Int
   serviceId  services @relation(fields: [service_id], references: [id])
 
+  // service boy
+  acceptedBy Int?
+  serviceBoy serviceboy? @relation(fields: [acceptedBy], references: [id])
+
+  // address
+  addressId Int
+  address   address @relation(fields: [addressId], references: [id])
+
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
+}
 
+model address {
+  id          Int           @unique @default(autoincrement())
+  area        String
+  landmark    String
+  pincode     String
+  district    String
+  state       String
+  lat         String
+  lng         String
+  userId      Int
+  affilatedTo User          @relation(fields: [userId], references: [id])
+  address     appointment[]
 }
 
 model services {
@@ -62,6 +85,27 @@ model services {
   serviceId  appointment[]
 }
 
+model serviceboy {
+  id          Int           @unique @default(autoincrement())
+  first_name  String
+  last_name   String
+  phoneNumber String        @unique
+  email       String
+  password    String
+  zoneId      Int
+  status      Boolean       @default(false)
+  zone        zone          @relation(fields: [zoneId], references: [id])
+  appointment appointment[]
+}
+
+model admin {
+  id         Int    @unique @default(autoincrement())
+  first_name String
+  last_name  String
+  email      String @unique
+  password   String
+}
+
 enum Gender {
   Male
   Female
@@ -69,9 +113,8 @@ enum Gender {
 }
 
 enum Status {
-  SCHEDULED   // The appointment is scheduled but not yet confirmed.
-  ACCEPTED   // The appointment has been confirmed.
-  IN_PROGRESS // The service is currently being provided.
-  COMPLETED   // The appointment is finished.
-  CANCELLED   // The appointment was cancelled.
+  SCHEDULED // The appointment is scheduled but not yet confirmed.
+  ACCEPTED // The appointment has been confirmed.
+  COMPLETED // The appointment is finished.
+  CANCELLED // The appointment was cancelled.
 }
