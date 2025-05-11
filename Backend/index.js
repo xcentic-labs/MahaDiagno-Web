@@ -11,6 +11,16 @@ import { AdminRouter } from './Router/AdminRouter.js';
 import { AddressRouter } from './Router/AddressRouter.js';
 import { AppointmentRouter } from './Router/AppointmentRouter.js';
 
+
+// cros 
+import cors from 'cors'
+
+app.use(cors({
+  origin: "*",
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true
+}));
+
 const PORT = process.env.PORT || 8000;
 const app = express();
 
