@@ -71,32 +71,7 @@ export default function AppointmentTable() {
     }
   };
 
-  // Handle delete appointment
-  const handleDeleteAppointment = async (id: number) => {
-    try {
-      setDeletingIds(prevIds => new Set(prevIds).add(id));
-      
-      const res = await axiosClient.get(`/appointment/deleteappointement/${id}`);
 
-      if (res.status === 200) {
-        toast.success("Appointment deleted successfully");
-        // Update local state instead of refetching all data
-        setAppointments(prevAppointments => 
-          prevAppointments.filter(appointment => appointment.id !== id)
-        );
-      } else {
-        toast.error("Failed to delete appointment");
-      }
-    } catch (error) {
-      toast.error("An error occurred while deleting the appointment");
-    } finally {
-      setDeletingIds(prevIds => {
-        const newIds = new Set(prevIds);
-        newIds.delete(id);
-        return newIds;
-      });
-    }
-  };
 
   // Handle view details
   const handleViewDetails = (id: number): void => {
