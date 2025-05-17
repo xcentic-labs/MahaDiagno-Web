@@ -28,7 +28,7 @@ export default function LoginPage() {
             <div className="text-primary-foreground flex items-center justify-center rounded-md">
               <Image src={logo.src} width={50} height={50} alt="Logo" />
             </div>
-            <p className=" translate-y-1 font-bold">Mahaiagno</p>
+            <p className=" translate-y-1 font-bold">Mahiagno</p>
           </a>
         </div>
         <div className="flex flex-1 items-center justify-center">
