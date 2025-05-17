@@ -3,7 +3,7 @@ import { addAdmin, adminLogin, deleteAdmin, getAdmins } from '../Controller/Admi
 
 export const AdminRouter = express.Router();
 
-AdminRouter.post('/addadmin' , addAdmin);
-AdminRouter.delete('/deleteadmin/:id' , deleteAdmin);
-AdminRouter.post('/adminlogin' , adminLogin);
-AdminRouter.get('/getadmins' , getAdmins )
+AdminRouter.post('/addadmin' , addAdmin); // admin protected
+AdminRouter.delete('/deleteadmin/:id' , deleteAdmin); // admin protected
+AdminRouter.post('/adminlogin' , adminLogin); 
+AdminRouter.get('/getadmins' , getAdmins ) // admin protected

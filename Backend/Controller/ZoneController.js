@@ -42,6 +42,7 @@ export const deleteZone = async (req , res)=>{
         if(!result) return res.status(404).json({"error" : "Zone not found"});
         return res.status(200).json({"error" : "Zone Deleted Sucessfully"});
     } catch (error) {
+        console.log(error)
         return res.status(500).json({"error" : "Unable to delete the Zone Internal Server error"});     
     }
 }

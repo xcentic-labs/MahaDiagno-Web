@@ -67,12 +67,30 @@ export const getAllServiceBoys = async (req, res) => {
                         district : true,
                         pincode : true,   
                     }
+                },
+                _count : {
+                    select : {
+                        appointment : true
+                    }
                 }
             }
         })
 
+        const allServiceBoy = serviceBoys.map((serviceBoy)=>{
+            return {
+                id : serviceBoy.id,
+                firstName : serviceBoy.first_name,
+                lastName : serviceBoy.last_name,
+                email : serviceBoy.email,
+                phoneNumber : serviceBoy.email,
+                phoneNumber : serviceBoy.phoneNumber,
+                zone : serviceBoy.zone,
+                totalAppointments : serviceBoy._count.appointment
+            }
+        })
+
         if (!serviceBoys) return res.status(500).json({ "error": "Unable To Fetch Service Boys" });
-        return res.status(200).json({ "message": "Service Boys Fetched Sucessfully", serviceBoys: serviceBoys });
+        return res.status(200).json({ "message": "Service Boys Fetched Sucessfully", serviceBoys: allServiceBoy });
     } catch (error) {
         console.log(error)
         return res.status(500).json({ "error": "Unable To FetchService Boy Internal Server Error" });

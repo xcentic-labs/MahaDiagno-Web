@@ -54,66 +54,155 @@ export const updateUser = async (req, res) => {
             }
         });
 
-        if(!user) return res.status(500).json({"error" : "Unable to Update User"});
-        return res.status(200).json({"message" : "User Updated Sucessfully"});
+        if (!user) return res.status(500).json({ "error": "Unable to Update User" });
+        return res.status(200).json({ "message": "User Updated Sucessfully" });
     } catch (error) {
         console.log(error);
-        return res.status(500).json({"error" : "Unable to Update User Internal server error"});
+        return res.status(500).json({ "error": "Unable to Update User Internal server error" });
     }
 }
 
 
-export const verifyOtp = async (req,res)=>{
+export const verifyOtp = async (req, res) => {
     try {
-        const {otp , phoneNumber} = req.body
+        const { otp, phoneNumber } = req.body
 
-        if(!otp || !phoneNumber) return res.status(400).json({ "error": "All fields Are Required" });
+        if (!otp || !phoneNumber) return res.status(400).json({ "error": "All fields Are Required" });
 
         const user = await prisma.user.findUnique({
-            where : {
-                phoneNumber : phoneNumber
+            where: {
+                phoneNumber: phoneNumber
             }
         })
 
-        if(otp != '1234') return res.status(400).json({ "error": "Invalid OTP" });
-        return res.status(200).json({ "message": "OTP Matched" , user : user });
+        if (otp != '1234') return res.status(400).json({ "error": "Invalid OTP" });
+        return res.status(200).json({ "message": "OTP Matched", user: user });
     } catch (error) {
         return res.status(500).json({ "error": "Unable to process OTP internal server error" });
     }
 }
 
-export const getuser =async (req,res)=>{
+export const getUser = async (req, res) => {
     try {
         const id = req.params.id;
 
-        if(!id) return res.status(400).json({"error": "All fields Are Required" });
+        if (!id) return res.status(400).json({ "error": "All fields Are Required" });
 
-        const user =  await prisma.user.findUnique({
-            where : {
-                id : +id
+        const user = await prisma.user.findUnique({
+            where: {
+                id: +id
+            },
+            select: {
+                id: true,
+                first_name: true,
+                last_name: true,
+                email: true,
+                phoneNumber: true,
+                userId: true
             }
         });
 
-        console.log({
-            phoneNumber : user.phoneNumber,
-            firstName : user.first_name,
-            lastName : user.last_name,
-            email : user.email,
-            id : user.id
-            
-        })
+        const userData = {
+            id: user.id,
+            firstName: user.first_name,
+            lastName: user.last_name,
+            email: user.email,
+            phoneNumber: user.phoneNumber,
+            appointments: user.userId.map((app) => {
+                return {
+                    id: app.id,
+                    patientFirstName: app.patient_first_name,
+                    patientLastName: app.patient_last_name,
+                    patientAge: app.patient_age,
+                    gender: app.gender,
+                    referringDoctor: app.referring_doctor,
+                    additionalPhoneNumber: app.additional_phone_number,
+                    status: app.status,
+                }
+            })
+        };
 
-        if(!user) return res.status(404).json({"error": "User Not Found" });
-        return res.status(200).json({"message": "User found"  ,  userData : {
-            phoneNumber : user.phoneNumber,
-            firstName : user.first_name,
-            lastName : user.last_name,
-            email : user.email,
-            id : user.id
-            
-        }});
+
+
+        if (!user) return res.status(404).json({ "error": "User Not Found" });
+        return res.status(200).json({
+            "message": "User get sucessfully", userData: userData
+        });
     } catch (error) {
         console.log(error);
-        return res.status(404).json({"error": "Unable to get user Internal server error" }); 
+        return res.status(404).json({ "error": "Unable to get user Internal server error" });
+    }
+}
+
+export const getAllUser = async (req, res) => {
+    try {
+        const user = await prisma.user.findMany({
+            select: {
+                id: true,
+                first_name: true,
+                last_name: true,
+                email: true,
+                phoneNumber: true,
+                _count: {
+                    select: {
+                        userId: true,
+                    }
+                }
+            }
+        });
+
+        const allUser = user.map((user) => {
+            return {
+                phoneNumber: user.phoneNumber,
+                firstName: user.first_name,
+                lastName: user.last_name,
+                email: user.email,
+                id: user.id,
+                totalAppointments: user._count.userId
+            }
+        });
+
+        if (!user) return res.status(404).json({ "error": "Unable To Get User" });
+        return res.status(200).json({ "message": "User get sucessfully", userData: allUser });
+    } catch (error) {
+        console.log(error);
+        return res.status(404).json({ "error": "Unable to get user Internal server error" });
+    }
+}
+
+
+export const deleteUser = async (req, res) => {
+    try {
+        const id = req.params.id;
+
+        if (!id) return res.status(400).json({ "error": "All fields Are Required" });
+
+        console.log(id);
+
+        await prisma.appointment.deleteMany({
+            where: {
+                userId: +id
+            }
+        })
+
+        await prisma.address.deleteMany({
+            where: {
+                userId: +id
+            }
+        })
+
+        const user = await prisma.user.delete({
+            where: {
+                id: +id
+            }
+        });
+
+        if (!user) return res.status(404).json({ "error": "User Not Found" });
+
+        return res.status(200).json({ "message": "User Deleted sucessfully" });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(404).json({ "error": "Unable to get user Internal server error" });
     }
 }

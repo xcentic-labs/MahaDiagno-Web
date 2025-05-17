@@ -3,10 +3,13 @@ import { addServiceBoy, changeStatus, deleteServiceBoy, getAllServiceBoys, getSe
 
 export const ServiceBoyRouter = express.Router();
 
-ServiceBoyRouter.post('/addserviceboy' , addServiceBoy);
+ServiceBoyRouter.post('/addserviceboy' , addServiceBoy); // admin protected
 ServiceBoyRouter.post('/login' , serviceBoyLogin);
-ServiceBoyRouter.delete('/deleteserviceboy/:id' , deleteServiceBoy);
-ServiceBoyRouter.get('/getallserviceboy' , getAllServiceBoys);
-ServiceBoyRouter.get('/getserviceboy/:id' , getServiceBoy);
+
+
+ServiceBoyRouter.delete('/deleteserviceboy/:id' , deleteServiceBoy); // admin protected
+ServiceBoyRouter.get('/getallserviceboy' , getAllServiceBoys); // admin protected
+
+ServiceBoyRouter.get('/getserviceboy/:id' , getServiceBoy); 
 ServiceBoyRouter.patch('/updatepasswrod/:id' , UpdatePassword);
-ServiceBoyRouter.patch('/changestatus/:id' , changeStatus);
+ServiceBoyRouter.patch('/changestatus/:id' , changeStatus); 

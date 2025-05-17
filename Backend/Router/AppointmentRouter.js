@@ -10,7 +10,7 @@ AppointmentRouter.post('/createappointement' , addAppointment);
 AppointmentRouter.delete('/deleteappointement' , deleteAppointment);
 
 // get routes
-AppointmentRouter.get('/getallappointement' , getAllAppointments);
+AppointmentRouter.get('/getallappointement' , getAllAppointments);  // admin protected
 AppointmentRouter.get('/myappointement/:id' , getPersonalAppointments);
 
 // gtespecfic 

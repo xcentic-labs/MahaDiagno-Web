@@ -336,17 +336,6 @@ export const deleteAppointment = async (req, res) => {
     }
 }
 
-export const getAllAppointments = async (req, res) => {
-    try {
-        const allAppointments = await prisma.appointment.findMany({});
-
-        if (!allAppointments) return res.status(500).json({ "error": "Unable To Fetch Appointments" });
-        return res.status(200).json({ "message": "Appointments Fetched Sucessfully", allAppointments: allAppointments });
-    } catch (error) {
-        console.log(error)
-        return res.status(500).json({ "error": "Unable To Fetch Appointments Internal Server Error" });
-    }
-}
 
 
 export const getPersonalAppointments = async (req, res) => {
@@ -588,6 +577,7 @@ export const getSpecificAppointment = async (req, res) => {
                 id: +id
             },
             select: {
+                id : true,
                 patient_first_name: true,
                 patient_last_name: true,
                 patient_age: true,
@@ -631,6 +621,7 @@ export const getSpecificAppointment = async (req, res) => {
 
         // Map snake_case fields to camelCase
         const formattedAppointment = {
+            id:  appointment.id,
             patientFirstName: appointment.patient_first_name,
             patientLastName: appointment.patient_last_name,
             patientAge: appointment.patient_age,
@@ -673,3 +664,82 @@ export const getSpecificAppointment = async (req, res) => {
         return res.status(500).json({ error: "Internal Server Error" });
     }
 };
+
+
+export const getAllAppointments = async (req, res) => {
+    try {
+
+        const matchedCondition = {}
+
+        if (req.query.status != 'all') {
+            matchedCondition.status = (req.query.status).toUpperCase()
+        }
+
+        const myAppointments = await prisma.appointment.findMany({
+            where: matchedCondition,
+            select: {
+                serviceId: {
+                    select: {
+                        title: true,
+                        price: true,
+                        id: true
+                    }
+                },
+                address: {
+                    select: {
+                        state: true,
+                        area: true,
+                        district: true,
+                        landmark: true
+                    }
+                },
+                status: true,
+                createdAt: true,
+                id: true,
+                booked_by: {
+                    select: {
+                        first_name: true,
+                        last_name: true,
+                        phoneNumber: true,
+                        email: true
+                    }
+                }
+            }
+        });
+
+
+        const allAppointments = myAppointments.map((appt) => {
+            return {
+                id: appt.id,
+                status: appt.status,
+                createdAt: appt.createdAt,
+
+                service: {
+                    id: appt.serviceId?.id,
+                    title: appt.serviceId?.title,
+                    price: appt.serviceId?.price,
+                },
+                address: {
+                    state: appt.address?.state,
+                    area: appt.address?.area,
+                    district: appt.address?.district,
+                    landmark: appt.address?.landmark,
+                },
+                bookedBy: {
+                    firstName: appt.booked_by?.first_name,
+                    lastName: appt.booked_by?.last_name,
+                    phoneNumber: appt.booked_by?.phoneNumber,
+                    email: appt.booked_by?.email,
+                }
+            };
+        });
+
+
+        if (!myAppointments) return res.status(500).json({ "error": "Unable To Fetch Appointments" });
+        return res.status(200).json({ "message": "Appointments Fetched Sucessfully", allAppointments: allAppointments });
+
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ "error": "Unable To Fetch Appointments Internal Server Error" });
+    }
+}

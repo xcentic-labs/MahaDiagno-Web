@@ -5,6 +5,6 @@ import { addService, deleteService, getService } from '../Controller/ServiceCont
 export const ServiceRouter = express.Router();
 
 
-ServiceRouter.post('/addservice' , uploadBanner.single('banner') , addService);
-ServiceRouter.delete('/deleteservice/:id' , deleteService);
-ServiceRouter.get('/getservices' , getService);
+ServiceRouter.post('/addservice' , uploadBanner.single('banner') , addService); // admin protected
+ServiceRouter.delete('/deleteservice/:id' , deleteService); // admin protected
+ServiceRouter.get('/getservices' , getService); // admin protected

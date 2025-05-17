@@ -1,5 +1,6 @@
 import prisma from "../Utils/prismaclint.js";
 import { generatePassword, matchedPassword } from "../Utils/password.js";
+import { generateToken } from "../Utils/jwt.js";
 
 export const addAdmin = async (req, res) => {
     try {
@@ -73,10 +74,13 @@ export const adminLogin = async(req,res)=>{
 
         if(!matchedPassword(password , admin.password)) return res.status(403).json({"error" : "Password Is Incorrect"});
 
+        const generatedToken = generateToken(admin.email , admin.id);
+
         return res.status(200).json({"message" : "LoggedIn Sucessfull" , admin : {
             firstName : admin.first_name,
             lastName :  admin.last_name,
             email : admin.email,
+            token : generatedToken
         }});
 
     } catch (error) {
@@ -88,11 +92,29 @@ export const adminLogin = async(req,res)=>{
 
 export const getAdmins = async (req , res)=>{
     try {
-        const result = await prisma.admin.findMany({});
+        const result = await prisma.admin.findMany({
+            where : {},
+            select : {
+                id : true,
+                first_name : true,
+                last_name : true,
+                email : true
+            }
+        });
+
+
+        const admins = result.map((admin)=>{
+            return {
+                id : admin.id,
+                firstName : admin.first_name,
+                lastName : admin.last_name,
+                email : admin.email
+            }
+        })
 
         if(!result) return res.status(500).json({"error" : "Unable to get Admins"});
 
-        return res.status(200).json({"message" : "Admin Data fetched Sucessfully" , admins : result});
+        return res.status(200).json({"message" : "Admin Data fetched Sucessfully" , admins : admins});
 
     } catch (error) {
         return res.status(500).json({"error" : "Unable to get Admins Internal Server error"});
