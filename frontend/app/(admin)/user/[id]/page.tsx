@@ -106,30 +106,30 @@ export default function UserDetail() {
             <div className="grid grid-cols-2 gap-4">
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-500 mb-1">First Name</label>
-                <div className="text-gray-700">{userData.firstName}</div>
+                <div className="text-gray-700">{userData?.firstName}</div>
               </div>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-500 mb-1">Last Name</label>
-                <div className="text-gray-700">{userData.lastName}</div>
+                <div className="text-gray-700">{userData?.lastName}</div>
               </div>
             </div>
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-500 mb-1">Email</label>
-              <div className="text-gray-700">{userData.email}</div>
+              <div className="text-gray-700">{userData?.email}</div>
             </div>
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-500 mb-1">Phone Number</label>
-              <div className="text-gray-700">+91 {userData.phoneNumber}</div>
+              <div className="text-gray-700">+91 {userData?.phoneNumber}</div>
             </div>
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-500 mb-1">User ID</label>
-              <div className="text-gray-700">{userData.id}</div>
+              <div className="text-gray-700">{userData?.id}</div>
             </div>
           </div>
           <div className="flex justify-center md:justify-end items-start">
             <div className="bg-gray-100 border rounded-full h-24 w-24 flex items-center justify-center">
               <span className="text-2xl font-medium text-gray-500">
-                {userData.firstName.charAt(0)}{userData.lastName.charAt(0)}
+                {userData?.firstName?.charAt(0)}{userData?.lastName?.charAt(0)}
               </span>
             </div>
           </div>
@@ -147,7 +147,7 @@ export default function UserDetail() {
           </div>
           <div>
             <span className="px-2 py-1 text-sm bg-gray-200 rounded-md text-gray-700">
-              Total: {userData.appointments.length}
+              Total: {userData?.appointments.length}
             </span>
           </div>
         </div>
@@ -169,31 +169,31 @@ export default function UserDetail() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {userData.appointments.length > 0 ? (
-                userData.appointments.map((appointment) => (
+              {userData?.appointments.length > 0 ? (
+                userData?.appointments.map((appointment) => (
                   <tr key={appointment.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {appointment.id}
+                      {appointment?.id}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">
-                      {appointment.patientFirstName} {appointment.patientLastName}
+                      {appointment?.patientFirstName} {appointment?.patientLastName}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {appointment.patientAge} / {appointment.gender}
+                      {appointment?.patientAge} / {appointment?.gender}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {appointment.referringDoctor}
+                      {appointment?.referringDoctor}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {appointment.additionalPhoneNumber}
+                      {appointment?.additionalPhoneNumber}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <span className={statusColors[appointment.status]}>
-                        {appointment.status}
+                      <span className={statusColors[appointment?.status]}>
+                        {appointment?.status}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <button className="text-blue-500 hover:text-blue-700 cursor-pointer" onClick={()=> redirect.push(`/appointment/${appointment.id}`)}>
+                      <button className="text-blue-500 hover:text-blue-700 cursor-pointer" onClick={()=> redirect.push(`/appointment/${appointment?.id}`)}>
                         <Eye />
                       </button>
                     </td>

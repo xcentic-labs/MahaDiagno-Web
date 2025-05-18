@@ -19,7 +19,7 @@ import {
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { useParams } from 'next/navigation';
-import { MapPin, Calendar, User, Phone, FileText, Upload, Trash2, ArrowLeft } from 'lucide-react';
+import { MapPin, Calendar, User, Phone, FileText, Upload, Trash2, PinIcon, Locate, LocationEdit, Download } from 'lucide-react';
 
 interface Address {
     area: string;
@@ -59,6 +59,9 @@ interface Appointment {
     bookedBy: BookedBy;
     service: Service;
     address: Address;
+    isReportUploaded: boolean;
+    reportName: string
+    appointementId : string
 }
 
 interface AppointmentDetailsProps { }
@@ -105,29 +108,39 @@ const AppointmentDetails = () => {
             return;
         }
 
+
         try {
             const formData = new FormData();
-            formData.append('report', selectedFile);
-            formData.append('appointmentId', id as string);
+            formData.append('file', selectedFile);
+            formData.append('appointementId', appointment?.appointementId  as string);
 
             toast.info('Uploading report...', { autoClose: false, toastId: 'uploading' });
 
             // Replace with your actual upload endpoint
-            await axiosClient.post('/reports/upload', formData, {
+            const res = await axiosClient.post(`/appointment/uploadreport/${id}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
             });
 
+
+            if (res.status == 200) {
+                toast.success('Report uploaded successfully!');
+                setSelectedFile(null);
+                setAppointment(res.data.appointment);
+            }
+            else {
+                toast.error(res.data.error)
+            }
+
+
+        } catch (err: any) {
             toast.dismiss('uploading');
-            toast.success('Report uploaded successfully!');
-            setSelectedFile(null);
-            // Refresh appointment data
-            fetchAppointmentDetails();
-        } catch (err) {
-            toast.dismiss('uploading');
-            toast.error('Failed to upload report. Please try again.');
+            toast.error(err.response.data.error)
             console.error('Error uploading report:', err);
+        }
+        finally {
+            toast.dismiss('uploading');
         }
     };
 
@@ -139,10 +152,16 @@ const AppointmentDetails = () => {
 
         try {
             toast.info('Deleting appointment...', { autoClose: false, toastId: 'deleting' });
-            await axiosClient.delete(`/appointment/delete/${id}`);
-            toast.dismiss('deleting');
-            toast.success('Appointment deleted successfully');
-            router.push('/appointments'); // Redirect to appointments list
+
+            const res = await axiosClient.delete(`/appointment/deleteappointement/${id}`);
+            if (res.status == 200) {
+                toast.dismiss('deleting');
+                toast.success('Appointment deleted successfully');
+                router.back();
+            }
+            else {
+                toast.error(res.data.error)
+            }
         } catch (err) {
             toast.dismiss('deleting');
             toast.error('Failed to delete appointment. Please try again.');
@@ -187,11 +206,33 @@ const AppointmentDetails = () => {
         }).format(date);
     };
 
+
+    const handleUpdateStatus = async (status: string) => {
+        try {
+            const res = await axiosClient.post('/appointment/updatestatus', {
+                status: status,
+                appointmentId: id
+            });
+
+            if (res.status == 200) {
+                toast.success("Appointement status Changed Sucesssfully");
+                setAppointment(res.data.appointment);
+            }
+            else {
+                toast.error("Unable to Change The status")
+            }
+        } catch (error) {
+            console.log(error);
+            toast.error("Unable to Change The status")
+        }
+    }
+
+
     return (
         <div className="container mx-auto p-4 w-full">
             <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} />
             <div className="flex items-center mb-6">
-                <h1 className="text-2xl font-bold">Appointment Details</h1>
+                <h1 className="text-2xl font-bold">Appointment ID :  {appointment.appointementId}</h1>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -200,9 +241,9 @@ const AppointmentDetails = () => {
                         <CardTitle className="flex justify-between">
                             <span>Patient Information</span>
                             <span className={`px-3 py-1 rounded-full text-sm ${appointment.status === 'ACCEPTED' ? 'bg-green-100 text-green-800' :
-                                    appointment.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
-                                        appointment.status === 'COMPLETED' ? 'bg-blue-100 text-blue-800' :
-                                            'bg-red-100 text-red-800'
+                                appointment.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                                    appointment.status === 'COMPLETED' ? 'bg-blue-100 text-blue-800' :
+                                        'bg-red-100 text-red-800'
                                 }`}>
                                 {appointment.status}
                             </span>
@@ -280,39 +321,60 @@ const AppointmentDetails = () => {
                         <CardTitle>Actions</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
+                        {
+                            appointment.status == 'COMPLETED' && !(appointment.isReportUploaded) && (
+                                <>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">Upload Report</label>
+                                        <div className="flex flex-col space-y-2">
+                                            <input
+                                                type="file"
+                                                id="report"
+                                                onChange={handleFileSelect}
+                                                className="hidden"
+                                            />
+                                            <label
+                                                htmlFor="report"
+                                                className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
+                                            >
+                                                <Upload className="h-4 w-4 mr-2" />
+                                                {selectedFile ? selectedFile.name : 'Select File'}
+                                            </label>
+                                            <Button
+                                                onClick={handleFileUpload}
+                                                disabled={!selectedFile}
+                                                className="w-full"
+                                            >
+                                                <FileText className="h-4 w-4 mr-2" />
+                                                Upload Report
+                                            </Button>
+                                        </div>
+                                    </div>
+
+                                    <Separator />
+                                </>
+                            )
+                        }
+
+
                         <div>
-                            <label className="block text-sm font-medium mb-2">Upload Report</label>
-                            <div className="flex flex-col space-y-2">
-                                <input
-                                    type="file"
-                                    id="report"
-                                    onChange={handleFileSelect}
-                                    className="hidden"
-                                />
-                                <label
-                                    htmlFor="report"
-                                    className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
-                                >
-                                    <Upload className="h-4 w-4 mr-2" />
-                                    {selectedFile ? selectedFile.name : 'Select File'}
-                                </label>
-                                <Button
-                                    onClick={handleFileUpload}
-                                    disabled={!selectedFile}
-                                    className="w-full"
-                                >
-                                    <FileText className="h-4 w-4 mr-2" />
-                                    Upload Report
-                                </Button>
-                            </div>
+                            <select name="" id="" className='w-full h-10 px-3 pr-10 font-semibold border border-slate-300 rounded-md' onChange={(e) => handleUpdateStatus(e.target.value)} value={appointment.status}>
+                                <option value="SCHEDULED">Mark as Scheduled</option>
+                                <option value="ACCEPTED">Mark as Accepted</option>
+                                <option value="COMPLETED">Mark as Completed</option>
+                                <option value="CANCELLED">Mark as Cancelled</option>
+                            </select>
                         </div>
 
-                        <Separator />
+
+
+
+
 
                         <div>
                             <Button
                                 variant="destructive"
-                                className="w-full"
+                                className="w-full cursor-pointer"
                                 onClick={handleDeleteAppointment}
                             >
                                 <Trash2 className="h-4 w-4 mr-2" />
@@ -324,10 +386,46 @@ const AppointmentDetails = () => {
                                 </p>
                             )}
                         </div>
+                        <Separator />
+
+                        {
+                            appointment.isReportUploaded && (
+
+                                <>
+                                    <div>
+                                        <a href={`${process.env.NEXT_PUBLIC_IMAGE_URL}/reports/${appointment.reportName}`} download={true} target='_blank'>
+                                            <Button
+                                                variant="destructive"
+                                                className="w-full cursor-pointer bg-blue-500 hover:bg-blue-600"
+                                            >
+                                                <Download className="h-4 w-4 mr-2" />
+                                                Download REPORT
+                                            </Button>
+                                        </a>
+                                    </div>
+                                    <Separator />
+                                </>
+
+                            )
+                        }
+
+
+                        <a href={`https://maps.google.com/?q=${appointment.address.lat},${appointment.address.lng}`} target='_blank'>
+                            <div>
+                                <Button
+                                    variant="destructive"
+                                    className="w-full cursor-pointer bg-blue-500 hover:bg-blue-600"
+                                >
+                                    <LocationEdit className="h-4 w-4 mr-2" />
+                                    Get Location
+                                </Button>
+                            </div>
+                        </a>
                     </CardContent>
+
                 </Card>
             </div>
-        </div>
+        </div >
     );
 };
 

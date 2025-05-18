@@ -1,6 +1,6 @@
 "use client"
 import { useEffect, useState } from 'react';
-import { Eye, Edit, Trash2, Search, Loader2, RefreshCw, AlertCircle } from 'lucide-react';
+import { Edit, Search, Loader2, RefreshCw, AlertCircle, UploadCloud } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { axiosClient } from '@/lib/axiosClient';
 import { useRouter } from 'next/navigation';
@@ -90,7 +90,7 @@ export default function AppointmentTable() {
     setError(null);
 
     try {
-      const res = await axiosClient.get('/appointment/getallappointement?status=SCHEDULED');
+      const res = await axiosClient.get('/appointment/getallappointement?status=COMPLETED&include=reports');
 
       if (res.status === 200) {
         setAppointments(res.data.allAppointments || []);
@@ -223,15 +223,15 @@ export default function AppointmentTable() {
                       {appointment.status}
                     </span>
                   </td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <div className="flex space-x-2">
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                    <div className="flex item-center justify-center">
                       <button
                         onClick={() => handleViewDetails(appointment.id)}
-                        className="text-yellow-600 hover:text-yellow-800 transition-colors cursor-pointer"
+                        className="text-blue-600 hover:text-yellow-800 transition-colors cursor-pointer flex item-center "
                         title="Edit Appointment"
                         disabled={deletingIds.has(appointment.id)}
                       >
-                        <Edit size={16} />
+                        <UploadCloud size={18} />
                       </button>
 
                     </div>

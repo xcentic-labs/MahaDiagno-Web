@@ -9,15 +9,7 @@ import {
   CalendarClock,
   ShieldCheck,
   BadgePlus,
-  BookOpen,
-  Bot,
-  Command,
-  Frame,
-  LifeBuoy,
-  PieChart,
-  Send,
-  Settings2,
-  SquareTerminal,
+  Upload
 } from "lucide-react";
 
 import Link from "next/link";
@@ -66,11 +58,16 @@ const data = {
       icon: Users, // more appropriate than Settings2
     },
     {
+      title: "Upload Report",
+      url: "/appointment/uploadreport",
+      icon: Upload, // perfect for appointments
+    },
+    {
       title: "Appointment",
       url: "/appointment/pending",
       icon: CalendarClock, // perfect for appointments
       items: [
-        { title: "Pending", url: "/appointment/pending" },
+        { title: "Pending", url: "/appointment/pending/" },
         { title: "Accepted", url: "/appointment/accepted" },
         { title: "Completed", url: "/appointment/completed" },
         { title: "Cancelled", url: "/appointment/cancelled" },

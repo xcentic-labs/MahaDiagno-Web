@@ -19,13 +19,14 @@ interface ServiceBoyItem {
     lastName: string;
     email: string;
     phoneNumber: string;
+    status: boolean;
     zone?: {
         id: number;
         district: string;
         state: string;
         pincode: string;
     };
-    totalAppointments : number
+    totalAppointments: number
 }
 
 interface ZoneItem {
@@ -46,7 +47,7 @@ export default function ServiceBoyManagement() {
         zoneId: '',
     });
     const [showPassword, setShowPassword] = useState<boolean>(false);
-    
+
     // Data states
     const [serviceBoys, setServiceBoys] = useState<ServiceBoyItem[]>([]);
     const [zones, setZones] = useState<ZoneItem[]>([]);
@@ -66,7 +67,7 @@ export default function ServiceBoyManagement() {
     const handleInputChange = (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLSelectElement>): void => {
         // Clear any add errors when user starts typing
         if (addError) setAddError(null);
-        
+
         const { name, value } = e.target;
         setNewServiceBoy({
             ...newServiceBoy,
@@ -125,9 +126,9 @@ export default function ServiceBoyManagement() {
 
     const handleAddServiceBoy = async () => {
         // Form validation
-        if (!newServiceBoy.firstName.trim() || 
-            !newServiceBoy.lastName.trim() || 
-            !newServiceBoy.email.trim() || 
+        if (!newServiceBoy.firstName.trim() ||
+            !newServiceBoy.lastName.trim() ||
+            !newServiceBoy.email.trim() ||
             !newServiceBoy.password.trim() ||
             !newServiceBoy.phoneNumber.trim() ||
             !newServiceBoy.zoneId) {
@@ -168,7 +169,7 @@ export default function ServiceBoyManagement() {
                     password: '',
                     zoneId: '',
                 });
-                
+
                 // Refresh the service boys list
                 fetchServiceBoys();
             } else {
@@ -339,7 +340,7 @@ export default function ServiceBoyManagement() {
                             ) : zonesFetchError ? (
                                 <div className="border border-red-200 bg-red-50 rounded-md px-3 py-2 w-full flex items-center justify-between">
                                     <span className="text-red-600">Failed to load zones</span>
-                                    <button 
+                                    <button
                                         onClick={fetchZones}
                                         className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200"
                                     >
@@ -370,9 +371,8 @@ export default function ServiceBoyManagement() {
                     <button
                         onClick={handleAddServiceBoy}
                         disabled={isAddingServiceBoy || isLoadingZones || !!zonesFetchError}
-                        className={`mt-4 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors flex items-center font-medium ${
-                            (isAddingServiceBoy || isLoadingZones || !!zonesFetchError) ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'
-                        }`}
+                        className={`mt-4 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors flex items-center font-medium ${(isAddingServiceBoy || isLoadingZones || !!zonesFetchError) ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'
+                            }`}
                     >
                         {isAddingServiceBoy ? (
                             <>
@@ -393,8 +393,8 @@ export default function ServiceBoyManagement() {
                     <h2 className="text-lg font-semibold text-gray-700 flex items-center">
                         <List size={18} className="mr-2" /> Service Boys List
                     </h2>
-                    
-                    <button 
+
+                    <button
                         onClick={fetchServiceBoys}
                         disabled={isLoadingServiceBoys}
                         className="flex items-center text-blue-600 hover:text-blue-800"
@@ -412,8 +412,8 @@ export default function ServiceBoyManagement() {
                             <AlertTriangle size={18} className="mr-2" />
                             <span>{serviceBoysFetchError}</span>
                         </div>
-                        <button 
-                            onClick={fetchServiceBoys} 
+                        <button
+                            onClick={fetchServiceBoys}
                             className="px-3 py-1 bg-red-100 text-red-700 rounded-md hover:bg-red-200 flex items-center text-sm"
                         >
                             <RefreshCw size={14} className="mr-1" /> Try Again
@@ -463,6 +463,9 @@ export default function ServiceBoyManagement() {
                                         Phone Number
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-50 uppercase tracking-wider">
+                                        Status
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-50 uppercase tracking-wider">
                                         Total Appointments
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-50 uppercase tracking-wider">
@@ -492,6 +495,14 @@ export default function ServiceBoyManagement() {
                                                 {serviceBoy.phoneNumber}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                {
+                                                    serviceBoy.status ? 
+                                                    <p className='text-green-600 font-bold animate-pulse'> &bull; Online</p>
+                                                    :
+                                                    <p className='text-red-600 font-bold'>Offline</p>
+                                                }
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                 {serviceBoy.totalAppointments}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -501,9 +512,8 @@ export default function ServiceBoyManagement() {
                                                 <button
                                                     onClick={() => handleDeleteServiceBoy(serviceBoy.id)}
                                                     disabled={deletingServiceBoyIds.includes(serviceBoy.id)}
-                                                    className={`text-red-500 hover:text-red-700 transition-colors ${
-                                                        deletingServiceBoyIds.includes(serviceBoy.id) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-                                                    }`}
+                                                    className={`text-red-500 hover:text-red-700 transition-colors ${deletingServiceBoyIds.includes(serviceBoy.id) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                                                        }`}
                                                     title="Delete Service Boy"
                                                 >
                                                     {deletingServiceBoyIds.includes(serviceBoy.id) ? (
@@ -517,7 +527,7 @@ export default function ServiceBoyManagement() {
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan={6} className="px-6 py-4 text-center text-sm text-gray-500">
+                                        <td colSpan={8} className="px-6 py-4 text-center text-sm text-gray-500">
                                             No service boys found matching your search
                                         </td>
                                     </tr>

@@ -1,6 +1,6 @@
 "use client"
 import { useEffect, useState } from 'react';
-import { Edit, Search, Loader2, RefreshCw, AlertCircle } from 'lucide-react';
+import { Eye, Edit, Trash2, Search, Loader2, RefreshCw, AlertCircle } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { axiosClient } from '@/lib/axiosClient';
 import { useRouter } from 'next/navigation';
@@ -33,6 +33,7 @@ interface Appointment {
   service: Service;
   address: Address;
   bookedBy: BookedBy;
+  appointementId: string
 }
 
 export default function AppointmentTable() {
@@ -42,7 +43,7 @@ export default function AppointmentTable() {
   const [error, setError] = useState<string | null>(null);
   const [deletingIds, setDeletingIds] = useState<Set<number>>(new Set());
   const [loadingState, setLoadingState] = useState<'initial' | 'loading' | 'success' | 'error'>('initial');
-  const redirect = useRouter();
+  const redirect = useRouter()
 
   // Function to get the full name, handling null values
   const getFullName = (booking: BookedBy): string => {
@@ -72,6 +73,7 @@ export default function AppointmentTable() {
   };
 
 
+
   // Handle view details
   const handleViewDetails = (id: number): void => {
     redirect.push(`/appointment/${id}`)
@@ -79,14 +81,7 @@ export default function AppointmentTable() {
 
   // Filter appointments based on search query
   const filteredAppointments = appointments.filter(appointment => {
-    const fullName = getFullName(appointment.bookedBy).toLowerCase();
-    const email = (appointment.bookedBy.email || "").toLowerCase();
-    const phone = appointment.bookedBy.phoneNumber.toLowerCase();
-    const query = searchQuery.toLowerCase();
-
-    return fullName.includes(query) ||
-      email.includes(query) ||
-      phone.includes(query);
+    return appointment.appointementId.includes(searchQuery.toUpperCase());
   });
 
   const handleFetchAppointments = async () => {
@@ -107,9 +102,9 @@ export default function AppointmentTable() {
       }
     } catch (error: any) {
       // More specific error messages based on error type
-      const errorMessage = error.response?.data?.message || 
-                          error.message || 
-                          "An error occurred while fetching appointments";
+      const errorMessage = error.response?.data?.message ||
+        error.message ||
+        "An error occurred while fetching appointments";
       setError(errorMessage);
       toast.error("Unable to load appointments");
       setLoadingState('error');
@@ -163,32 +158,35 @@ export default function AppointmentTable() {
             <span>Refreshing appointment data...</span>
           </div>
         )}
-        
+
         <table className="w-full bg-white rounded-xl overflow-hidden border-2 border-slate-500 table-fixed">
           <thead className="bg-gray-300 border-b rounded-t-xl">
             <tr>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider w-12">
                 S.No
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider w-36">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider ">
+                Appointment ID
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider ">
                 Name
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider w-32">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider ">
                 Phone Number
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider w-48">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider ">
                 Email
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider w-48">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider ">
                 Service Name
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider w-64">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider ">
                 Address
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider w-24">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider ">
                 Status
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider w-24">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider ">
                 Actions
               </th>
             </tr>
@@ -199,6 +197,9 @@ export default function AppointmentTable() {
                 <tr key={appointment.id} className="hover:bg-gray-50">
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                     {index + 1}
+                  </td>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {appointment?.appointementId}
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                     {getFullName(appointment.bookedBy)}
@@ -232,19 +233,19 @@ export default function AppointmentTable() {
                       >
                         <Edit size={16} />
                       </button>
-                      
+
                     </div>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={8} className="px-4 py-4 text-center text-sm text-gray-500">
+                <td colSpan={9} className="px-4 py-4 text-center text-sm text-gray-500">
                   {searchQuery ? (
                     <div className="py-8">
                       <Search size={24} className="mx-auto text-gray-400 mb-2" />
                       <p>No matching appointments found for "{searchQuery}"</p>
-                      <button 
+                      <button
                         onClick={() => setSearchQuery('')}
                         className="text-blue-500 hover:text-blue-700 text-sm mt-2"
                       >
@@ -270,8 +271,8 @@ export default function AppointmentTable() {
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold text-gray-700">Appointment Management</h2>
-          <button 
-            onClick={handleRetry} 
+          <button
+            onClick={handleRetry}
             className="text-blue-600 hover:text-blue-800 flex items-center text-sm"
             disabled={isLoading}
           >
@@ -285,7 +286,7 @@ export default function AppointmentTable() {
           <div className="relative">
             <input
               type="text"
-              placeholder="Search appointments by name, email or phone..."
+              placeholder="Search By Appointments ID"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full border border-gray-300 rounded-md pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
