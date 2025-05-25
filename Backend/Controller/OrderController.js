@@ -36,7 +36,8 @@ export const addAppointment = async (req, res) => {
                         service_id: +serviceId,
                         addressId: +addressId,
                         modeOfPayment: modeOfPayment,
-                        isPaid: true
+                        isPaid: true,
+                        isRecivesByAdmin : true
                     },
                 });
 

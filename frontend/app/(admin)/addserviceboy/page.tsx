@@ -3,6 +3,7 @@ import { useState, ChangeEvent, useEffect } from 'react';
 import { Trash2, Plus, User, Mail, Lock, Search, Eye, EyeOff, Phone, LocateFixed, Loader, AlertTriangle, RefreshCw, List, MapPin, Tractor } from 'lucide-react';
 import { axiosClient } from '@/lib/axiosClient';
 import { toast } from 'react-toastify';
+import { useRouter } from 'next/navigation';
 
 interface ServiceBoyForm {
     firstName: string;
@@ -37,6 +38,7 @@ interface ZoneItem {
 }
 
 export default function ServiceBoyManagement() {
+    const redirect = useRouter()
     // Form state
     const [newServiceBoy, setNewServiceBoy] = useState<ServiceBoyForm>({
         firstName: '',
@@ -451,11 +453,9 @@ export default function ServiceBoyManagement() {
                             <thead className="bg-gray-500 border-b">
                                 <tr>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-50 uppercase tracking-wider">
-                                        First Name
+                                        Name
                                     </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-50 uppercase tracking-wider">
-                                        Last Name
-                                    </th>
+                                    
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-50 uppercase tracking-wider">
                                         Email
                                     </th>
@@ -483,10 +483,7 @@ export default function ServiceBoyManagement() {
                                     filteredServiceBoys.map((serviceBoy) => (
                                         <tr key={serviceBoy.id} className="hover:bg-gray-50">
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                {serviceBoy.firstName}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                {serviceBoy.lastName}
+                                                {`${serviceBoy.firstName} ${serviceBoy.lastName}`}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                 {serviceBoy.email}
@@ -508,7 +505,7 @@ export default function ServiceBoyManagement() {
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                 {serviceBoy.zone?.district || getZoneNameById(Number(serviceBoy.zone?.id))}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 flex gap-3 justify-center">
                                                 <button
                                                     onClick={() => handleDeleteServiceBoy(serviceBoy.id)}
                                                     disabled={deletingServiceBoyIds.includes(serviceBoy.id)}
@@ -521,6 +518,17 @@ export default function ServiceBoyManagement() {
                                                     ) : (
                                                         <Trash2 size={18} />
                                                     )}
+                                                </button>
+
+
+                                                <button
+                                                    onClick={() => redirect.push(`/addserviceboy/${serviceBoy.id}`)}
+                                                    // disabled={deletingServiceBoyIds.includes(serviceBoy.id)}
+                                                    className={`text-blue-500 hover:text-blue-700 transition-colors ${deletingServiceBoyIds.includes(serviceBoy.id) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                                                        }`}
+                                                    title="Delete Service Boy"
+                                                >
+                                                    <Eye size={18} />
                                                 </button>
                                             </td>
                                         </tr>

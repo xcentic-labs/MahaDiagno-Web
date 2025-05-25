@@ -1,5 +1,5 @@
 import express from 'express'
-import { addServiceBoy, changeStatus, deleteServiceBoy, getAllServiceBoys, getServiceBoy, serviceBoyLogin, UpdatePassword } from '../Controller/ServiceBoyController.js';
+import { addServiceBoy, changeStatus, deleteServiceBoy, getAllServiceBoys, getServiceBoy, getSpecficServiceBoy, handleUpdateCashToRecived, serviceBoyLogin, UpdatePassword } from '../Controller/ServiceBoyController.js';
 
 export const ServiceBoyRouter = express.Router();
 
@@ -13,3 +13,8 @@ ServiceBoyRouter.get('/getallserviceboy' , getAllServiceBoys); // admin protecte
 ServiceBoyRouter.get('/getserviceboy/:id' , getServiceBoy); 
 ServiceBoyRouter.patch('/updatepasswrod/:id' , UpdatePassword);
 ServiceBoyRouter.patch('/changestatus/:id' , changeStatus); 
+
+
+ServiceBoyRouter.get('/getspecficserviceboy/:id' , getSpecficServiceBoy);
+
+ServiceBoyRouter.patch('/updatedcashrecived/:id', handleUpdateCashToRecived); // admin protected

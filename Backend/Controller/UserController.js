@@ -1,5 +1,5 @@
 import prisma from "../Utils/prismaclint.js";
-import { sentopt } from "../Utils/otp.js";
+import { sentopt, verify2factorOtp } from "../Utils/otp.js";
 
 export const getopt = async (req, res) => {
     try {
@@ -14,6 +14,7 @@ export const getopt = async (req, res) => {
             }
         })
 
+
         if (!user) {
             const createUser = await prisma.user.create({
                 data: {
@@ -24,11 +25,11 @@ export const getopt = async (req, res) => {
             if (!createUser) return res.status(500).json({ "error": "Unable to create user" });
         }
 
-        const isSent = await sentopt();
+        const isSent = await sentopt(phoneNumber);
 
-        if (isSent != 200) return res.status(502).json({ "error": "Unable to sent OTP" });
+        if (isSent.status != 200) return res.status(502).json({ "error": "Unable to sent OTP" });
 
-        return res.status(200).json({ "message": "OTP sent Sucessfully" });
+        return res.status(200).json({ "message": "OTP sent Sucessfully" , sessionId : isSent.sessionId });
     } catch (error) {
         console.log(error);
         return res.status(500).json({ "error": "Unable to sent OTP Internal server error" });
@@ -69,13 +70,16 @@ export const verifyOtp = async (req, res) => {
 
         if (!otp || !phoneNumber) return res.status(400).json({ "error": "All fields Are Required" });
 
+        const isMatched = await verify2factorOtp(phoneNumber , otp)
+
+        if(isMatched.status != 200) return res.status(400).json({ "error": "Invalid OTP" });
+
         const user = await prisma.user.findUnique({
             where: {
                 phoneNumber: phoneNumber
             }
         })
 
-        if (otp != '1234') return res.status(400).json({ "error": "Invalid OTP" });
         return res.status(200).json({ "message": "OTP Matched", user: user });
     } catch (error) {
         return res.status(500).json({ "error": "Unable to process OTP internal server error" });
