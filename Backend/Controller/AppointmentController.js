@@ -1,321 +1,7 @@
 import prisma from "../Utils/prismaclint.js";
+import { uploadReportFile } from '../Storage/ReportRouter.js';
+import { generateFormatedRes, fieldToBeSelected } from "../Utils/GenerateFormatedRes.js";
 
-export const addAppointment = async (req, res) => {
-    try {
-        const { patientFirstName, patientLastName, patientAge, gender, doctorName, AdditionalPhoneNumber, userId, serviceId, addressId } = req.body
-
-        if (!patientFirstName || !patientLastName || !patientAge || !gender || !doctorName || !AdditionalPhoneNumber || !userId || !serviceId || !addressId) return res.status(400).json({ "error": "All Fields Are Required" });
-
-        console.log(req.body)
-
-        const appointment = await prisma.appointment.create({
-            data: {
-                patient_first_name: patientFirstName,
-                patient_last_name: patientLastName,
-                patient_age: patientAge,
-                gender: gender,
-                referring_doctor: doctorName,
-                additional_phone_number: AdditionalPhoneNumber,
-                userId: +userId,
-                service_id: +serviceId,
-                addressId: +addressId,
-            },
-        });
-
-
-        console.log(appointment);
-
-        if (!appointment) return res.status(500).json({ "error": "Unable to Add Appointment" });
-        return res.status(201).json({ "message": "Appointment Added Sucessfully" });
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({ "error": "Unable to Add Appointment Internal Server Error" });
-    }
-}
-
-export const acceptAppointment = async (req, res) => {
-    try {
-        const { serviceBoyId, appointmentId } = req.body
-        if (!serviceBoyId, !appointmentId) return res.status(400).json({ "error": "Service Boy ID And Appointment Id is required" });
-
-        const appointment = await prisma.appointment.update({
-            where: {
-                id: +appointmentId
-            },
-            data: {
-                acceptedBy: serviceBoyId,
-                status: 'ACCEPTED'
-            },
-            select: {
-                patient_first_name: true,
-                patient_last_name: true,
-                patient_age: true,
-                gender: true,
-                referring_doctor: true,
-                additional_phone_number: true,
-                userId: true,
-                service_id: true,
-                addressId: true,
-                status: true,
-                createdAt: true,
-                booked_by: {
-                    select: {
-                        first_name: true,
-                        last_name: true,
-                        phoneNumber: true
-                    }
-                },
-                serviceId: {
-                    select: {
-                        title: true,
-                        price: true,
-                        banner_url: true
-                    }
-                },
-                address: {
-                    select: {
-                        area: true,
-                        landmark: true,
-                        pincode: true,
-                        district: true,
-                        state: true,
-                        lat: true,
-                        lng: true
-                    }
-                }
-            }
-        });
-
-        const formattedAppointment = {
-            patientFirstName: appointment.patient_first_name,
-            patientLastName: appointment.patient_last_name,
-            patientAge: appointment.patient_age,
-            gender: appointment.gender,
-            referringDoctor: appointment.referring_doctor,
-            additionalPhoneNumber: appointment.additional_phone_number,
-            userId: appointment.userId,
-            serviceId: appointment.service_id,
-            addressId: appointment.addressId,
-            status: appointment.status,
-            createdAt: appointment.createdAt,
-            bookedBy: {
-                firstName: appointment.booked_by.first_name,
-                lastName: appointment.booked_by.last_name,
-                phoneNumber: appointment.booked_by.phoneNumber
-            },
-            service: {
-                title: appointment.serviceId.title,
-                price: appointment.serviceId.price,
-                bannerUrl: appointment.serviceId.banner_url
-            },
-            address: {
-                area: appointment.address.area,
-                landmark: appointment.address.landmark,
-                pincode: appointment.address.pincode,
-                district: appointment.address.district,
-                state: appointment.address.state,
-                lat: appointment.address.lat,
-                lng: appointment.address.lng
-            }
-        };
-
-        if (!appointment) return res.status(404).json({ "error": "Appointment Not Found" });
-        return res.status(200).json({ "message": "Appointment Accepted Sucessfully", appointment: formattedAppointment });
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({ "error": "Unable to Accept Internal server error" })
-    }
-}
-
-export const completeAppointment = async (req, res) => {
-    try {
-        const { serviceBoyId, appointmentId } = req.body
-        if (!serviceBoyId, !appointmentId) return res.status(400).json({ "error": "Service Boy ID And Appointment Id is required" });
-
-        const appointment = await prisma.appointment.update({
-            where: {
-                id: +appointmentId,
-                acceptedBy: serviceBoyId,
-            },
-            data: {
-                status: 'COMPLETED'
-            },
-            select: {
-                patient_first_name: true,
-                patient_last_name: true,
-                patient_age: true,
-                gender: true,
-                referring_doctor: true,
-                additional_phone_number: true,
-                userId: true,
-                service_id: true,
-                addressId: true,
-                status: true,
-                createdAt: true,
-                booked_by: {
-                    select: {
-                        first_name: true,
-                        last_name: true,
-                        phoneNumber: true
-                    }
-                },
-                serviceId: {
-                    select: {
-                        title: true,
-                        price: true,
-                        banner_url: true
-                    }
-                },
-                address: {
-                    select: {
-                        area: true,
-                        landmark: true,
-                        pincode: true,
-                        district: true,
-                        state: true,
-                        lat: true,
-                        lng: true
-                    }
-                }
-            }
-        });
-
-        const formattedAppointment = {
-            patientFirstName: appointment.patient_first_name,
-            patientLastName: appointment.patient_last_name,
-            patientAge: appointment.patient_age,
-            gender: appointment.gender,
-            referringDoctor: appointment.referring_doctor,
-            additionalPhoneNumber: appointment.additional_phone_number,
-            userId: appointment.userId,
-            serviceId: appointment.service_id,
-            addressId: appointment.addressId,
-            status: appointment.status,
-            createdAt: appointment.createdAt,
-            bookedBy: {
-                firstName: appointment.booked_by.first_name,
-                lastName: appointment.booked_by.last_name,
-                phoneNumber: appointment.booked_by.phoneNumber
-            },
-            service: {
-                title: appointment.serviceId.title,
-                price: appointment.serviceId.price,
-                bannerUrl: appointment.serviceId.banner_url
-            },
-            address: {
-                area: appointment.address.area,
-                landmark: appointment.address.landmark,
-                pincode: appointment.address.pincode,
-                district: appointment.address.district,
-                state: appointment.address.state,
-                lat: appointment.address.lat,
-                lng: appointment.address.lng
-            }
-        };
-
-        if (!appointment) return res.status(404).json({ "error": "Internal server error" });
-        return res.status(200).json({ "message": "Appointment COMPLETED Sucessfully", appointment: formattedAppointment });
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({ "error": "Unable to Complete Internal server error" })
-    }
-}
-
-export const cancleAppointment = async (req, res) => {
-    try {
-        const { serviceBoyId, appointmentId } = req.body
-        console.log(serviceBoyId, appointmentId);
-        if (!serviceBoyId, !appointmentId) return res.status(400).json({ "error": "Service Boy ID And Appointment Id is required" });
-
-        const appointment = await prisma.appointment.update({
-            where: {
-                id: +appointmentId,
-            },
-            data: {
-                status: 'CANCELLED',
-                acceptedBy: serviceBoyId,
-            },
-            select: {
-                patient_first_name: true,
-                patient_last_name: true,
-                patient_age: true,
-                gender: true,
-                referring_doctor: true,
-                additional_phone_number: true,
-                userId: true,
-                service_id: true,
-                addressId: true,
-                status: true,
-                createdAt: true,
-                booked_by: {
-                    select: {
-                        first_name: true,
-                        last_name: true,
-                        phoneNumber: true
-                    }
-                },
-                serviceId: {
-                    select: {
-                        title: true,
-                        price: true,
-                        banner_url: true
-                    }
-                },
-                address: {
-                    select: {
-                        area: true,
-                        landmark: true,
-                        pincode: true,
-                        district: true,
-                        state: true,
-                        lat: true,
-                        lng: true
-                    }
-                }
-            }
-        });
-
-        const formattedAppointment = {
-            patientFirstName: appointment.patient_first_name,
-            patientLastName: appointment.patient_last_name,
-            patientAge: appointment.patient_age,
-            gender: appointment.gender,
-            referringDoctor: appointment.referring_doctor,
-            additionalPhoneNumber: appointment.additional_phone_number,
-            userId: appointment.userId,
-            serviceId: appointment.service_id,
-            addressId: appointment.addressId,
-            status: appointment.status,
-            createdAt: appointment.createdAt,
-            bookedBy: {
-                firstName: appointment.booked_by.first_name,
-                lastName: appointment.booked_by.last_name,
-                phoneNumber: appointment.booked_by.phoneNumber
-            },
-            service: {
-                title: appointment.serviceId.title,
-                price: appointment.serviceId.price,
-                bannerUrl: appointment.serviceId.banner_url
-            },
-            address: {
-                area: appointment.address.area,
-                landmark: appointment.address.landmark,
-                pincode: appointment.address.pincode,
-                district: appointment.address.district,
-                state: appointment.address.state,
-                lat: appointment.address.lat,
-                lng: appointment.address.lng
-            }
-        };
-
-
-        if (!appointment) return res.status(404).json({ "error": "Internal server error" });
-        return res.status(200).json({ "message": "Appointment Canclled Sucessfully", appointment: formattedAppointment });
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({ "error": "Unable to Complete Internal server error" })
-    }
-}
 
 export const deleteAppointment = async (req, res) => {
     try {
@@ -335,8 +21,6 @@ export const deleteAppointment = async (req, res) => {
         return res.status(500).json({ "error": "Unable to Deleted Appointment Internal Server Error" });
     }
 }
-
-
 
 export const getPersonalAppointments = async (req, res) => {
     try {
@@ -359,6 +43,7 @@ export const getPersonalAppointments = async (req, res) => {
         const myAppointments = await prisma.appointment.findMany({
             where: matchedCondition,
             select: {
+                id: true,
                 patient_first_name: true,
                 patient_last_name: true,
                 patient_age: true,
@@ -370,7 +55,10 @@ export const getPersonalAppointments = async (req, res) => {
                 addressId: true,
                 status: true,
                 createdAt: true,
-                // Related: User info
+                isReportUploaded: true,
+                reportName: true,
+                isPaid : true,
+                modeOfPayment : true,
                 booked_by: {
                     select: {
                         first_name: true,
@@ -416,6 +104,7 @@ export const getPersonalAppointments = async (req, res) => {
 
         // Map to rename fields as required
         const formattedAppointments = myAppointments.map(appointment => ({
+            id: appointment.id,
             patientFirstName: appointment.patient_first_name,
             patientLastName: appointment.patient_last_name,
             patientAge: appointment.patient_age,
@@ -425,7 +114,11 @@ export const getPersonalAppointments = async (req, res) => {
             userId: appointment.userId,
             status: appointment.status,
             createdAt: appointment.createdAt,
-
+            isReportUploaded: appointment.isReportUploaded,
+            reportName: appointment.reportName,
+            appointementId: `MH2025D${appointment.id}`,
+            isPaid : appointment.isPaid,
+            modeOfPayment : appointment.modeOfPayment,
             // Service Info
             service: {
                 serviceId: appointment.service_id,
@@ -513,10 +206,15 @@ export const serviceBoyAppointments = async (req, res) => {
             }
         });
 
+        const appointments = myAppointments.map(appointment => ({
+            ...appointment,
+            appointmentId: `MH2025D${appointment.id}`
+        }));
+
 
         if (!myAppointments) return res.status(500).json({ "error": "Unable To Fetch Appointments" });
 
-        return res.status(200).json({ "message": "Appointments Fetched Sucessfully", myAppointments: myAppointments });
+        return res.status(200).json({ "message": "Appointments Fetched Sucessfully", myAppointments: appointments });
     } catch (error) {
         console.log(error)
         return res.status(500).json({ "error": "Unable To Fetch Appointments Internal Server Error" });
@@ -531,6 +229,15 @@ export const getAppointments = async (req, res) => {
         if (req.query.status != 'all') {
             matchedCondition.status = (req.query.status).toUpperCase()
         }
+
+        if (!req.query?.zone) return res.status(400).json({ "error": "Service Boy Zone is Required" });
+
+
+        matchedCondition.address = {
+            pincode: req.query?.zone
+        }
+
+        console.log(matchedCondition);
 
         const myAppointments = await prisma.appointment.findMany({
             where: matchedCondition,
@@ -552,14 +259,23 @@ export const getAppointments = async (req, res) => {
                 },
                 status: true,
                 createdAt: true,
-                id: true
+                id: true,
+                isPaid : true
             }
         });
+
+        const appointments = myAppointments.map(appointment => ({
+            ...appointment,
+            appointmentId: `MH2025D${appointment.id}`
+        }));
+
+
+
 
 
         if (!myAppointments) return res.status(500).json({ "error": "Unable To Fetch Appointments" });
 
-        return res.status(200).json({ "message": "Appointments Fetched Sucessfully", myAppointments: myAppointments });
+        return res.status(200).json({ "message": "Appointments Fetched Sucessfully", myAppointments: appointments });
     } catch (error) {
         console.log(error)
         return res.status(500).json({ "error": "Unable To Fetch Appointments Internal Server Error" });
@@ -576,83 +292,12 @@ export const getSpecificAppointment = async (req, res) => {
             where: {
                 id: +id
             },
-            select: {
-                id : true,
-                patient_first_name: true,
-                patient_last_name: true,
-                patient_age: true,
-                gender: true,
-                referring_doctor: true,
-                additional_phone_number: true,
-                userId: true,
-                service_id: true,
-                addressId: true,
-                status: true,
-                createdAt: true,
-                booked_by: {
-                    select: {
-                        first_name: true,
-                        last_name: true,
-                        phoneNumber: true
-                    }
-                },
-                serviceId: {
-                    select: {
-                        title: true,
-                        price: true,
-                        banner_url: true
-                    }
-                },
-                address: {
-                    select: {
-                        area: true,
-                        landmark: true,
-                        pincode: true,
-                        district: true,
-                        state: true,
-                        lat: true,
-                        lng: true
-                    }
-                }
-            }
+            select: fieldToBeSelected
         });
 
         if (!appointment) return res.status(404).json({ error: "No appointment found with this ID" });
 
-        // Map snake_case fields to camelCase
-        const formattedAppointment = {
-            id:  appointment.id,
-            patientFirstName: appointment.patient_first_name,
-            patientLastName: appointment.patient_last_name,
-            patientAge: appointment.patient_age,
-            gender: appointment.gender,
-            referringDoctor: appointment.referring_doctor,
-            additionalPhoneNumber: appointment.additional_phone_number,
-            userId: appointment.userId,
-            serviceId: appointment.service_id,
-            addressId: appointment.addressId,
-            status: appointment.status,
-            createdAt: appointment.createdAt,
-            bookedBy: {
-                firstName: appointment.booked_by.first_name,
-                lastName: appointment.booked_by.last_name,
-                phoneNumber: appointment.booked_by.phoneNumber
-            },
-            service: {
-                title: appointment.serviceId.title,
-                price: appointment.serviceId.price,
-                bannerUrl: appointment.serviceId.banner_url
-            },
-            address: {
-                area: appointment.address.area,
-                landmark: appointment.address.landmark,
-                pincode: appointment.address.pincode,
-                district: appointment.address.district,
-                state: appointment.address.state,
-                lat: appointment.address.lat,
-                lng: appointment.address.lng
-            }
-        };
+        const formattedAppointment = generateFormatedRes(appointment);
 
         return res.status(200).json({
             message: "Appointment fetched successfully",
@@ -673,6 +318,10 @@ export const getAllAppointments = async (req, res) => {
 
         if (req.query.status != 'all') {
             matchedCondition.status = (req.query.status).toUpperCase()
+        }
+
+        if (req.query?.include == 'reports') {
+            matchedCondition.isReportUploaded = false
         }
 
         const myAppointments = await prisma.appointment.findMany({
@@ -696,6 +345,7 @@ export const getAllAppointments = async (req, res) => {
                 status: true,
                 createdAt: true,
                 id: true,
+                isPaid : true,
                 booked_by: {
                     select: {
                         first_name: true,
@@ -713,7 +363,7 @@ export const getAllAppointments = async (req, res) => {
                 id: appt.id,
                 status: appt.status,
                 createdAt: appt.createdAt,
-
+                appointementId: `MH2025D${appt.id}`,
                 service: {
                     id: appt.serviceId?.id,
                     title: appt.serviceId?.title,
@@ -742,4 +392,186 @@ export const getAllAppointments = async (req, res) => {
         console.log(error)
         return res.status(500).json({ "error": "Unable To Fetch Appointments Internal Server Error" });
     }
+}
+
+
+
+export const acceptAppointment = async (req, res) => {
+    try {
+        const { serviceBoyId, appointmentId } = req.body
+        if (!serviceBoyId, !appointmentId) return res.status(400).json({ "error": "Service Boy ID And Appointment Id is required" });
+
+        const appointment = await prisma.appointment.update({
+            where: {
+                id: +appointmentId,
+                status : 'SCHEDULED'
+            },
+            data: {
+                acceptedBy: serviceBoyId,
+                status: 'ACCEPTED'
+            },
+            select: fieldToBeSelected
+        });
+
+        const formattedAppointment = generateFormatedRes(appointment)
+
+        if (!appointment) return res.status(404).json({ "error": "Appointment Not Found" });
+        return res.status(200).json({ "message": "Appointment Accepted Sucessfully", appointment: formattedAppointment });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ "error": "Unable to Accept Internal server error" })
+    }
+}
+
+export const completeAppointment = async (req, res) => {
+    try {
+        const { serviceBoyId, appointmentId } = req.body
+        if (!serviceBoyId, !appointmentId) return res.status(400).json({ "error": "Service Boy ID And Appointment Id is required" });
+
+        const appointment = await prisma.appointment.update({
+            where: {
+                id: +appointmentId,
+                acceptedBy: serviceBoyId,
+            },
+            data: {
+                status: 'COMPLETED'
+            },
+            select: fieldToBeSelected
+        });
+
+        const formattedAppointment = generateFormatedRes(appointment);
+
+        if (!appointment) return res.status(404).json({ "error": "Internal server error" });
+        return res.status(200).json({ "message": "Appointment COMPLETED Sucessfully", appointment: formattedAppointment });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ "error": "Unable to Complete Internal server error" })
+    }
+}
+
+export const cancleAppointment = async (req, res) => {
+    try {
+        const { serviceBoyId, appointmentId } = req.body
+        console.log(serviceBoyId, appointmentId);
+        if (!serviceBoyId, !appointmentId) return res.status(400).json({ "error": "Service Boy ID And Appointment Id is required" });
+
+        const appointment = await prisma.appointment.update({
+            where: {
+                id: +appointmentId,
+            },
+            data: {
+                status: 'CANCELLED',
+                acceptedBy: serviceBoyId,
+            },
+            select: fieldToBeSelected
+        });
+
+        const formattedAppointment = generateFormatedRes(appointment);
+
+
+        if (!appointment) return res.status(404).json({ "error": "Internal server error" });
+        return res.status(200).json({ "message": "Appointment Canclled Sucessfully", appointment: formattedAppointment });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ "error": "Unable to Complete Internal server error" })
+    }
+}
+
+//  chage status 
+export const updateStatus = async (req, res) => {
+    try {
+        const { status, appointmentId } = req.body
+        if (!status, !appointmentId) return res.status(400).json({ "error": "Service Boy ID And Appointment Id is required" });
+
+
+
+        if (!(status == 'SCHEDULED' || status == 'ACCEPTED' || status == 'COMPLETED' || status == 'CANCELLED')) {
+            return res.status(400).json({ "error": "Inavali Status Value" });
+        }
+
+        const appointment = await prisma.appointment.update({
+            where: {
+                id: +appointmentId
+            },
+            data: {
+                status: status
+            },
+            select: fieldToBeSelected
+        });
+
+        const formattedAppointment = generateFormatedRes(appointment);
+
+        if (!appointment) return res.status(404).json({ "error": "Appointment Not Found" });
+        return res.status(200).json({ "message": "Appointment Accepted Sucessfully", appointment: formattedAppointment });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ "error": "Unable to Accept Internal server error" })
+    }
+}
+
+
+export const uploadReport = async (req, res) => {
+    try {
+        const id = req.params.id;
+
+        if (!id) return res.status(400).json({ error: "Id is required" });
+
+        const result = uploadReportFile.single("file")(req, res, async (err) => {
+            if (err) {
+                if (err) {
+                    if (err.code === 'LIMIT_FILE_SIZE') {
+                        return res.status(400).json({ error: "File too large. Max size is 5MB." });
+                    }
+                    return res.status(400).json({ error: err.message });
+                }
+                return res.status(400).json({ error: err.message });
+            }
+
+            const appointment = await prisma.appointment.update({
+                where: {
+                    id: +id
+                },
+                data: {
+                    isReportUploaded: true,
+                    reportName: req.file.filename,
+                },
+                select: fieldToBeSelected
+            });
+
+            const formattedAppointment = generateFormatedRes(appointment);
+
+            if (!appointment) return res.status(404).json({ "error": "Appointment Not Found" });
+            return res.status(200).json({ "message": "PDF Uploded Sucessfully", appointment: formattedAppointment });
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ "error": "Unable to Accept Internal server error" })
+    }
+}
+
+
+
+export const handleMarkAsPaid = async (req , res) =>{
+    try {
+        const { appointmentId } = req.body
+        if (!appointmentId) return res.status(400).json({ "error": "Appointment Id is required" });
+
+        const appointment = await prisma.appointment.update({
+            where: {
+                id: +appointmentId
+            },
+            data: {
+                isPaid : true
+            },
+            select: fieldToBeSelected
+        });
+
+        const formattedAppointment = generateFormatedRes(appointment);
+
+        if (!appointment) return res.status(404).json({ "error": "Appointment Not Found" });
+        return res.status(200).json({ "message": "Appointment Accepted Sucessfully", appointment: formattedAppointment });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ "error": "Unable to Accept Internal server error" })
+    }   
 }

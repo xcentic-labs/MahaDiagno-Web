@@ -60,6 +60,7 @@ export const getAllServiceBoys = async (req, res) => {
                 last_name: true,
                 email: true,
                 phoneNumber: true,
+                status : true,
                 zone : {
                     select : {
                         id : true,
@@ -85,6 +86,7 @@ export const getAllServiceBoys = async (req, res) => {
                 phoneNumber : serviceBoy.email,
                 phoneNumber : serviceBoy.phoneNumber,
                 zone : serviceBoy.zone,
+                status : serviceBoy.status,
                 totalAppointments : serviceBoy._count.appointment
             }
         })

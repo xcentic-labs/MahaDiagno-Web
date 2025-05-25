@@ -1,5 +1,7 @@
 import express from 'express'
-import { acceptAppointment, addAppointment, cancleAppointment, completeAppointment, deleteAppointment, getAllAppointments, getAppointments, getPersonalAppointments, getSpecificAppointment, serviceBoyAppointments } from '../Controller/AppointmentController.js';
+import { acceptAppointment, cancleAppointment, completeAppointment, deleteAppointment, getAllAppointments, getAppointments, getPersonalAppointments, getSpecificAppointment, handleMarkAsPaid, serviceBoyAppointments, updateStatus, uploadReport } from '../Controller/AppointmentController.js';
+import { addAppointment } from '../Controller/OrderController.js';
+
 
 export const AppointmentRouter = express.Router();
 
@@ -7,7 +9,7 @@ export const AppointmentRouter = express.Router();
 AppointmentRouter.post('/createappointement' , addAppointment);
 
 // delete
-AppointmentRouter.delete('/deleteappointement' , deleteAppointment);
+AppointmentRouter.delete('/deleteappointement/:id' , deleteAppointment);
 
 // get routes
 AppointmentRouter.get('/getallappointement' , getAllAppointments);  // admin protected
@@ -25,3 +27,13 @@ AppointmentRouter.get('/getappointement' , getAppointments);
 AppointmentRouter.patch('/acceptappointement' , acceptAppointment);
 AppointmentRouter.patch('/completappointement' , completeAppointment);
 AppointmentRouter.patch('/cancleappointement' , cancleAppointment);
+
+
+// update status
+AppointmentRouter.post('/updatestatus' , updateStatus); // admin protected
+
+// upload report
+AppointmentRouter.post('/uploadreport/:id' , uploadReport); // admin protectd
+
+// mark as paid 
+AppointmentRouter.post('/markaspaid' , handleMarkAsPaid); // admin protectd

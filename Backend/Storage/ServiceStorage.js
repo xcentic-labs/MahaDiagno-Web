@@ -12,4 +12,4 @@ const Storage = multer.diskStorage({
     }
 })
 
-export const uploadBanner =  multer({ storage : Storage });
+export const uploadBanner =  multer({ storage : Storage  });

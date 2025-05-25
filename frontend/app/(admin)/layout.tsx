@@ -40,7 +40,7 @@ export default function RootLayout({ children, }: Readonly<{ children: React.Rea
 
     useEffect(() => {
         if (!isLoogedIn) {
-            redirect.push('/login')
+            redirect.push('/')
         }
     }, [isLoogedIn])
 

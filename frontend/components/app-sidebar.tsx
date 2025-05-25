@@ -11,6 +11,7 @@ import {
   BadgePlus,
   Upload
 } from "lucide-react";
+import { Bike } from "lucide-react";
 
 import Link from "next/link";
 import { NavMain } from "@/components/nav-main"
@@ -28,13 +29,9 @@ import {
 } from "@/components/ui/sidebar"
 import Image from "next/image"
 import logo from '@/assets/logo.png'
+import { useGetUser, useIsLoggedIn } from "@/hooks/use-isloogedIn";
 
 const data = {
-  user: {
-    name: "Anish",
-    email: "admin@gmail.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
   navMain: [
     {
       title: "Dashboard",
@@ -83,11 +80,18 @@ const data = {
       url: "/addserviceboy",
       icon: BadgePlus, // suits service personnel
     },
+    {
+      title: "Track Service Boy",
+      url: "/serviceboylocation",
+      icon: Bike,
+    }
+    
   ],
 };
 
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const user = useGetUser()
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
@@ -111,7 +115,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={data.navMain} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
   )

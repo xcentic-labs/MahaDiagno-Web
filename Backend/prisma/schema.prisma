@@ -44,8 +44,8 @@ model appointment {
   status Status @default(SCHEDULED)
 
   // user id
-  userId Int
-  booked_by  User @relation(fields: [userId], references: [id])
+  userId    Int
+  booked_by User @relation(fields: [userId], references: [id])
 
   // service id 
   service_id Int
@@ -58,6 +58,14 @@ model appointment {
   // address
   addressId Int
   address   address @relation(fields: [addressId], references: [id])
+
+  // report
+  isReportUploaded Boolean @default(false)
+  reportName       String?
+
+  // payment
+  isPaid Boolean @default(false)
+  modeOfPayment   Mode @default(cash)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
@@ -117,4 +125,9 @@ enum Status {
   ACCEPTED // The appointment has been confirmed.
   COMPLETED // The appointment is finished.
   CANCELLED // The appointment was cancelled.
+}
+
+enum Mode {
+  cash
+  razorpay
 }

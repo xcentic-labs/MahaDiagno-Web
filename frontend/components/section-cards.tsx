@@ -1,80 +1,58 @@
-import { TrendingDownIcon, TrendingUpIcon } from "lucide-react"
+import {
+  UsersIcon,
+  LayersIcon,
+  MapIcon,
+  UserCogIcon,
+} from "lucide-react"
 
-import { Badge } from "@/components/ui/badge"
 import {
   Card,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
 
-export function SectionCards() {
+export function SectionCards({totalUsers , totalServices , totalServiceBoy , totalZones} : {totalUsers : string | number , totalServices  : string | number , totalServiceBoy : string | number , totalZones : string | number }) {
   return (
-    <div className=" grid grid-cols-4 gap-5">
+    <div className="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-5">
       <Card className="@container/card">
         <CardHeader className="relative">
+          <UsersIcon className="absolute right-4 top-4 h-6 w-6 text-muted-foreground" />
           <CardDescription>Total Users</CardDescription>
           <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums tracking-wider">
-            4800
+            {totalUsers}
           </CardTitle>
         </CardHeader>
-        <CardFooter className="flex-col items-start gap-1 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Trending up this month
-          </div>
-          <div className="text-muted-foreground">
-            Visitors for the last 6 months
-          </div>
-        </CardFooter>
       </Card>
+
       <Card className="@container/card">
         <CardHeader className="relative">
-          <CardDescription>Total Users</CardDescription>
+          <LayersIcon className="absolute right-4 top-4 h-6 w-6 text-muted-foreground" />
+          <CardDescription>Total Services</CardDescription>
           <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums tracking-wider">
-            4800
+            {totalServices}
           </CardTitle>
         </CardHeader>
-        <CardFooter className="flex-col items-start gap-1 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Trending up this month
-          </div>
-          <div className="text-muted-foreground">
-            Visitors for the last 6 months
-          </div>
-        </CardFooter>
       </Card>
+
       <Card className="@container/card">
         <CardHeader className="relative">
-          <CardDescription>Total Users</CardDescription>
+          <MapIcon className="absolute right-4 top-4 h-6 w-6 text-muted-foreground" />
+          <CardDescription>Total Zones</CardDescription>
           <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums tracking-wider">
-            4800
+            {totalZones}
           </CardTitle>
         </CardHeader>
-        <CardFooter className="flex-col items-start gap-1 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Trending up this month
-          </div>
-          <div className="text-muted-foreground">
-            Visitors for the last 6 months
-          </div>
-        </CardFooter>
       </Card>
+
       <Card className="@container/card">
         <CardHeader className="relative">
-          <CardDescription>Total Users</CardDescription>
+          <UserCogIcon className="absolute right-4 top-4 h-6 w-6 text-muted-foreground" />
+          <CardDescription>Total Services Boy</CardDescription>
           <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums tracking-wider">
-            4800
+            {totalServiceBoy}
           </CardTitle>
         </CardHeader>
-        <CardFooter className="flex-col items-start gap-1 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Trending up this month
-          </div>
-          <div className="text-muted-foreground">
-            Visitors for the last 6 months
-          </div>
-        </CardFooter>
       </Card>
     </div>
   )

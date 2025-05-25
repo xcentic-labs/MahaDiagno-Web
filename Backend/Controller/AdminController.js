@@ -50,38 +50,40 @@ export const deleteAdmin = async (req, res) => {
 }
 
 
-export const adminLogin = async(req,res)=>{
+export const adminLogin = async (req, res) => {
     try {
-        const {email , password} = req.body
+        const { email, password } = req.body
 
-        if(!email || !password) return res.status(400).json({"error" : "All Fields Are Required"});
+        if (!email || !password) return res.status(400).json({ "error": "All Fields Are Required" });
 
         const admin = await prisma.admin.findUnique({
-            where : {
-                email : email
+            where: {
+                email: email
             },
-            select : {
+            select: {
                 id: true,
                 first_name: true,
                 last_name: true,
                 email: true,
-                password : true,
+                password: true,
             }
         })
 
-        if(!admin) return res.status(404).json({"error" : "No Admin Exist"});
+        if (!admin) return res.status(404).json({ "error": "No Admin Exist" });
 
 
-        if(!matchedPassword(password , admin.password)) return res.status(403).json({"error" : "Password Is Incorrect"});
+        if (!matchedPassword(password, admin.password)) return res.status(403).json({ "error": "Password Is Incorrect" });
 
-        const generatedToken = generateToken(admin.email , admin.id);
+        const generatedToken = generateToken(admin.email, admin.id);
 
-        return res.status(200).json({"message" : "LoggedIn Sucessfull" , admin : {
-            firstName : admin.first_name,
-            lastName :  admin.last_name,
-            email : admin.email,
-            token : generatedToken
-        }});
+        return res.status(200).json({
+            "message": "LoggedIn Sucessfull", admin: {
+                firstName: admin.first_name,
+                lastName: admin.last_name,
+                email: admin.email,
+                token: generatedToken
+            }
+        });
 
     } catch (error) {
         console.log(error)
@@ -90,33 +92,56 @@ export const adminLogin = async(req,res)=>{
 }
 
 
-export const getAdmins = async (req , res)=>{
+export const getAdmins = async (req, res) => {
     try {
         const result = await prisma.admin.findMany({
-            where : {},
-            select : {
-                id : true,
-                first_name : true,
-                last_name : true,
-                email : true
+            where: {},
+            select: {
+                id: true,
+                first_name: true,
+                last_name: true,
+                email: true
             }
         });
 
 
-        const admins = result.map((admin)=>{
+        const admins = result.map((admin) => {
             return {
-                id : admin.id,
-                firstName : admin.first_name,
-                lastName : admin.last_name,
-                email : admin.email
+                id: admin.id,
+                firstName: admin.first_name,
+                lastName: admin.last_name,
+                email: admin.email
             }
         })
 
-        if(!result) return res.status(500).json({"error" : "Unable to get Admins"});
+        if (!result) return res.status(500).json({ "error": "Unable to get Admins" });
 
-        return res.status(200).json({"message" : "Admin Data fetched Sucessfully" , admins : admins});
+        return res.status(200).json({ "message": "Admin Data fetched Sucessfully", admins: admins });
 
     } catch (error) {
-        return res.status(500).json({"error" : "Unable to get Admins Internal Server error"});
+        return res.status(500).json({ "error": "Unable to get Admins Internal Server error" });
     }
 }
+
+
+export const dashboardData = async (req, res) => {
+    try {
+        const [userCount, zoneCount, serviceCount, serviceBoyCount] = await Promise.all([
+            prisma.user.count(),
+            prisma.zone.count(),
+            prisma.services.count(),
+            prisma.serviceboy.count()
+        ]);
+
+
+        res.status(200).json({
+            totalUsers: userCount,
+            totalServiceBoy: serviceBoyCount,
+            totalZones: zoneCount,
+            totalServices: serviceCount,
+        });
+    } catch (error) {
+        console.error("Dashboard data error:", error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};

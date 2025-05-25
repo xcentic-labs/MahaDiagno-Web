@@ -19,7 +19,7 @@ import {
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { useParams } from 'next/navigation';
-import { MapPin, Calendar, User, Phone, FileText, Upload, Trash2, PinIcon, Locate, LocationEdit, Download } from 'lucide-react';
+import { MapPin, Calendar, User, Phone, FileText, Upload, Trash2, PinIcon, Locate, LocationEdit, Download, Wallet } from 'lucide-react';
 
 interface Address {
     area: string;
@@ -61,10 +61,11 @@ interface Appointment {
     address: Address;
     isReportUploaded: boolean;
     reportName: string
-    appointementId : string
+    appointementId: string,
+    isPaid: boolean,
+    modeOfPayment: string
 }
 
-interface AppointmentDetailsProps { }
 
 const AppointmentDetails = () => {
     const router = useRouter();
@@ -112,7 +113,7 @@ const AppointmentDetails = () => {
         try {
             const formData = new FormData();
             formData.append('file', selectedFile);
-            formData.append('appointementId', appointment?.appointementId  as string);
+            formData.append('appointementId', appointment?.appointementId as string);
 
             toast.info('Uploading report...', { autoClose: false, toastId: 'uploading' });
 
@@ -227,6 +228,27 @@ const AppointmentDetails = () => {
         }
     }
 
+    const handleMarkAsPaid = async ( Paidstatus : string) => {
+        if(Paidstatus == 'false') return toast.info("Alerady Marked As Not Paid")
+
+        try {
+            const res = await axiosClient.post('/appointment/markaspaid', {
+                appointmentId: id
+            });
+
+            if (res.status == 200) {
+                toast.success("Marked As Paid");
+                setAppointment(res.data.appointment);
+            }
+            else {
+                toast.error("Unable to Change The status")
+            }
+        } catch (error) {
+            console.log(error);
+            toast.error("Unable to Change The status")
+        }
+    }
+
 
     return (
         <div className="container mx-auto p-4 w-full">
@@ -288,6 +310,19 @@ const AppointmentDetails = () => {
                             <div className="flex items-center mt-1">
                                 <Phone className="h-4 w-4 mr-2 text-gray-400" />
                                 <p>{appointment.bookedBy.phoneNumber}</p>
+                            </div>
+                        </div>
+
+
+                        <Separator className="my-4" />
+
+                        <div className="mt-4">
+                            <label className="text-sm text-gray-500">Mode Of Payment</label>
+                            <div className="flex items-start mt-1">
+                                <Wallet className="h-4 w-4 mr-2 text-gray-400 mt-1" />
+                                <p>
+                                    {appointment.modeOfPayment}
+                                </p>
                             </div>
                         </div>
 
@@ -355,6 +390,20 @@ const AppointmentDetails = () => {
                                 </>
                             )
                         }
+
+
+                        {
+                            appointment.isPaid ?
+                                ""
+                                :
+                                <div>
+                                    <select name="" id="" className='w-full h-10 px-3 pr-10 font-semibold border border-slate-300 rounded-md' onChange={(e) => handleMarkAsPaid(e.target.value)} value={appointment.isPaid ? 'Paid' : 'Not Paid'}>
+                                        <option value="Not Paid">Mark as Not Paid</option>
+                                        <option value="Paid">Mark as Paid</option>
+                                    </select>
+                                </div>
+                        }
+
 
 
                         <div>

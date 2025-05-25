@@ -33,6 +33,13 @@ export const deleteZone = async (req , res)=>{
 
         if(!id) return res.status(400).json({"error" : "Id is required"});
 
+
+        await prisma.serviceboy.deleteMany({
+            where : {
+                zoneId : +id
+            }
+        })
+
         const result = await prisma.zone.delete({
             where : {
                 id : (+id)
