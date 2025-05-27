@@ -1,7 +1,7 @@
 import express from 'express'
 import { acceptAppointment, cancleAppointment, completeAppointment, deleteAppointment, getAllAppointments, getAppointments, getPersonalAppointments, getSpecificAppointment, handleMarkAsPaid, serviceBoyAppointments, updateStatus, uploadReport } from '../Controller/AppointmentController.js';
 import { addAppointment } from '../Controller/OrderController.js';
-
+import { checkadmin } from '../Middleware/middleware.js';
 
 export const AppointmentRouter = express.Router();
 
@@ -12,7 +12,7 @@ AppointmentRouter.post('/createappointement' , addAppointment);
 AppointmentRouter.delete('/deleteappointement/:id' , deleteAppointment);
 
 // get routes
-AppointmentRouter.get('/getallappointement' , getAllAppointments);  // admin protected
+AppointmentRouter.get('/getallappointement' , checkadmin, getAllAppointments);  // admin protected
 AppointmentRouter.get('/myappointement/:id' , getPersonalAppointments);
 
 // gtespecfic 
@@ -30,10 +30,10 @@ AppointmentRouter.patch('/cancleappointement' , cancleAppointment);
 
 
 // update status
-AppointmentRouter.post('/updatestatus' , updateStatus); // admin protected
+AppointmentRouter.post('/updatestatus' , checkadmin, updateStatus); // admin protected
 
 // upload report
-AppointmentRouter.post('/uploadreport/:id' , uploadReport); // admin protectd
+AppointmentRouter.post('/uploadreport/:id' ,checkadmin, uploadReport); // admin protectd
 
 // mark as paid 
-AppointmentRouter.post('/markaspaid' , handleMarkAsPaid); // admin protectd
+AppointmentRouter.post('/markaspaid' , handleMarkAsPaid); // for service boy and admin both
