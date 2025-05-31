@@ -15,6 +15,8 @@ import { OrderRouter } from './Router/OrderRouter.js';
 import cors from 'cors'
 import { createServer } from 'http'
 import { initSocket } from './websocket/locationSocket.js';
+import { SubscriptionRouter } from './Router/SubscriptionRouter.js';
+import { PartnersRouter } from './Router/PartnersRouter.js';
 
 
 
@@ -51,6 +53,8 @@ app.use('/api/v1/admin', AdminRouter);
 app.use('/api/v1/address', AddressRouter);
 app.use('/api/v1/appointment', AppointmentRouter);
 app.use('/api/v1/order' , OrderRouter);
+app.use('/api/v1/subscription' , SubscriptionRouter);
+app.use('/api/v1/partners' , PartnersRouter);
 
 
 app.get('/', (req, res) => {
