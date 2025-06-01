@@ -49,6 +49,37 @@ export const deleteAdmin = async (req, res) => {
     }
 }
 
+export const getAdmins = async (req, res) => {
+    try {
+        const result = await prisma.admin.findMany({
+            where: {},
+            select: {
+                id: true,
+                first_name: true,
+                last_name: true,
+                email: true
+            }
+        });
+
+
+        const admins = result.map((admin) => {
+            return {
+                id: admin.id,
+                firstName: admin.first_name,
+                lastName: admin.last_name,
+                email: admin.email
+            }
+        })
+
+        if (!result) return res.status(500).json({ "error": "Unable to get Admins" });
+
+        return res.status(200).json({ "message": "Admin Data fetched Sucessfully", admins: admins });
+
+    } catch (error) {
+        return res.status(500).json({ "error": "Unable to get Admins Internal Server error" });
+    }
+}
+
 
 export const adminLogin = async (req, res) => {
     try {
@@ -90,39 +121,6 @@ export const adminLogin = async (req, res) => {
         return res.status(500).json({ "error": "Unable To LoogedIn Internal Server Error" });
     }
 }
-
-
-export const getAdmins = async (req, res) => {
-    try {
-        const result = await prisma.admin.findMany({
-            where: {},
-            select: {
-                id: true,
-                first_name: true,
-                last_name: true,
-                email: true
-            }
-        });
-
-
-        const admins = result.map((admin) => {
-            return {
-                id: admin.id,
-                firstName: admin.first_name,
-                lastName: admin.last_name,
-                email: admin.email
-            }
-        })
-
-        if (!result) return res.status(500).json({ "error": "Unable to get Admins" });
-
-        return res.status(200).json({ "message": "Admin Data fetched Sucessfully", admins: admins });
-
-    } catch (error) {
-        return res.status(500).json({ "error": "Unable to get Admins Internal Server error" });
-    }
-}
-
 
 export const dashboardData = async (req, res) => {
     try {

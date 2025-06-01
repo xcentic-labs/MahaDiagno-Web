@@ -7,6 +7,9 @@ const razorpay = new Razorpay({
     key_secret: process.env.key_secret,
 });
 
+
+
+// add appointment for users
 export const addAppointment = async (req, res) => {
     try {
         console.log(req.body)
@@ -84,8 +87,6 @@ export const addAppointment = async (req, res) => {
 
 export const createOrder = async (req, res) => {
     const { amount, currency = 'INR', receipt = 'receipt#1' } = req.body;
-
-    console.log(req.body)
 
     try {
         const order = await razorpay.orders.create({

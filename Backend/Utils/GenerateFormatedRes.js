@@ -18,9 +18,9 @@ export const generateFormatedRes = (appointment) => {
         isPaid : appointment.isPaid,
         modeOfPayment : appointment.modeOfPayment,
         bookedBy: {
-            firstName: appointment.booked_by.first_name,
-            lastName: appointment.booked_by.last_name,
-            phoneNumber: appointment.booked_by.phoneNumber
+            firstName: appointment.booked_by_user.first_name,
+            lastName: appointment.booked_by_user.last_name,
+            phoneNumber: appointment.booked_by_user.phoneNumber
         },
         service: {
             title: appointment.serviceId.title,
@@ -56,7 +56,7 @@ export const fieldToBeSelected = {
     reportName: true,
     isPaid : true,
     modeOfPayment : true,
-    booked_by: {
+    booked_by_user: {
         select: {
             first_name: true,
             last_name: true,

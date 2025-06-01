@@ -1,11 +1,12 @@
-import prisma from "../Utils/prismaclint";
-import { generatePassword , matchedPassword } from "../Utils/password";
+import prisma from "../Utils/prismaclint.js";
+import { generatePassword , matchedPassword } from "../Utils/password.js";
 
 
 export const createPartnersAccount = async (req, res) => {
     try {
-        const { hospitalName, email, phoneNumber, password } = req.body
+        const { hospitalName, email, phoneNumber, password , addressId } = req.body
 
+        console.log(req.body)
         if (!hospitalName || !phoneNumber || !email || !password) return res.status(400).json({ "error": "All Fields Are Required" });
 
         const hasedPassword = generatePassword(password);
@@ -15,9 +16,12 @@ export const createPartnersAccount = async (req, res) => {
                 hospitalName: hospitalName,
                 email: email,
                 phoneNuber: phoneNumber,
-                password: hasedPassword
+                password: hasedPassword,
+                addressId : addressId
             }
         })
+
+        console.log(partners)
 
         if (!partners) return res.status(500).json({ "error": "Unable Create Partners Account" });
         return res.status(201).json({ "message": "Partners account Created Sucessfully" });
@@ -103,7 +107,6 @@ export const getPartners = async (req, res) => {
 
 export const partnersLogin = async (req, res) => {
     try {
-        console.log(req.body)
         const { phoneNumber, password } = req.body
 
         if (!phoneNumber || !password) return res.status(400).json({ "error": "All Fields Are Required" });

@@ -59,7 +59,7 @@ export const getPersonalAppointments = async (req, res) => {
                 reportName: true,
                 isPaid : true,
                 modeOfPayment : true,
-                booked_by: {
+                booked_by_user: {
                     select: {
                         first_name: true,
                         last_name: true,
@@ -141,9 +141,9 @@ export const getPersonalAppointments = async (req, res) => {
 
             // Booked By User Info
             bookedBy: {
-                firstName: appointment.booked_by.first_name,
-                lastName: appointment.booked_by.last_name,
-                phoneNumber: appointment.booked_by.phoneNumber
+                firstName: appointment.booked_by_user.first_name,
+                lastName: appointment.booked_by_user.last_name,
+                phoneNumber: appointment.booked_by_user.phoneNumber
             },
 
             // Service Boy Info (if assigned)
@@ -346,7 +346,7 @@ export const getAllAppointments = async (req, res) => {
                 createdAt: true,
                 id: true,
                 isPaid : true,
-                booked_by: {
+                booked_by_user: {
                     select: {
                         first_name: true,
                         last_name: true,
@@ -376,10 +376,10 @@ export const getAllAppointments = async (req, res) => {
                     landmark: appt.address?.landmark,
                 },
                 bookedBy: {
-                    firstName: appt.booked_by?.first_name,
-                    lastName: appt.booked_by?.last_name,
-                    phoneNumber: appt.booked_by?.phoneNumber,
-                    email: appt.booked_by?.email,
+                    firstName: appt.booked_by_user?.first_name,
+                    lastName: appt.booked_by_user?.last_name,
+                    phoneNumber: appt.booked_by_user?.phoneNumber,
+                    email: appt.booked_by_user?.email,
                 }
             };
         });

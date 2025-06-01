@@ -10,13 +10,14 @@ import { AdminRouter } from './Router/AdminRouter.js';
 import { AddressRouter } from './Router/AddressRouter.js';
 import { AppointmentRouter } from './Router/AppointmentRouter.js';
 import { OrderRouter } from './Router/OrderRouter.js';
+import { SubscriptionRouter } from './Router/SubscriptionRouter.js';
+import { PartnersRouter } from './Router/PartnersRouter.js';
+import { SubscriptionPurchaseRouter } from './Router/subscriptionPurchaseRouter.js';
 
 // cros 
 import cors from 'cors'
 import { createServer } from 'http'
 import { initSocket } from './websocket/locationSocket.js';
-import { SubscriptionRouter } from './Router/SubscriptionRouter.js';
-import { PartnersRouter } from './Router/PartnersRouter.js';
 
 
 
@@ -55,6 +56,7 @@ app.use('/api/v1/appointment', AppointmentRouter);
 app.use('/api/v1/order' , OrderRouter);
 app.use('/api/v1/subscription' , SubscriptionRouter);
 app.use('/api/v1/partners' , PartnersRouter);
+app.use('/api/v1/subscriptionpurchase' , SubscriptionPurchaseRouter);
 
 
 app.get('/', (req, res) => {

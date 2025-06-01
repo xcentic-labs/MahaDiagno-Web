@@ -2,11 +2,11 @@ import prisma from "../Utils/prismaclint.js";
 
 export const addAddress = async (req, res) => {
     try {
-        const { area, landmark, pincode, district, state, lat, lng, userId } = req.body
+        const { area, landmark, pincode, district, state, lat, lng , userId } = req.body
 
         console.log(req.body);
 
-        if (!area || !landmark || !pincode || !district || !state || !userId) return res.status(400).json({ "error": "All Fields Are Required" });
+        if (!area || !landmark || !pincode || !district || !state ) return res.status(400).json({ "error": "All Fields Are Required" });
 
 
         const address = await prisma.address.create({
@@ -16,7 +16,7 @@ export const addAddress = async (req, res) => {
                 pincode: pincode,
                 district: district,
                 state: state,
-                userId: userId,
+                userId: userId ? userId : null,
                 lat: lat.toString(),
                 lng: lng.toString()
             }
@@ -24,7 +24,7 @@ export const addAddress = async (req, res) => {
 
         console.log(address);
         if (!address) return res.status(500).json({ "error": "Unable To Add Address" });
-        return res.status(201).json({ "message": "Address Added Sucessfully" });
+        return res.status(201).json({ "message": "Address Added Sucessfully" , address : address });
     } catch (error) {
         console.log(error)
         return res.status(500).json({ "error": "Unable To Add Address Internal Server Error" });
