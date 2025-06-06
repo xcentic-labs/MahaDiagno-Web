@@ -5,7 +5,7 @@ export const SubscriptionPurchaseRouter = express.Router();
 
 SubscriptionPurchaseRouter.post('/buysubscription' , BuySubscription);
 SubscriptionPurchaseRouter.post('/usecoupon' , useCoupon);
-SubscriptionPurchaseRouter.get('/getmysubscriptions' , getMySubscriptions);
+SubscriptionPurchaseRouter.get('/getmysubscriptions/:id' , getMySubscriptions);
 
 
 

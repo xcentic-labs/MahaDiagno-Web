@@ -1,5 +1,6 @@
 import prisma from "../Utils/prismaclint.js";
 
+
 export const addSubscription = async (req, res) => {
     try {
         const { subscriptionName, price, numberOfTimes, serviceId, benefits } = req.body;

@@ -15,7 +15,7 @@ CREATE TABLE "partners" (
     "id" SERIAL NOT NULL,
     "hospitalName" TEXT NOT NULL,
     "email" TEXT NOT NULL,
-    "phoneNuber" TEXT NOT NULL,
+    "phoneNumber" TEXT NOT NULL,
     "password" TEXT NOT NULL
 );
 
@@ -23,7 +23,7 @@ CREATE TABLE "partners" (
 CREATE UNIQUE INDEX "partners_id_key" ON "partners"("id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "partners_phoneNuber_key" ON "partners"("phoneNuber");
+CREATE UNIQUE INDEX "partners_phoneNumber_key" ON "partners"("phoneNumber");
 
 -- AddForeignKey
 ALTER TABLE "subscription_purchase" ADD CONSTRAINT "subscription_purchase_patnerId_fkey" FOREIGN KEY ("patnerId") REFERENCES "partners"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

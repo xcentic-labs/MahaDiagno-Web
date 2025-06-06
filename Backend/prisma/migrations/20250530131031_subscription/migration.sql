@@ -13,7 +13,7 @@ CREATE TABLE "patners" (
     "id" SERIAL NOT NULL,
     "hospitalName" TEXT NOT NULL,
     "email" TEXT NOT NULL,
-    "phoneNuber" TEXT NOT NULL,
+    "phoneNumber" TEXT NOT NULL,
     "password" TEXT NOT NULL
 );
 

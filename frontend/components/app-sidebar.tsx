@@ -9,7 +9,8 @@ import {
   CalendarClock,
   ShieldCheck,
   BadgePlus,
-  Upload
+  Upload,
+  DollarSign
 } from "lucide-react";
 import { Bike } from "lucide-react";
 
@@ -59,6 +60,7 @@ const data = {
       url: "/appointment/uploadreport",
       icon: Upload, // perfect for appointments
     },
+    
     {
       title: "Appointment",
       url: "/appointment/pending",
@@ -71,10 +73,32 @@ const data = {
       ],
     },
     {
+      title: "Upload Partner Report",
+      url: "/partnerappointment/uploadreport",
+      icon: Upload, // perfect for appointments
+    },
+    {
+      title: "Partner Appointment",
+      url: "/partnerappointment/pending",
+      icon: CalendarClock, // perfect for appointments partnerappointment
+      items: [
+        { title: "Pending", url: "/partnerappointment/pending/" },
+        { title: "Accepted", url: "/partnerappointment/accepted" },
+        { title: "Completed", url: "/partnerappointment/completed" },
+        { title: "Cancelled", url: "/partnerappointment/cancelled" },
+      ],
+    },
+    {
       title: "Admin",
       url: "/admin",
       icon: ShieldCheck, // indicates admin/security
     },
+    {
+      title: "Subscription",
+      url: "/subscription",
+      icon: DollarSign, // indicates admin/security
+    },
+    
     {
       title: "Service Boy",
       url: "/addserviceboy",

@@ -5,15 +5,9 @@ import { checkadmin } from '../Middleware/middleware.js';
 
 export const AppointmentRouter = express.Router();
 
-// creat appointement
-AppointmentRouter.post('/createappointement' , addAppointment);
 
-// delete
-AppointmentRouter.delete('/deleteappointement/:id' , deleteAppointment);
 
-// get routes
-AppointmentRouter.get('/getallappointement' , checkadmin, getAllAppointments);  // admin protected
-AppointmentRouter.get('/myappointement/:id' , getPersonalAppointments);
+AppointmentRouter.get('/myappointement/:id' , getPersonalAppointments);  
 
 // gtespecfic 
 AppointmentRouter.get('/getSpecificappointment/:id' , getSpecificAppointment);
@@ -37,3 +31,16 @@ AppointmentRouter.post('/uploadreport/:id' ,checkadmin, uploadReport); // admin 
 
 // mark as paid 
 AppointmentRouter.post('/markaspaid' , handleMarkAsPaid); // for service boy and admin both
+
+
+// not required to chage
+
+
+// creat appointement
+AppointmentRouter.post('/createappointement' , addAppointment); 
+
+// delete
+AppointmentRouter.delete('/deleteappointement/:id' , deleteAppointment);
+
+// get routes
+AppointmentRouter.get('/getallappointement' , checkadmin, getAllAppointments);  // admin protected
