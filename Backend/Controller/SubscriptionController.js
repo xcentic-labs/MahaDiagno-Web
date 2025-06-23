@@ -13,7 +13,7 @@ export const addSubscription = async (req, res) => {
         }
 
 
-        if(typeof(timePeriod) != 'number' || typeof(numberOfServiceBoys) != 'number') return res.status(400).json({ error: "All Fields Are Required" });
+        // if(typeof(timePeriod) != 'number' || typeof(numberOfServiceBoys) != 'number') return res.status(400).json({ error: "All Fields Are Required" });
 
         const subscription = await prisma.subscription.create({
             data: {

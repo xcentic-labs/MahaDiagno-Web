@@ -27,17 +27,20 @@ export const getPersonalAppointments = async (req, res) => {
     try {
         const id = req.params.id;
 
-        console.log(req.params.id)
-        const matchedCondition = {}
-
         if (!id) {
             return res.status(400).json({ error: "Id Is Required" });
         }
 
+        const matchedCondition = {
+            userId: +id
+        }
 
+        console.log(req.params.id)
         if (req.query.status) {
             matchedCondition.status = (req.query.status).toUpperCase();
         }
+
+        console.log(matchedCondition)
 
 
         const myAppointments = await prisma.appointment.findMany({
@@ -50,8 +53,9 @@ export const getPersonalAppointments = async (req, res) => {
             }
         });
 
+        console.log(myAppointments)
+
         const formattedAppointments = myAppointments.map((app) => {
-            console.log(app.id)
             return { ...convertKeysToCamelCase(app), appointementId: `MH2025D${app.id}` }
         })
 
@@ -78,7 +82,7 @@ export const getPartnerAppointments = async (req, res) => {
 
         console.log(req.params.id)
         const matchedCondition = {
-            partnerId : +id
+            partnerId: +id
         }
 
         if (!id) {
@@ -94,24 +98,24 @@ export const getPartnerAppointments = async (req, res) => {
             matchedCondition.status = 'COMPLETED'
             matchedCondition.isReportUploaded = false
         }
-        
+
 
         const myAppointments = await prisma.appointment.findMany({
             where: matchedCondition,
             include: {
                 serviceId: true,
                 serviceBoy: {
-                    select : {
-                        id : true,
-                        first_name : true,
-                        last_name : true,
-                        phoneNumber : true,
-                        email : true,
+                    select: {
+                        id: true,
+                        first_name: true,
+                        last_name: true,
+                        phoneNumber: true,
+                        email: true,
                         partnerId: true
                     }
                 },
                 address: true,
-                booked_by_user : true
+                booked_by_user: true
             }
         });
 
@@ -155,15 +159,15 @@ export const serviceBoyAppointments = async (req, res) => {
 
         const myAppointments = await prisma.appointment.findMany({
             where: matchedCondition,
-            include : {
-                booked_by_user : true,
-                serviceId : true,
-                address : true
+            include: {
+                booked_by_user: true,
+                serviceId: true,
+                address: true
             },
         });
 
         const appointments = myAppointments.map(appointment => ({
-             ...convertKeysToCamelCase(appointment),
+            ...convertKeysToCamelCase(appointment),
             appointementId: `MH2025D${appointment.id}`
         }));
 
@@ -199,10 +203,10 @@ export const getAppointments = async (req, res) => {
 
         const myAppointments = await prisma.appointment.findMany({
             where: matchedCondition,
-            include : {
-                booked_by_user : true,
-                serviceId : true,
-                address : true
+            include: {
+                booked_by_user: true,
+                serviceId: true,
+                address: true
             },
         });
 
@@ -272,7 +276,7 @@ export const getAllAppointments = async (req, res) => {
     try {
         const matchedCondition = {}
 
-    
+
 
 
         if (req.query.status != 'all') {
@@ -283,28 +287,28 @@ export const getAllAppointments = async (req, res) => {
             matchedCondition.status = 'COMPLETED'
             matchedCondition.isReportUploaded = false
         }
-        
+
 
         const myAppointments = await prisma.appointment.findMany({
             where: matchedCondition,
             include: {
                 serviceId: {
-                    include : {
-                        partner : true
+                    include: {
+                        partner: true
                     }
                 },
                 serviceBoy: {
-                    select : {
-                        id : true,
-                        first_name : true,
-                        last_name : true,
-                        phoneNumber : true,
-                        email : true,
+                    select: {
+                        id: true,
+                        first_name: true,
+                        last_name: true,
+                        phoneNumber: true,
+                        email: true,
                         partnerId: true
                     }
                 },
                 address: true,
-                booked_by_user : true
+                booked_by_user: true
             }
         });
 
@@ -584,9 +588,9 @@ export const uploadReport = async (req, res) => {
             });
 
             const formattedAppointment = {
-            ...convertKeysToCamelCase(appointment),
-            appointementId: `MH2025D${appointment.id}`
-        }
+                ...convertKeysToCamelCase(appointment),
+                appointementId: `MH2025D${appointment.id}`
+            }
 
             if (!appointment) return res.status(404).json({ "error": "Appointment Not Found" });
             return res.status(200).json({ "message": "PDF Uploded Sucessfully", appointment: formattedAppointment });

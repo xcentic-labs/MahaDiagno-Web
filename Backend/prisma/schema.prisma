@@ -57,11 +57,36 @@ model partners {
 
   isSubscribed Boolean @default(false)
 
+  amount Int
+
   subscription_purchase subscription_purchase[]
   // services 
   services              services[]
   serviceBoy            serviceboy[]
   appointment           appointment[]
+  withdraw              withdraw[]
+  paymentMethod         paymentMethod[]
+}
+
+model paymentMethod {
+  id            Int        @unique @default(autoincrement())
+  partnerId     Int
+  partner       partners   @relation(fields: [partnerId], references: [id])
+  bankName      String
+  accountNumber String
+  ifscCode      String
+  bankeeName    String
+  withdraw      withdraw[]
+}
+
+model withdraw {
+  id              Int            @unique @default(autoincrement())
+  partnerId       Int
+  partner         partners       @relation(fields: [partnerId], references: [id])
+  amount          Int
+  status          withdrawStatus @default(PENDING)
+  paymentMethodId Int
+  paymentMethod   paymentMethod  @relation(fields: [paymentMethodId], references: [id])
 }
 
 model User {
@@ -203,4 +228,10 @@ enum Mode {
   cash
   razorpay
   subscriptionBased
+}
+
+enum withdrawStatus {
+  PENDING
+  SUCCESS
+  REJECTED
 }

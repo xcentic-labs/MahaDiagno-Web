@@ -10,7 +10,8 @@ import {
   ShieldCheck,
   BadgePlus,
   Upload,
-  DollarSign
+  DollarSign,
+  Banknote
 } from "lucide-react";
 import { Bike } from "lucide-react";
 
@@ -77,6 +78,12 @@ const data = {
     //     { title: "Cancelled", url: "/partnerappointment/cancelled" },
     //   ],
     // },
+    // withdraw
+    {
+      title: "Withdraw Request",
+      url: "/withdraw",
+      icon: Banknote, // indicates admin/security
+    },
     {
       title: "Admin",
       url: "/admin",
@@ -92,11 +99,11 @@ const data = {
       url: "/addserviceboy",
       icon: BadgePlus, // suits service personnel
     },
-    {
-      title: "Track Service Boy",
-      url: "/serviceboylocation",
-      icon: Bike,
-    }
+    // {
+    //   title: "Track Service Boy",
+    //   url: "/serviceboylocation",
+    //   icon: Bike,
+    // }
     
   ],
 };

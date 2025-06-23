@@ -153,27 +153,8 @@ export default function subscriptionManagement() {
         }
     };
 
-
-    const fetchServices = async (): Promise<void> => {
-        setIsLoading(true);
-
-        try {
-            const res = await axiosClient.get('/service/getservices');
-
-            if (res.status === 200) {
-                setServices(res.data.services || []);
-            } else {
-                throw new Error("Failed to fetch services");
-            }
-        } catch (error: any) {
-            const errorMessage = error.response?.data?.error || "Unable to fetch services. Please try again.";
-            toast.error(errorMessage);
-        }
-    };
-
     useEffect(() => {
         handleFetchSubscription();
-        fetchServices();
     }, []);
 
     return (
@@ -228,7 +209,7 @@ export default function subscriptionManagement() {
                         </label>
                         <input
                             type="number"
-                            name="numberOfTimes"
+                            name="numberOfServiceBoys"
                             value={newSubscription?.numberOfServiceBoys}
                             onChange={handleInputChange}
                             className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -243,7 +224,7 @@ export default function subscriptionManagement() {
                             <Layers size={16} className="mr-1" /> TimePeriod
                         </label>
                         <select
-                            name="serviceId"
+                            name="timePeriod"
                             className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                             disabled={isAddingSubscription}
                             value={newSubscription.timePeriod}
