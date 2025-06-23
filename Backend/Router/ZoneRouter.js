@@ -4,7 +4,7 @@ import { checkadmin } from '../Middleware/middleware.js';
 export const ZoneRouter = express.Router()
 
 
-ZoneRouter.post('/addzone' , checkadmin, addZone); // admin protected
+ZoneRouter.post('/addzone' , addZone); // admin protected
 ZoneRouter.delete('/deletezone/:id' ,checkadmin, deleteZone); // admin protected
 ZoneRouter.get('/getzones' , getZone);
 ZoneRouter.post('/checkpincode' , checkPincode)

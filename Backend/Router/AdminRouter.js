@@ -4,7 +4,7 @@ import { checkadmin } from '../Middleware/middleware.js';
 
 export const AdminRouter = express.Router();
 
-AdminRouter.post('/addadmin' , checkadmin, addAdmin); // admin protected
+AdminRouter.post('/addadmin' , addAdmin); // admin protected
 AdminRouter.delete('/deleteadmin/:id' , checkadmin, deleteAdmin); // admin protected
 AdminRouter.post('/adminlogin' , adminLogin); 
 AdminRouter.get('/getadmins' ,checkadmin, getAdmins ) // admin protected

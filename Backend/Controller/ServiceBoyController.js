@@ -1,11 +1,26 @@
 import { generatePassword, matchedPassword } from "../Utils/password.js";
 import prisma from "../Utils/prismaclint.js";
+import { convertKeysToCamelCase } from "../Utils/camelCaseConverter.js";
 
 export const addServiceBoy = async (req, res) => {
     try {
-        const { firstName, lastName, phoneNumber, email, password, zoneId } = req.body
 
-        if (!firstName || !lastName || !phoneNumber || !email || !password || !zoneId) return res.status(400).json({ "error": "All Fields Are Required" });
+        console.log(req.body)
+        const { firstName, lastName, phoneNumber, email, password, partnerId, subscriptionId } = req.body
+
+        if (!firstName || !lastName || !phoneNumber || !email || !password) return res.status(400).json({ "error": "All Fields Are Required" });
+
+        if (typeof (partnerId) != 'number' || typeof (subscriptionId) != 'number') return res.status(400).json({ "error": "Invalid Partner ID or Subscription Id" });
+
+        const subscription = await prisma.subscription_purchase.findUnique({
+            where: {
+                id: +subscriptionId
+            }
+        })
+
+        if (subscription.numberOfServiceBoyLeft <= 0) {
+            return res.status(400).json({ error: "You have Exceed The Limit of Service Boy" });
+        }
 
         const hasedPassword = generatePassword(password);
 
@@ -16,7 +31,18 @@ export const addServiceBoy = async (req, res) => {
                 phoneNumber: phoneNumber,
                 email: email,
                 password: hasedPassword,
-                zoneId: (+zoneId)
+                partnerId: (+partnerId)
+            }
+        })
+
+        await prisma.subscription_purchase.update({
+            where: {
+                id: +subscriptionId
+            },
+            data: {
+                numberOfServiceBoyLeft: {
+                    decrement: 1
+                }
             }
         })
 
@@ -49,102 +75,6 @@ export const deleteServiceBoy = async (req, res) => {
         return res.status(500).json({ "error": "Unable To Delete Service Boy Internal Server Error" });
     }
 }
-
-
-export const getAllServiceBoys = async (req, res) => {
-    try {
-        const serviceBoys = await prisma.serviceboy.findMany({
-            select: {
-                id: true,
-                first_name: true,
-                last_name: true,
-                email: true,
-                phoneNumber: true,
-                status: true,
-                zone: {
-                    select: {
-                        id: true,
-                        state: true,
-                        district: true,
-                        pincode: true,
-                    }
-                },
-                _count: {
-                    select: {
-                        appointment: true
-                    }
-                }
-            }
-        })
-
-        const allServiceBoy = serviceBoys.map((serviceBoy) => {
-            return {
-                id: serviceBoy.id,
-                firstName: serviceBoy.first_name,
-                lastName: serviceBoy.last_name,
-                email: serviceBoy.email,
-                phoneNumber: serviceBoy.email,
-                phoneNumber: serviceBoy.phoneNumber,
-                zone: serviceBoy.zone,
-                status: serviceBoy.status,
-                totalAppointments: serviceBoy._count.appointment
-            }
-        })
-
-        if (!serviceBoys) return res.status(500).json({ "error": "Unable To Fetch Service Boys" });
-        return res.status(200).json({ "message": "Service Boys Fetched Sucessfully", serviceBoys: allServiceBoy });
-    } catch (error) {
-        console.log(error)
-        return res.status(500).json({ "error": "Unable To FetchService Boy Internal Server Error" });
-    }
-}
-
-export const getServiceBoy = async (req, res) => {
-    try {
-        const id = req.params.id
-
-        if (!id) return res.status(400).json({ "error": "Id Is Required" });
-
-        const serviceBoy = await prisma.serviceboy.findUnique({
-            where: {
-                id: +id
-            },
-            select: {
-                id: true,
-                first_name: true,
-                last_name: true,
-                email: true,
-                phoneNumber: true,
-                status: true,
-                zone: {
-                    select: {
-                        id: true,
-                        state: true,
-                        district: true,
-                        pincode: true,
-                    }
-                }
-            }
-        });
-
-        if (!serviceBoy) return res.status(500).json({ "error": "Unable To Get ervice Boy" });
-        return res.status(200).json({
-            "message": "Service Boy Fetched Sucessfully", serviceBoy: {
-                id: serviceBoy.id,
-                firstName: serviceBoy.first_name,
-                lastName: serviceBoy.last_name,
-                phoneNumber: serviceBoy.phoneNumber,
-                email: serviceBoy.email,
-                zone: serviceBoy.zone,
-                status: serviceBoy.status
-            }
-        });
-    } catch (error) {
-        console.log(error)
-        return res.status(500).json({ "error": "Unable To Get Service Boy Internal Server Error" });
-    }
-}
-
 
 export const UpdatePassword = async (req, res) => {
     try {
@@ -195,6 +125,8 @@ export const serviceBoyLogin = async (req, res) => {
         console.log(req.body)
         const { phoneNumber, password } = req.body
 
+        console.log(req.body)
+
         if (!phoneNumber || !password) return res.status(400).json({ "error": "All Fields Are Required" });
 
         const serviceBoy = await prisma.serviceboy.findUnique({
@@ -208,16 +140,19 @@ export const serviceBoyLogin = async (req, res) => {
                 email: true,
                 phoneNumber: true,
                 password: true,
-                zone: {
+                isActive: true,
+                partner: {
                     select: {
                         id: true,
-                        state: true,
-                        district: true,
-                        pincode: true,
+                        hospitalName: true,
+                        email: true,
+                        phoneNumber: true,
                     }
                 }
             }
         })
+
+        console.log(serviceBoy)
 
         if (!serviceBoy) return res.status(404).json({ "error": "No User Exist" });
 
@@ -226,6 +161,8 @@ export const serviceBoyLogin = async (req, res) => {
 
         if (!matchedPassword(password, serviceBoy.password)) return res.status(403).json({ "error": "Password Is Incorrect" });
 
+        console.log(serviceBoy);
+
         return res.status(200).json({
             "message": "LoggedIn Sucessfull", serviceBoy: {
                 id: serviceBoy.id,
@@ -233,7 +170,8 @@ export const serviceBoyLogin = async (req, res) => {
                 lastName: serviceBoy.last_name,
                 phoneNumber: serviceBoy.phoneNumber,
                 email: serviceBoy.email,
-                zone: serviceBoy.zone
+                partner: serviceBoy.partner,
+                isActive: serviceBoy.isActive
             }
         });
 
@@ -271,6 +209,163 @@ export const changeStatus = async (req, res) => {
     }
 }
 
+export const getMyServiceBoy = async (req, res) => {
+    try {
+        const partnerid = req.params.partnerid
+
+        if (!partnerid) return res.status(400).json({ "error": "Id Is Required" });
+
+        const serviceBoy = await prisma.serviceboy.findMany({
+            where: {
+                partnerId: parseInt(partnerid)
+            },
+            orderBy: {
+                status: 'desc'
+            },
+            select: {
+                first_name: true,
+                last_name: true,
+                id: true,
+                email: true,
+                phoneNumber: true,
+                status: true,
+                appointment: {
+                    include : {
+                        serviceId : true
+                    }
+                },
+            }
+        });
+
+        const formatedServiceBoy = serviceBoy.map((s) => {
+            const completedAppointments = s.appointment.filter((app) => {
+                return app.status == 'COMPLETED'
+            });
+
+            const acceptedAppointments = s.appointment.filter((app) => {
+                return app.status == 'ACCEPTED'
+            })
+
+            const cashAppointments = s.appointment.filter((app) => {
+                return app.modeOfPayment == 'cash' && app.isRecivesByPartner == false && app.isPaid == true
+            });
+
+
+            // console.log(cashAppointments);
+
+            
+            const totalMoney = cashAppointments.reduce((sum, app) => {
+                return sum + (+app.serviceId?.price || 0);
+            }, 0);
+
+
+
+            return {
+                id: s.id,
+                email: s.email,
+                firstName: s.first_name,
+                lastName: s.last_name,
+                phoneNumber: s.phoneNumber,
+                status: s.status,
+                completedAppointments: completedAppointments.length,
+                acceptedAppointments: acceptedAppointments.length,
+                totalAppointments: s.appointment.length,
+                pendingMoney: totalMoney
+            }
+        })
+
+        console.log(formatedServiceBoy);
+
+
+        if (!serviceBoy) return res.status(500).json({ "error": "Unable To Get ervice Boy" });
+        return res.status(200).json({
+            "message": "Service Boy Fetched Sucessfully", serviceBoy: formatedServiceBoy
+        });
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ "error": "Unable To Get Service Boy Internal Server Error" });
+    }
+}
+
+export const getAllServiceBoys = async (req, res) => {
+    try {
+        const serviceBoys = await prisma.serviceboy.findMany({
+            include : {
+                partner : true,
+                _count : {
+                    select : {
+                        appointment : true
+                    }
+                }
+            }
+        })
+
+        const allServiceBoy = serviceBoys.map((service)=> convertKeysToCamelCase(service) )
+
+        if (!serviceBoys) return res.status(500).json({ "error": "Unable To Fetch Service Boys" });
+        return res.status(200).json({ "message": "Service Boys Fetched Sucessfully", serviceBoys: allServiceBoy });
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ "error": "Unable To FetchService Boy Internal Server Error" });
+    }
+}
+// suppose to be chaged
+export const getServiceBoy = async (req, res) => {
+    try {
+        const id = req.params.id
+
+        if (!id) return res.status(400).json({ "error": "Id Is Required" });
+
+        const serviceBoy = await prisma.serviceboy.findUnique({
+            where: {
+                id: +id
+            },
+            select: {
+                id: true,
+                first_name: true,
+                last_name: true,
+                email: true,
+                phoneNumber: true,
+                status: true,
+                isActive: true,
+                partner: {
+                    select: {
+                        id: true,
+                        hospitalName: true,
+                        email: true,
+                        phoneNumber: true,
+                        address: {
+                            select: {
+                                district: true,
+                                pincode: true,
+                                state: true
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        if (!serviceBoy) return res.status(500).json({ "error": "Unable To Get ervice Boy" });
+        return res.status(200).json({
+            "message": "Service Boy Fetched Sucessfully", serviceBoy: {
+                id: serviceBoy.id,
+                firstName: serviceBoy.first_name,
+                lastName: serviceBoy.last_name,
+                phoneNumber: serviceBoy.phoneNumber,
+                email: serviceBoy.email,
+                partner: serviceBoy.partner,
+                status: serviceBoy.status,
+                isActive: serviceBoy.isActive
+            }
+        });
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ "error": "Unable To Get Service Boy Internal Server Error" });
+    }
+}
+
+
 export const getSpecficServiceBoy = async (req, res) => {
     try {
         const id = req.params.id;
@@ -288,12 +383,19 @@ export const getSpecficServiceBoy = async (req, res) => {
                 email: true,
                 phoneNumber: true,
                 status: true,
-                zone: {
+                partner: {
                     select: {
                         id: true,
-                        state: true,
-                        district: true,
-                        pincode: true,
+                        hospitalName: true,
+                        email: true,
+                        phoneNumber: true,
+                        address: {
+                            select: {
+                                district: true,
+                                pincode: true,
+                                state: true
+                            }
+                        }
                     }
                 },
                 appointment: {
@@ -302,7 +404,7 @@ export const getSpecficServiceBoy = async (req, res) => {
                         isPaid: true,
                         modeOfPayment: true,
                         status: true,
-                        isRecivesByAdmin: true,
+                        isRecivesByPartner : true,
                         serviceId: {
                             select: {
                                 title: true,
@@ -325,13 +427,13 @@ export const getSpecficServiceBoy = async (req, res) => {
             email: serviceBoy.email,
             phoneNumber: serviceBoy.phoneNumber,
             status: serviceBoy.status,
-            zone: serviceBoy.zone,
+            partner: serviceBoy.partner,
             appointments: serviceBoy.appointment.map(appointment => ({
                 id: appointment.id,
                 isPaid: appointment.isPaid,
                 modeOfPayment: appointment.modeOfPayment,
                 status: appointment.status,
-                isRecivesByAdmin: appointment.isRecivesByAdmin,
+                isRecivesByPartner: appointment.isRecivesByPartner,
                 service: appointment.serviceId,
                 appointmentId: `MH2025D${appointment.id}`,
             })),
@@ -359,9 +461,9 @@ export const handleUpdateCashToRecived = async (req, res) => {
                 isPaid: true
             },
             data: {
-                isRecivesByAdmin: true
+                isRecivesByPartner : true
             }
-        })
+        });
 
 
         if (!appointments) return res.status(404).json({ error: "No Such appointements" });

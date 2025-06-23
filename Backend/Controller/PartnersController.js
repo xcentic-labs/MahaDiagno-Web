@@ -5,7 +5,9 @@ import { sentopt, verify2factorOtp } from "../Utils/otp.js";
 
 export const createPartnersAccount = async (req, res) => {
     try {
-        const { hospitalName, email, phoneNumber, password, addressId } = req.body
+        const { hospitalName, email, phoneNumber, password, addressId , zoneId } = req.body
+
+        console.log(req.body)
 
         console.log(req.body)
         if (!hospitalName || !phoneNumber || !email || !password) return res.status(400).json({ "error": "All Fields Are Required" });
@@ -18,7 +20,8 @@ export const createPartnersAccount = async (req, res) => {
                 email: email,
                 phoneNumber: phoneNumber,
                 password: hasedPassword,
-                addressId: addressId
+                addressId: addressId,
+                zoneId : zoneId
             }
         })
 
@@ -37,22 +40,29 @@ export const createPartnersAccount = async (req, res) => {
 
 export const deletePartners = async (req, res) => {
     try {
-        const id = req.params.id
+        const id = parseInt(req.params.id);
+        if (!id) return res.status(400).json({ error: "Id is required" });
 
-        if (!id) return res.status(400).json({ "error": "Id Is Required" });
+        // Check if partner exists
+        const existingPartner = await prisma.partners.findUnique({ where: { id : +id } });
+        if (!existingPartner) return res.status(404).json({ error: "Partner not found" });
 
-        const partners = await prisma.partners.delete({
-            where: {
-                id: +id
-            }
-        })
-        if (!partners) return res.status(500).json({ "error": "Unable To Delete partners" });
-        return res.status(200).json({ "message": "partners Deleted Sucessfully" });
+        // Delete dependent records in correct order
+        await prisma.appointment.deleteMany({ where: { partnerId : +id } });
+        await prisma.serviceboy.deleteMany({ where: { partnerId : +id } });
+        await prisma.services.deleteMany({ where: { partnerId : +id } });
+        await prisma.subscription_purchase.deleteMany({ where: {  partnersId : +id} });
+
+        // Delete the partner
+        await prisma.partners.delete({ where: { id : +id } });
+
+        return res.status(200).json({ message: "Partner and related data deleted successfully" });
     } catch (error) {
-        console.log(error)
-        return res.status(500).json({ "error": "Unable To Delete partners Internal Server Error" });
+        console.error(error);
+        return res.status(500).json({ error: "Unable to delete partner. Internal server error." });
     }
-}
+};
+
 
 export const getAllPartners = async (req, res) => {
     try {
@@ -63,9 +73,13 @@ export const getAllPartners = async (req, res) => {
                 hospitalName: true,
                 phoneNumber: true,
                 email: true,
+                isSubscribed : true,
                 _count: {
                     select: {
-                        subscription_purchase: true
+                        subscription_purchase: true,
+                        serviceBoy : true,
+                        appointment : true,
+                        services : true
                     }
                 }
             }
@@ -90,35 +104,19 @@ export const getPartners = async (req, res) => {
             where: {
                 id: +id
             },
-            select: {
-                id: true,
-                hospitalName: true,
-                phoneNumber: true,
-                email: true,
-                address: {
-                    select: {
-                        id: true,
-                        area: true,
-                        landmark: true,
-                        pincode: true,
-                        state: true,
-                        lat: true,
-                        lng: true,
-                    }
-                }
+            include : {
+                subscription_purchase : true,
+                serviceBoy : true,
+                appointment : true,
+                services : true,
+                address : true
             }
         });
 
         if (!partners) return res.status(500).json({ "error": "Unable To Get Partner" });
         console.log(partners);
         return res.status(200).json({
-            "message": "Partner Fetched Sucessfully", partner: {
-                id: partners.id,
-                address: partners.address,
-                email: partners.email,
-                phoneNumber: partners.phoneNumber,
-                hospitalName: partners.hospitalName
-            }
+            "message": "Partner Fetched Sucessfully", partner: partners
         });
     } catch (error) {
         console.log(error)
@@ -152,6 +150,14 @@ export const partnersLogin = async (req, res) => {
                         lat: true,
                         lng: true,
                     }
+                },
+                zone : {
+                    select : {
+                        id : true,
+                        district : true,
+                        state :true,
+                        pincode : true
+                    }
                 }
             }
         })
@@ -168,7 +174,8 @@ export const partnersLogin = async (req, res) => {
                 address: partners.address,
                 email: partners.email,
                 phoneNumber: partners.phoneNumber,
-                hospitalName: partners.hospitalName
+                hospitalName: partners.hospitalName,
+                zone : partners.zone
             }
         });
 

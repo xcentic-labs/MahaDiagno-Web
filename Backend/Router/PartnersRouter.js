@@ -10,8 +10,8 @@ PartnersRouter.post('/partnerslogin' , partnersLogin)
 
 
 // admin routes 
-PartnersRouter.delete('/deletepartners' , checkadmin , deletePartners);
-PartnersRouter.get('/getallpartners' , checkadmin ,getAllPartners);
+PartnersRouter.delete('/deletepartners/:id' , checkadmin , deletePartners);
+PartnersRouter.get('/getallpartners', checkadmin ,getAllPartners);
 
 // forgot password
 PartnersRouter.post('/getotp' , getForgotPasswordOtp);

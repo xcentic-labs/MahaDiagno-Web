@@ -19,7 +19,7 @@ import {
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { useParams } from 'next/navigation';
-import { MapPin, Calendar, User, Phone, FileText, Upload, Trash2, PinIcon, Locate, LocationEdit, Download, Wallet } from 'lucide-react';
+import { MapPin, Calendar, User, Phone, FileText, Upload, Trash2, PinIcon, Locate, LocationEdit, Download, Wallet, Building2, Mail } from 'lucide-react';
 
 interface Address {
     area: string;
@@ -31,16 +31,32 @@ interface Address {
     lng: string;
 }
 
-interface BookedBy {
+interface BookedByUser {
     firstName: string;
     lastName: string;
     phoneNumber: string;
 }
 
-interface Service {
+interface Partner {
+    id: number;
+    hospitalName: string;
+    email: string;
+    phoneNumber: string;
+    password: string;
+    zoneId: number;
+    addressId: number;
+    isSubscribed: boolean;
+}
+
+interface ServiceId {
+    id: number;
     title: string;
     price: string;
     bannerUrl: string;
+    isHomeServiceAvail: boolean;
+    zoneId: number;
+    partnerId: number;
+    partner: Partner;
 }
 
 interface Appointment {
@@ -52,20 +68,18 @@ interface Appointment {
     referringDoctor: string;
     additionalPhoneNumber: string;
     userId: number;
-    serviceId: number;
-    addressId: number;
+    bookedByUser: BookedByUser;
+    serviceId: ServiceId;
+    addressId: number | null;
     status: string;
     createdAt: string;
-    bookedBy: BookedBy;
-    service: Service;
-    address: Address;
+    address: Address | null;
     isReportUploaded: boolean;
-    reportName: string
-    appointementId: string,
-    isPaid: boolean,
-    modeOfPayment: string
+    reportName: string | null;
+    appointementId: string;
+    isPaid: boolean;
+    modeOfPayment: string;
 }
-
 
 const AppointmentDetails = () => {
     const router = useRouter();
@@ -109,21 +123,18 @@ const AppointmentDetails = () => {
             return;
         }
 
-
         try {
             const formData = new FormData();
-            formData.append('file', selectedFile);
+            formData.append('report', selectedFile);
             formData.append('appointementId', appointment?.appointementId as string);
 
             toast.info('Uploading report...', { autoClose: false, toastId: 'uploading' });
 
-            // Replace with your actual upload endpoint
             const res = await axiosClient.post(`/appointment/uploadreport/${id}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
             });
-
 
             if (res.status == 200) {
                 toast.success('Report uploaded successfully!');
@@ -133,7 +144,6 @@ const AppointmentDetails = () => {
             else {
                 toast.error(res.data.error)
             }
-
 
         } catch (err: any) {
             toast.dismiss('uploading');
@@ -207,7 +217,6 @@ const AppointmentDetails = () => {
         }).format(date);
     };
 
-
     const handleUpdateStatus = async (status: string) => {
         try {
             const res = await axiosClient.post('/appointment/updatestatus', {
@@ -216,20 +225,20 @@ const AppointmentDetails = () => {
             });
 
             if (res.status == 200) {
-                toast.success("Appointement status Changed Sucesssfully");
+                toast.success("Appointment status changed successfully");
                 setAppointment(res.data.appointment);
             }
             else {
-                toast.error("Unable to Change The status")
+                toast.error("Unable to change the status")
             }
         } catch (error) {
             console.log(error);
-            toast.error("Unable to Change The status")
+            toast.error("Unable to change the status")
         }
     }
 
-    const handleMarkAsPaid = async ( Paidstatus : string) => {
-        if(Paidstatus == 'false') return toast.info("Alerady Marked As Not Paid")
+    const handleMarkAsPaid = async (Paidstatus: string) => {
+        if (Paidstatus == 'false') return toast.info("Already marked as not paid")
 
         try {
             const res = await axiosClient.post('/appointment/markaspaid', {
@@ -237,35 +246,35 @@ const AppointmentDetails = () => {
             });
 
             if (res.status == 200) {
-                toast.success("Marked As Paid");
+                toast.success("Marked as paid");
                 setAppointment(res.data.appointment);
             }
             else {
-                toast.error("Unable to Change The status")
+                toast.error("Unable to change the payment status")
             }
         } catch (error) {
             console.log(error);
-            toast.error("Unable to Change The status")
+            toast.error("Unable to change the payment status")
         }
     }
-
 
     return (
         <div className="container mx-auto p-4 w-full">
             <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} />
             <div className="flex items-center mb-6">
-                <h1 className="text-2xl font-bold">Appointment ID :  {appointment.appointementId}</h1>
+                <h1 className="text-2xl font-bold">Appointment ID: {appointment.appointementId}</h1>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="md:col-span-2">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <Card className="lg:col-span-2">
                     <CardHeader>
-                        <CardTitle className="flex justify-between">
+                        <CardTitle className="flex justify-between items-center">
                             <span>Patient Information</span>
-                            <span className={`px-3 py-1 rounded-full text-sm ${appointment.status === 'ACCEPTED' ? 'bg-green-100 text-green-800' :
+                            <span className={`px-3 py-1 rounded-full text-sm font-medium ${appointment.status === 'ACCEPTED' ? 'bg-green-100 text-green-800' :
                                 appointment.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
                                     appointment.status === 'COMPLETED' ? 'bg-blue-100 text-blue-800' :
-                                        'bg-red-100 text-red-800'
+                                        appointment.status === 'SCHEDULED' ? 'bg-purple-100 text-purple-800' :
+                                            'bg-red-100 text-red-800'
                                 }`}>
                                 {appointment.status}
                             </span>
@@ -294,9 +303,39 @@ const AppointmentDetails = () => {
                         <Separator className="my-4" />
 
                         <div className="mt-4">
-                            <label className="text-sm text-gray-500">Service</label>
-                            <p className="font-medium">{appointment.service.title}</p>
-                            <p className="text-sm">Price: ₹{appointment.service.price}</p>
+                            <label className="text-sm text-gray-500">Service Details</label>
+                            <p className="font-medium text-lg">{appointment.serviceId.title}</p>
+                            <p className="text-sm text-green-600 font-semibold">Price: ₹{appointment.serviceId.price}</p>
+                            <div className="flex items-center mt-2 text-sm text-gray-600">
+                                <span className={`px-2 py-1 rounded-full text-xs ${appointment.serviceId.isHomeServiceAvail ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                                    {appointment.serviceId.isHomeServiceAvail ? 'Home Service Available' : 'In-Clinic Only'}
+                                </span>
+                            </div>
+                        </div>
+
+                        <Separator className="my-4" />
+
+                        <div className="mt-4">
+                            <label className="text-sm text-gray-500">Partner Hospital</label>
+                            <div className="bg-gray-50 p-3 rounded-lg mt-2">
+                                <div className="flex items-center mb-2">
+                                    <Building2 className="h-4 w-4 mr-2 text-gray-600" />
+                                    <p className="font-medium">{appointment.serviceId.partner.hospitalName}</p>
+                                    {appointment.serviceId.partner.isSubscribed && (
+                                        <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                                            Subscribed
+                                        </span>
+                                    )}
+                                </div>
+                                <div className="flex items-center mb-1">
+                                    <Mail className="h-4 w-4 mr-2 text-gray-400" />
+                                    <p className="text-sm text-gray-600">{appointment.serviceId.partner.email}</p>
+                                </div>
+                                <div className="flex items-center">
+                                    <Phone className="h-4 w-4 mr-2 text-gray-400" />
+                                    <p className="text-sm text-gray-600">{appointment.serviceId.partner.phoneNumber}</p>
+                                </div>
+                            </div>
                         </div>
 
                         <Separator className="my-4" />
@@ -305,41 +344,46 @@ const AppointmentDetails = () => {
                             <label className="text-sm text-gray-500">Appointment Booked By</label>
                             <div className="flex items-center mt-1">
                                 <User className="h-4 w-4 mr-2 text-gray-400" />
-                                <p>{appointment.bookedBy.firstName} {appointment.bookedBy.lastName}</p>
+                                <p>{appointment.bookedByUser.firstName} {appointment.bookedByUser.lastName}</p>
                             </div>
                             <div className="flex items-center mt-1">
                                 <Phone className="h-4 w-4 mr-2 text-gray-400" />
-                                <p>{appointment.bookedBy.phoneNumber}</p>
-                            </div>
-                        </div>
-
-
-                        <Separator className="my-4" />
-
-                        <div className="mt-4">
-                            <label className="text-sm text-gray-500">Mode Of Payment</label>
-                            <div className="flex items-start mt-1">
-                                <Wallet className="h-4 w-4 mr-2 text-gray-400 mt-1" />
-                                <p>
-                                    {appointment.modeOfPayment}
-                                </p>
+                                <p>{appointment.bookedByUser.phoneNumber}</p>
                             </div>
                         </div>
 
                         <Separator className="my-4" />
 
                         <div className="mt-4">
-                            <label className="text-sm text-gray-500">Address</label>
-                            <div className="flex items-start mt-1">
-                                <MapPin className="h-4 w-4 mr-2 text-gray-400 mt-1" />
-                                <p>
-                                    {appointment.address.area}, {appointment.address.landmark},
-                                    {appointment.address.district}, {appointment.address.state} - {appointment.address.pincode}
-                                </p>
+                            <label className="text-sm text-gray-500">Payment Information</label>
+                            <div className="flex items-center justify-between mt-1">
+                                <div className="flex items-center">
+                                    <Wallet className="h-4 w-4 mr-2 text-gray-400" />
+                                    <p className="capitalize">{appointment.modeOfPayment}</p>
+                                </div>
+                                <span className={`px-3 py-1 rounded-full text-sm ${appointment.isPaid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                    {appointment.isPaid ? 'Paid' : 'Unpaid'}
+                                </span>
                             </div>
                         </div>
 
                         <Separator className="my-4" />
+
+                        {appointment.address && (
+                            <>
+                                <div className="mt-4">
+                                    <label className="text-sm text-gray-500">Address</label>
+                                    <div className="flex items-start mt-1">
+                                        <MapPin className="h-4 w-4 mr-2 text-gray-400 mt-1" />
+                                        <p>
+                                            {appointment.address.area}, {appointment.address.landmark},
+                                            {appointment.address.district}, {appointment.address.state} - {appointment.address.pincode}
+                                        </p>
+                                    </div>
+                                </div>
+                                <Separator className="my-4" />
+                            </>
+                        )}
 
                         <div className="mt-4">
                             <label className="text-sm text-gray-500">Appointment Date & Time</label>
@@ -356,58 +400,59 @@ const AppointmentDetails = () => {
                         <CardTitle>Actions</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        {
-                            appointment.status == 'COMPLETED' && !(appointment.isReportUploaded) && (
-                                <>
-                                    <div>
-                                        <label className="block text-sm font-medium mb-2">Upload Report</label>
-                                        <div className="flex flex-col space-y-2">
-                                            <input
-                                                type="file"
-                                                id="report"
-                                                onChange={handleFileSelect}
-                                                className="hidden"
-                                            />
-                                            <label
-                                                htmlFor="report"
-                                                className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
-                                            >
-                                                <Upload className="h-4 w-4 mr-2" />
-                                                {selectedFile ? selectedFile.name : 'Select File'}
-                                            </label>
-                                            <Button
-                                                onClick={handleFileUpload}
-                                                disabled={!selectedFile}
-                                                className="w-full"
-                                            >
-                                                <FileText className="h-4 w-4 mr-2" />
-                                                Upload Report
-                                            </Button>
-                                        </div>
-                                    </div>
-
-                                    <Separator />
-                                </>
-                            )
-                        }
-
-
-                        {
-                            appointment.isPaid ?
-                                ""
-                                :
+                        {appointment.status == 'COMPLETED' && !(appointment.isReportUploaded) && (
+                            <>
                                 <div>
-                                    <select name="" id="" className='w-full h-10 px-3 pr-10 font-semibold border border-slate-300 rounded-md' onChange={(e) => handleMarkAsPaid(e.target.value)} value={appointment.isPaid ? 'Paid' : 'Not Paid'}>
-                                        <option value="Not Paid">Mark as Not Paid</option>
-                                        <option value="Paid">Mark as Paid</option>
-                                    </select>
+                                    <label className="block text-sm font-medium mb-2">Upload Report</label>
+                                    <div className="flex flex-col space-y-2">
+                                        <input
+                                            type="file"
+                                            id="report"
+                                            onChange={handleFileSelect}
+                                            className="hidden"
+                                        />
+                                        <label
+                                            htmlFor="report"
+                                            className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
+                                        >
+                                            <Upload className="h-4 w-4 mr-2" />
+                                            {selectedFile ? selectedFile.name : 'Select File'}
+                                        </label>
+                                        <Button
+                                            onClick={handleFileUpload}
+                                            disabled={!selectedFile}
+                                            className="w-full"
+                                        >
+                                            <FileText className="h-4 w-4 mr-2" />
+                                            Upload Report
+                                        </Button>
+                                    </div>
                                 </div>
-                        }
+                                <Separator />
+                            </>
+                        )}
 
-
+                        {!appointment.isPaid && (
+                            <div>
+                                <label className="block text-sm font-medium mb-2">Payment Status</label>
+                                <select 
+                                    className='w-full h-10 px-3 pr-10 font-semibold border border-slate-300 rounded-md' 
+                                    onChange={(e) => handleMarkAsPaid(e.target.value)} 
+                                    value={appointment.isPaid ? 'Paid' : 'Not Paid'}
+                                >
+                                    <option value="Not Paid">Mark as Not Paid</option>
+                                    <option value="Paid">Mark as Paid</option>
+                                </select>
+                            </div>
+                        )}
 
                         <div>
-                            <select name="" id="" className='w-full h-10 px-3 pr-10 font-semibold border border-slate-300 rounded-md' onChange={(e) => handleUpdateStatus(e.target.value)} value={appointment.status}>
+                            <label className="block text-sm font-medium mb-2">Appointment Status</label>
+                            <select 
+                                className='w-full h-10 px-3 pr-10 font-semibold border border-slate-300 rounded-md' 
+                                onChange={(e) => handleUpdateStatus(e.target.value)} 
+                                value={appointment.status}
+                            >
                                 <option value="SCHEDULED">Mark as Scheduled</option>
                                 <option value="ACCEPTED">Mark as Accepted</option>
                                 <option value="COMPLETED">Mark as Completed</option>
@@ -415,10 +460,36 @@ const AppointmentDetails = () => {
                             </select>
                         </div>
 
+                        {appointment.isReportUploaded && appointment.reportName && (
+                            <>
+                                <div>
+                                    <a href={`${process.env.NEXT_PUBLIC_IMAGE_URL}/reports/${appointment.reportName}`} download={true} target='_blank'>
+                                        <Button
+                                            variant="default"
+                                            className="w-full cursor-pointer bg-blue-500 hover:bg-blue-600"
+                                        >
+                                            <Download className="h-4 w-4 mr-2" />
+                                            Download Report
+                                        </Button>
+                                    </a>
+                                </div>
+                                <Separator />
+                            </>
+                        )}
 
+                        {appointment.address && (
+                            <a href={`https://maps.google.com/?q=${appointment.address.lat},${appointment.address.lng}`} target='_blank'>
+                                <Button
+                                    variant="default"
+                                    className="w-full cursor-pointer bg-blue-500 hover:bg-blue-600"
+                                >
+                                    <LocationEdit className="h-4 w-4 mr-2" />
+                                    Get Location
+                                </Button>
+                            </a>
+                        )}
 
-
-
+                        <Separator />
 
                         <div>
                             <Button
@@ -435,46 +506,10 @@ const AppointmentDetails = () => {
                                 </p>
                             )}
                         </div>
-                        <Separator />
-
-                        {
-                            appointment.isReportUploaded && (
-
-                                <>
-                                    <div>
-                                        <a href={`${process.env.NEXT_PUBLIC_IMAGE_URL}/reports/${appointment.reportName}`} download={true} target='_blank'>
-                                            <Button
-                                                variant="destructive"
-                                                className="w-full cursor-pointer bg-blue-500 hover:bg-blue-600"
-                                            >
-                                                <Download className="h-4 w-4 mr-2" />
-                                                Download REPORT
-                                            </Button>
-                                        </a>
-                                    </div>
-                                    <Separator />
-                                </>
-
-                            )
-                        }
-
-
-                        <a href={`https://maps.google.com/?q=${appointment.address.lat},${appointment.address.lng}`} target='_blank'>
-                            <div>
-                                <Button
-                                    variant="destructive"
-                                    className="w-full cursor-pointer bg-blue-500 hover:bg-blue-600"
-                                >
-                                    <LocationEdit className="h-4 w-4 mr-2" />
-                                    Get Location
-                                </Button>
-                            </div>
-                        </a>
                     </CardContent>
-
                 </Card>
             </div>
-        </div >
+        </div>
     );
 };
 

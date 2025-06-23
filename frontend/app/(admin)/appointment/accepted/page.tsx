@@ -1,39 +1,71 @@
 "use client"
 import { useEffect, useState } from 'react';
-import { Eye, Edit, Trash2, Search, Loader2, RefreshCw, AlertCircle } from 'lucide-react';
+import { Eye, Edit, Trash2, Search, Loader2, RefreshCw, AlertCircle, Download } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { axiosClient } from '@/lib/axiosClient';
 import { useRouter } from 'next/navigation';
 
-// Define TypeScript interfaces for the data structure
-interface Address {
-  state: string;
-  area: string;
-  district: string;
-  landmark?: string;
-}
-
-interface BookedBy {
-  firstName: string | null;
-  lastName: string | null;
+// Updated TypeScript interfaces for the new data structure
+interface ServiceBoy {
+  id: number;
+  firstName: string;
+  lastName: string;
   phoneNumber: string;
-  email: string | null;
+  email: string;
+  partnerId: number;
 }
 
-interface Service {
+interface BookedByUser {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+}
+
+interface ServiceId {
   id: number;
   title: string;
   price: string;
+  bannerUrl: string;
+  isHomeServiceAvail: boolean;
+  zoneId: number;
+  partnerId: number;
+  partner : {
+    hospitalName : string
+  }
 }
 
 interface Appointment {
   id: number;
+  patientFirstName: string;
+  patientLastName: string;
+  patientAge: string;
+  gender: 'Male' | 'Female' | 'Other';
+  referringDoctor: string;
+  additionalPhoneNumber: string;
   status: 'ACCEPTED' | 'CANCELLED' | 'COMPLETED' | 'SCHEDULED';
+  userId: number;
+  partnerId: number;
+  serviceId: ServiceId;
+  acceptedBy: number;
+  addressId: number | null;
+  isReportUploaded: boolean;
+  reportName: string | null;
+  isPaid: boolean;
+  modeOfPayment: string;
+  isRecivesByPartner: boolean;
   createdAt: string;
-  service: Service;
-  address: Address;
-  bookedBy: BookedBy;
-  appointementId: string
+  updatedAt: string;
+  serviceBoy: ServiceBoy;
+  address: any | null;
+  bookedByUser: BookedByUser;
+  appointementId: string;
+}
+
+interface ApiResponse {
+  message: string;
+  myAppointments: Appointment[];
 }
 
 export default function AppointmentTable() {
@@ -45,15 +77,19 @@ export default function AppointmentTable() {
   const [loadingState, setLoadingState] = useState<'initial' | 'loading' | 'success' | 'error'>('initial');
   const redirect = useRouter()
 
-  // Function to get the full name, handling null values
-  const getFullName = (booking: BookedBy): string => {
-    if (!booking.firstName && !booking.lastName) return "N/A";
-    return `${booking.firstName || ""} ${booking.lastName || ""}`.trim();
+  // Function to get the patient's full name
+  const getPatientFullName = (appointment: Appointment): string => {
+    return `${appointment.patientFirstName} ${appointment.patientLastName}`.trim();
   };
 
-  // Function to get the full address
-  const getFullAddress = (address: Address): string => {
-    return `${address.area}, ${address.district}, ${address.state}${address.landmark ? `, Near ${address.landmark}` : ""}`;
+  // Function to get the booked by user's full name
+  const getBookedByFullName = (bookedBy: BookedByUser): string => {
+    return `${bookedBy.firstName} ${bookedBy.lastName}`.trim();
+  };
+
+  // Function to get the service boy's full name
+  const getServiceBoyFullName = (serviceBoy: ServiceBoy): string => {
+    return `${serviceBoy.firstName} ${serviceBoy.lastName}`.trim();
   };
 
   // Function to get the status badge color
@@ -72,16 +108,39 @@ export default function AppointmentTable() {
     }
   };
 
-
+  // Function to format date
+  const formatDate = (dateString: string): string => {
+    return new Date(dateString).toLocaleDateString('en-IN', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
 
   // Handle view details
   const handleViewDetails = (id: number): void => {
     redirect.push(`/appointment/${id}`)
   };
 
+  // Handle report download
+  const handleDownloadReport = (appointment: Appointment): void => {
+    if (appointment.reportName) {
+      // Implement your report download logic here
+      toast.info(`Downloading report: ${appointment.reportName}`);
+    }
+  };
+
   // Filter appointments based on search query
   const filteredAppointments = appointments.filter(appointment => {
-    return appointment.appointementId.includes(searchQuery.toUpperCase());
+    const searchTerm = searchQuery.toLowerCase();
+    return (
+      appointment.appointementId.toLowerCase().includes(searchTerm) ||
+      getPatientFullName(appointment).toLowerCase().includes(searchTerm) ||
+      getBookedByFullName(appointment.bookedByUser).toLowerCase().includes(searchTerm) ||
+      appointment.serviceId.title.toLowerCase().includes(searchTerm)
+    );
   });
 
   const handleFetchAppointments = async () => {
@@ -90,10 +149,12 @@ export default function AppointmentTable() {
     setError(null);
 
     try {
+      // Updated API endpoint - adjust according to your actual endpoint
       const res = await axiosClient.get('/appointment/getallappointement?status=ACCEPTED');
 
       if (res.status === 200) {
-        setAppointments(res.data.allAppointments || []);
+        const apiResponse: ApiResponse = res.data;
+        setAppointments(apiResponse.myAppointments || []);
         setLoadingState('success');
       } else {
         setError("Failed to load appointments. Server returned an error.");
@@ -101,7 +162,6 @@ export default function AppointmentTable() {
         setLoadingState('error');
       }
     } catch (error: any) {
-      // More specific error messages based on error type
       const errorMessage = error.response?.data?.message ||
         error.message ||
         "An error occurred while fetching appointments";
@@ -181,7 +241,7 @@ export default function AppointmentTable() {
                 Service Name
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider ">
-                Address
+                Hospital Name
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-800 uppercase tracking-wider ">
                 Status
@@ -198,24 +258,24 @@ export default function AppointmentTable() {
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                     {index + 1}
                   </td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {appointment?.appointementId}
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
+                    {appointment.appointementId}
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {getFullName(appointment.bookedBy)}
+                    {getBookedByFullName(appointment.bookedByUser)}
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {`+91 ${appointment.bookedBy.phoneNumber || "--"}`}
+                    {`+91 ${appointment.bookedByUser.phoneNumber || "--"}`}
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 truncate">
-                    {appointment.bookedBy.email || "--"}
+                    {appointment.bookedByUser.email || "--"}
                   </td>
                   <td className="px-4 py-4 text-sm text-gray-900 truncate">
-                    {appointment.service.title}
+                    {appointment.serviceId.title}
                   </td>
                   <td className="px-4 py-4 text-sm text-gray-900">
-                    <div className="max-w-full truncate" title={getFullAddress(appointment.address)}>
-                      {getFullAddress(appointment.address)}
+                    <div className="max-w-full truncate" title="Address not available">
+                      {appointment.serviceId.partner.hospitalName}
                     </div>
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap text-sm">
@@ -233,7 +293,6 @@ export default function AppointmentTable() {
                       >
                         <Edit size={16} />
                       </button>
-
                     </div>
                   </td>
                 </tr>
@@ -286,7 +345,7 @@ export default function AppointmentTable() {
           <div className="relative">
             <input
               type="text"
-              placeholder="Search By Appointments ID"
+              placeholder="Search by Appointment ID, Name, or Service"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full border border-gray-300 rounded-md pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"

@@ -14,11 +14,54 @@ datasource db {
 }
 
 model zone {
-  id         Int          @unique @default(autoincrement())
-  pincode    String       @unique
-  district   String
-  state      String
-  serviceBoy serviceboy[]
+  id       Int    @unique @default(autoincrement())
+  pincode  String @unique
+  district String
+  state    String
+
+  services services[]
+  partners partners[]
+}
+
+model services {
+  id                 Int     @unique @default(autoincrement())
+  title              String
+  price              String
+  banner_url         String
+  isHomeServiceAvail Boolean
+
+  // in which zone available
+  zoneId Int
+  zone   zone @relation(fields: [zoneId], references: [id])
+
+  // diagnosis id / partner id
+  partnerId Int
+  partner   partners @relation(fields: [partnerId], references: [id])
+
+  serviceId appointment[]
+}
+
+model partners {
+  id           Int    @unique @default(autoincrement())
+  hospitalName String
+  email        String
+  phoneNumber  String @unique
+  password     String
+
+  zoneId Int
+  zone   zone @relation(fields: [zoneId], references: [id])
+
+  // address
+  addressId Int
+  address   address @relation(fields: [addressId], references: [id])
+
+  isSubscribed Boolean @default(false)
+
+  subscription_purchase subscription_purchase[]
+  // services 
+  services              services[]
+  serviceBoy            serviceboy[]
+  appointment           appointment[]
 }
 
 model User {
@@ -40,19 +83,15 @@ model appointment {
   referring_doctor        String
   additional_phone_number String
 
-  // check wether it is subscribed appointement or not
-  IsSubscriptionBased Boolean @default(false)
-
   // status 
   status Status @default(SCHEDULED)
 
   // user id
-  userId         Int?
-  booked_by_user User? @relation(fields: [userId], references: [id])
+  userId         Int
+  booked_by_user User @relation(fields: [userId], references: [id])
 
-  // partners
-  partnerId         Int?
-  booked_by_partner partners? @relation(fields: [partnerId], references: [id])
+  partnerId Int
+  partner   partners @relation(fields: [partnerId], references: [id])
 
   // service id 
   service_id Int
@@ -63,8 +102,8 @@ model appointment {
   serviceBoy serviceboy? @relation(fields: [acceptedBy], references: [id])
 
   // address
-  addressId Int
-  address   address @relation(fields: [addressId], references: [id])
+  addressId Int?
+  address   address? @relation(fields: [addressId], references: [id])
 
   // report
   isReportUploaded Boolean @default(false)
@@ -75,49 +114,41 @@ model appointment {
   modeOfPayment Mode    @default(cash)
 
   // adminAccepted 
-  isRecivesByAdmin Boolean @default(false)
+  isRecivesByPartner Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 }
 
 model address {
-  id                   Int           @unique @default(autoincrement())
-  area                 String
-  landmark             String
-  pincode              String
-  district             String
-  state                String
-  lat                  String
-  lng                  String
-  
-  userId               Int?
-  affilatedTo          User?          @relation(fields: [userId], references: [id])
+  id       Int    @unique @default(autoincrement())
+  area     String
+  landmark String
+  pincode  String
+  district String
+  state    String
+  lat      String
+  lng      String
+
+  userId      Int?
+  affilatedTo User? @relation(fields: [userId], references: [id])
 
   address              appointment[]
   address_subscription partners[]
 }
 
-model services {
-  id                     Int                     @unique @default(autoincrement())
-  title                  String
-  price                  String
-  banner_url             String
-  serviceId              appointment[]
-  serviceId_subscription subscription[]
-  subscription_purchase  subscription_purchase[]
-}
-
 model serviceboy {
-  id          Int           @unique @default(autoincrement())
+  id          Int     @unique @default(autoincrement())
   first_name  String
   last_name   String
-  phoneNumber String        @unique
+  phoneNumber String  @unique
   email       String
   password    String
-  zoneId      Int
-  status      Boolean       @default(false)
-  zone        zone          @relation(fields: [zoneId], references: [id])
+  status      Boolean @default(false)
+
+  isActive    Boolean       @default(true)
+  partnerId   Int
+  partner     partners      @relation(fields: [partnerId], references: [id])
   appointment appointment[]
 }
 
@@ -130,36 +161,29 @@ model admin {
 }
 
 model subscription {
-  id               Int      @unique @default(autoincrement())
-  subscriptionName String
-  price            String
-  numberOfTimes    Int
-  serviceId        Int
-  service          services @relation(fields: [serviceId], references: [id])
-  benefits         String
-}
-
-model partners {
   id                    Int                     @unique @default(autoincrement())
-  hospitalName          String
-  email                 String
-  phoneNumber            String                  @unique
-  password              String
+  subscriptionName      String
+  price                 String
+  timePeriod            Int
+  benefits              String
+  numberOfServiceBoys   Int
   subscription_purchase subscription_purchase[]
-  partnerId             appointment[]
-  // address
-  addressId             Int
-  address               address                 @relation(fields: [addressId], references: [id])
 }
 
 model subscription_purchase {
-  id             Int      @unique @default(autoincrement())
-  partnersId     Int
-  partners       partners @relation(fields: [partnersId], references: [id])
-  noOfCouponLeft Int
-  purchasedAt    DateTime @default(now())
-  serviceId      Int
-  service        services @relation(fields: [serviceId], references: [id])
+  id Int @unique @default(autoincrement())
+
+  // to who it belong to
+  partnersId             Int      @unique
+  partners               partners @relation(fields: [partnersId], references: [id])
+  numberOfServiceBoyLeft Int
+
+  // to manage time
+  purchasedAt    DateTime      @default(now())
+  expiresAt      DateTime
+  renewedAt      DateTime?
+  subscriptionId Int? // remove the option when its prod
+  subscription   subscription? @relation(fields: [subscriptionId], references: [id]) // remove the option when its prod
 }
 
 enum Gender {

@@ -17,7 +17,7 @@ export function initSocket(server) {
       const localTime = now.toLocaleTimeString();
 
 // console.log("Local Time:", localTime);
-      // console.log({ userId,userName ,latitude, longitude , localTime  });
+      console.log({ userId,userName ,latitude, longitude , localTime  });
       io.emit('tracklocation', { userId, userName ,latitude, longitude });
     });
 

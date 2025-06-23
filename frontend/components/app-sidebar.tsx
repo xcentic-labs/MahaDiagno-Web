@@ -41,11 +41,6 @@ const data = {
       isActive: true,
     },
     {
-      title: "Services",
-      url: "/services",
-      icon: Layers, // represents modules/services
-    },
-    {
       title: "Zone",
       url: "/zone",
       icon: Map, // suitable for zones
@@ -54,13 +49,12 @@ const data = {
       title: "User",
       url: "/user",
       icon: Users, // more appropriate than Settings2
-    },
+    },    
     {
-      title: "Upload Report",
-      url: "/appointment/uploadreport",
-      icon: Upload, // perfect for appointments
-    },
-    
+      title: "Partners",
+      url: "/partner",
+      icon: Users, // more appropriate than Settings2
+    },    
     {
       title: "Appointment",
       url: "/appointment/pending",
@@ -72,22 +66,17 @@ const data = {
         { title: "Cancelled", url: "/appointment/cancelled" },
       ],
     },
-    {
-      title: "Upload Partner Report",
-      url: "/partnerappointment/uploadreport",
-      icon: Upload, // perfect for appointments
-    },
-    {
-      title: "Partner Appointment",
-      url: "/partnerappointment/pending",
-      icon: CalendarClock, // perfect for appointments partnerappointment
-      items: [
-        { title: "Pending", url: "/partnerappointment/pending/" },
-        { title: "Accepted", url: "/partnerappointment/accepted" },
-        { title: "Completed", url: "/partnerappointment/completed" },
-        { title: "Cancelled", url: "/partnerappointment/cancelled" },
-      ],
-    },
+    // {
+    //   title: "Partner Appointment",
+    //   url: "/partnerappointment/pending",
+    //   icon: CalendarClock, // perfect for appointments partnerappointment
+    //   items: [
+    //     { title: "Pending", url: "/partnerappointment/pending/" },
+    //     { title: "Accepted", url: "/partnerappointment/accepted" },
+    //     { title: "Completed", url: "/partnerappointment/completed" },
+    //     { title: "Cancelled", url: "/partnerappointment/cancelled" },
+    //   ],
+    // },
     {
       title: "Admin",
       url: "/admin",
@@ -98,7 +87,6 @@ const data = {
       url: "/subscription",
       icon: DollarSign, // indicates admin/security
     },
-    
     {
       title: "Service Boy",
       url: "/addserviceboy",

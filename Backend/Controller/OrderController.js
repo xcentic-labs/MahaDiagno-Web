@@ -13,7 +13,29 @@ const razorpay = new Razorpay({
 export const addAppointment = async (req, res) => {
     try {
         console.log(req.body)
-        const { patientFirstName, patientLastName, patientAge, gender, doctorName, AdditionalPhoneNumber, userId, serviceId, addressId, modeOfPayment } = req.body
+        const { patientFirstName, patientLastName, patientAge, gender, doctorName, AdditionalPhoneNumber, userId, serviceId, addressId, modeOfPayment , partnerId } = req.body
+
+        let dataToBeSaved = {
+            patient_first_name: patientFirstName,
+            patient_last_name: patientLastName,
+            patient_age: patientAge,
+            gender: gender,
+            referring_doctor: doctorName,
+            additional_phone_number: AdditionalPhoneNumber,
+            userId: +userId,
+            service_id: +serviceId,
+            partnerId : +partnerId
+        }
+
+        const service = await prisma.services.findUnique({
+            where: {
+                id: serviceId
+            }
+        })
+
+        if (service.isHomeServiceAvail) {
+            dataToBeSaved.addressId = addressId
+        }
 
         if (modeOfPayment == 'razorpay') {
             const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
@@ -26,21 +48,12 @@ export const addAppointment = async (req, res) => {
 
 
             if (generated_signature === razorpay_signature) {
-
                 const appointment = await prisma.appointment.create({
                     data: {
-                        patient_first_name: patientFirstName,
-                        patient_last_name: patientLastName,
-                        patient_age: patientAge,
-                        gender: gender,
-                        referring_doctor: doctorName,
-                        additional_phone_number: AdditionalPhoneNumber,
-                        userId: +userId,
-                        service_id: +serviceId,
-                        addressId: +addressId,
+                        ...dataToBeSaved,
                         modeOfPayment: modeOfPayment,
                         isPaid: true,
-                        isRecivesByAdmin : true
+                        isRecivesByPartner: true
                     },
                 });
 
@@ -54,21 +67,13 @@ export const addAppointment = async (req, res) => {
             }
         }
         else {
-            
-            if (!patientFirstName || !patientLastName || !patientAge || !gender || !doctorName || !AdditionalPhoneNumber || !userId || !serviceId || !addressId || !modeOfPayment) return res.status(400).json({ "error": "All Fields Are Required" });
+
+            if (!patientFirstName || !patientLastName || !patientAge || !gender || !doctorName || !AdditionalPhoneNumber || !userId || !serviceId || !modeOfPayment) return res.status(400).json({ "error": "All Fields Are Required" });
 
 
             const appointment = await prisma.appointment.create({
                 data: {
-                    patient_first_name: patientFirstName,
-                    patient_last_name: patientLastName,
-                    patient_age: patientAge,
-                    gender: gender,
-                    referring_doctor: doctorName,
-                    additional_phone_number: AdditionalPhoneNumber,
-                    userId: +userId,
-                    service_id: +serviceId,
-                    addressId: +addressId,
+                    ...dataToBeSaved,
                     modeOfPayment: modeOfPayment
                 },
             });

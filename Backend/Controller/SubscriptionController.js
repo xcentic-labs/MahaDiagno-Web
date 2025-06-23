@@ -3,19 +3,25 @@ import prisma from "../Utils/prismaclint.js";
 
 export const addSubscription = async (req, res) => {
     try {
-        const { subscriptionName, price, numberOfTimes, serviceId, benefits } = req.body;
+        const { subscriptionName, price, timePeriod , numberOfServiceBoys , benefits } = req.body;
 
-        if (!subscriptionName || !price || !numberOfTimes || !serviceId || !benefits) {
+        console.log(req.body);
+        console.log(typeof(timePeriod))
+
+        if (!subscriptionName || !price || !benefits) {
             return res.status(400).json({ error: "All Fields Are Required" });
         }
+
+
+        if(typeof(timePeriod) != 'number' || typeof(numberOfServiceBoys) != 'number') return res.status(400).json({ error: "All Fields Are Required" });
 
         const subscription = await prisma.subscription.create({
             data: {
                 subscriptionName,
                 price,
-                numberOfTimes: +numberOfTimes,
-                serviceId: +serviceId,
-                benefits
+                benefits,
+                numberOfServiceBoys : +numberOfServiceBoys,
+                timePeriod : +timePeriod
             }
         });
 
@@ -58,19 +64,8 @@ export const deleteSubscription = async (req, res) => {
 export const getSubscriptions = async (req, res) => {
     try {
         const result = await prisma.subscription.findMany({
-            select: {
-                id: true,
-                subscriptionName: true,
-                numberOfTimes: true,
-                price: true,
-                benefits: true,
-                service: {
-                    select: {
-                        title: true,
-                    }
-                }
-            }
         });
+        console.log(result);
 
         if (!result) {
             return res.status(500).json({ error: "Unable To Fetch Subscriptions" });

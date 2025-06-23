@@ -10,18 +10,16 @@ interface subscriptionItem {
     id: number;
     subscriptionName: string;
     price: string,
-    numberOfTimes: string,
-    service: {
-        title: string
-    }
+    numberOfServiceBoys: string,
+    timePeriod : string | number,
     benefits: string
 }
 
 interface NewSubscriptionForm {
     subscriptionName: string;
     price: string,
-    numberOfTimes: string,
-    serviceId: number | string,
+    timePeriod: string,
+    numberOfServiceBoys: number | string,
     benefits: string
 }
 
@@ -38,8 +36,8 @@ export default function subscriptionManagement() {
     const [newSubscription, setNewSubscription] = useState<NewSubscriptionForm>({
         subscriptionName: '',
         price: '',
-        numberOfTimes: '',
-        serviceId: '',
+        timePeriod: '',
+        numberOfServiceBoys: '',
         benefits: ''
     });
 
@@ -71,7 +69,7 @@ export default function subscriptionManagement() {
 
     const handleAddSubscription = async () => {
         // Form validation
-        if (!newSubscription.subscriptionName.trim() || !newSubscription.numberOfTimes.trim() || !newSubscription.price.trim() || !newSubscription.serviceId || !newSubscription.benefits.trim()) {
+        if (!newSubscription.subscriptionName.trim() || !newSubscription.numberOfServiceBoys || !newSubscription.price.trim() || !newSubscription.timePeriod || !newSubscription.benefits.trim()) {
             toast.warning("All fields are required");
             setAddError("All fields are required");
             return;
@@ -90,8 +88,8 @@ export default function subscriptionManagement() {
                 setNewSubscription({
                     subscriptionName: '',
                     price: '',
-                    numberOfTimes: '',
-                    serviceId: '',
+                    timePeriod: '',
+                    numberOfServiceBoys: '',
                     benefits: ''
                 });
 
@@ -201,7 +199,7 @@ export default function subscriptionManagement() {
                         <input
                             type="text"
                             name="subscriptionName"
-                            value={newSubscription.subscriptionName}
+                            value={newSubscription?.subscriptionName}
                             onChange={handleInputChange}
                             className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                             placeholder="Enter first name"
@@ -216,7 +214,7 @@ export default function subscriptionManagement() {
                         <input
                             type="text"
                             name="price"
-                            value={newSubscription.price}
+                            value={newSubscription?.price}
                             onChange={handleInputChange}
                             className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                             placeholder="Enter first name"
@@ -226,12 +224,12 @@ export default function subscriptionManagement() {
 
                     <div className="flex flex-col">
                         <label className="text-sm font-medium text-gray-600 mb-1 flex items-center">
-                            <Hash size={16} className="mr-1" /> Number of Coupon
+                            <Hash size={16} className="mr-1" /> Number of Service Boys
                         </label>
                         <input
                             type="number"
                             name="numberOfTimes"
-                            value={newSubscription.numberOfTimes}
+                            value={newSubscription?.numberOfServiceBoys}
                             onChange={handleInputChange}
                             className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                             placeholder="Enter first name"
@@ -242,19 +240,19 @@ export default function subscriptionManagement() {
 
                     <div className="flex flex-col">
                         <label className="text-sm font-medium text-gray-600 mb-1 flex items-center">
-                            <Layers size={16} className="mr-1" /> Service
+                            <Layers size={16} className="mr-1" /> TimePeriod
                         </label>
                         <select
                             name="serviceId"
                             className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
                             disabled={isAddingSubscription}
-                            value={newSubscription.serviceId}
+                            value={newSubscription.timePeriod}
                             onChange={handleInputChange}
                         >
                             <option value="">Select Service</option>
                             {
-                                services.map((service) => (
-                                    <option key={service.id} value={service.id}>{service.title}</option>
+                                [1,2,3,4,5,6,7,8,9,10,11,12].map((time) => (
+                                    <option key={time} value={time}>{time}</option>
                                 ))
                             }
                         </select>
@@ -345,13 +343,13 @@ export default function subscriptionManagement() {
                                         Subscription Name
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-50 uppercase tracking-wider">
-                                        Service Name
+                                        Time Period
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-50 uppercase tracking-wider">
                                         Price
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-50 uppercase tracking-wider">
-                                        Number Of Coupon
+                                        Number Of Service Boy
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-50 uppercase tracking-wider">
                                         Benefits
@@ -369,17 +367,17 @@ export default function subscriptionManagement() {
                                                 {subscription.subscriptionName}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                {subscription.service.title}
+                                                {subscription.timePeriod}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                 {subscription.price}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                {subscription.numberOfTimes}
+                                                {subscription.numberOfServiceBoys}
                                             </td>
                                             <th className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                 {
-                                                    subscription.benefits.split(',').map((be , index)=>(
+                                                    subscription.benefits.split(',').map((be, index) => (
                                                         <p key={index} className='text-gray-900 text-left font-medium'>&bull; {be}</p>
                                                     ))
                                                 }

@@ -57,6 +57,7 @@ export const deleteZone = async (req , res)=>{
 
 export const getZone = async (req , res)=>{
     try {
+        console.log(req.body)
         const result = await prisma.zone.findMany({});
 
         if(!result) return res.status(500).json({"error" : "Unable to get Zones"});

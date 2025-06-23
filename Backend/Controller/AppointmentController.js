@@ -1,6 +1,7 @@
 import prisma from "../Utils/prismaclint.js";
 import { uploadReportFile } from '../Storage/ReportRouter.js';
 import { generateFormatedRes, fieldToBeSelected } from "../Utils/GenerateFormatedRes.js";
+import { convertKeysToCamelCase } from "../Utils/camelCaseConverter.js";
 
 
 export const deleteAppointment = async (req, res) => {
@@ -20,86 +21,17 @@ export const deleteAppointment = async (req, res) => {
     } catch (error) {
         return res.status(500).json({ "error": "Unable to Deleted Appointment Internal Server Error" });
     }
-}
+} // no
 
 export const getPersonalAppointments = async (req, res) => {
     try {
         const id = req.params.id;
+
+        console.log(req.params.id)
         const matchedCondition = {}
-        const select = {
-            id: true,
-            patient_first_name: true,
-            patient_last_name: true,
-            patient_age: true,
-            gender: true,
-            referring_doctor: true,
-            additional_phone_number: true,
-            userId: true,
-            partnerId: true,
-            IsSubscriptionBased: true,
-            service_id: true,
-            addressId: true,
-            status: true,
-            createdAt: true,
-            isReportUploaded: true,
-            reportName: true,
-            isPaid: true,
-            modeOfPayment: true,
-            // Related: Service info
-            serviceId: {
-                select: {
-                    title: true,
-                    price: true,
-                    banner_url: true
-                }
-            },
-            // Related: Address info
-            address: {
-                select: {
-                    area: true,
-                    landmark: true,
-                    pincode: true,
-                    district: true,
-                    state: true,
-                    lat: true,
-                    lng: true
-                }
-            },
-            // Related: ServiceBoy info (optional)
-            serviceBoy: {
-                select: {
-                    first_name: true,
-                    last_name: true,
-                    phoneNumber: true,
-                    email: true
-                }
-            }
-        }
 
         if (!id) {
             return res.status(400).json({ error: "Id Is Required" });
-        }
-
-
-        if (req.query.usertype == 'partner') {
-            select.booked_by_partner = {
-                select: {
-                    hospitalName: true,
-                    phoneNumber: true
-                }
-            }
-
-            matchedCondition.partnerId = +id
-
-        } else {
-            select.booked_by_user = {
-                select: {
-                    first_name: true,
-                    last_name: true,
-                    phoneNumber: true
-                }
-            }
-            matchedCondition.userId = +id
         }
 
 
@@ -110,119 +42,88 @@ export const getPersonalAppointments = async (req, res) => {
 
         const myAppointments = await prisma.appointment.findMany({
             where: matchedCondition,
-            select: select
+            include: {
+                partner: true,
+                serviceId: true,
+                serviceBoy: true,
+                address: true
+            }
         });
+
+        const formattedAppointments = myAppointments.map((app) => {
+            console.log(app.id)
+            return { ...convertKeysToCamelCase(app), appointementId: `MH2025D${app.id}` }
+        })
 
         if (!myAppointments) {
             return res.status(500).json({ error: "Unable To Fetch Appointments" });
         }
 
-        // Map to rename fields as required
-        const formattedAppointments = myAppointments.map(appointment => {
-            return req.query.usertype == 'partner' ?
-                {
-                    id: appointment.id,
-                    patientFirstName: appointment.patient_first_name,
-                    patientLastName: appointment.patient_last_name,
-                    patientAge: appointment.patient_age,
-                    gender: appointment.gender,
-                    doctorName: appointment.referring_doctor,
-                    AdditionalPhoneNumber: appointment.additional_phone_number,
-                    userId: appointment.userId,
-                    partnerId: appointment.partnerId,
-                    IsSubscriptionBased: appointment.IsSubscriptionBased,
-                    status: appointment.status,
-                    createdAt: appointment.createdAt,
-                    isReportUploaded: appointment.isReportUploaded,
-                    reportName: appointment.reportName,
-                    appointementId: `MH2025D${appointment.id}`,
-                    isPaid: appointment.isPaid,
-                    modeOfPayment: appointment.modeOfPayment,
-                    // Service Info
-                    service: {
-                        serviceId: appointment.service_id,
-                        title: appointment.serviceId.title,
-                        price: appointment.serviceId.price,
-                        bannerUrl: appointment.serviceId.banner_url
-                    },
 
-                    // Address Info
-                    address: {
-                        addressId: appointment.addressId,
-                        area: appointment.address.area,
-                        landmark: appointment.address.landmark,
-                        pincode: appointment.address.pincode,
-                        district: appointment.address.district,
-                        state: appointment.address.state,
-                        lat: appointment.address.lat,
-                        lng: appointment.address.lng
-                    },
-                    // Booked By User Info
-                    bookedBy: {
-                        hospitalName: appointment.booked_by_partner.hospitalName,
-                        phoneNumber: appointment.booked_by_partner.phoneNumber
-                    },
-                    // Service Boy Info (if assigned)
-                    serviceBoy: appointment.serviceBoy ? {
-                        firstName: appointment.serviceBoy.first_name,
-                        lastName: appointment.serviceBoy.last_name,
-                        phoneNumber: appointment.serviceBoy.phoneNumber,
-                        email: appointment.serviceBoy.email
-                    } : null
-                }
-                :
-                {
-                    id: appointment.id,
-                    patientFirstName: appointment.patient_first_name,
-                    patientLastName: appointment.patient_last_name,
-                    patientAge: appointment.patient_age,
-                    gender: appointment.gender,
-                    doctorName: appointment.referring_doctor,
-                    AdditionalPhoneNumber: appointment.additional_phone_number,
-                    userId: appointment.userId,
-                    partnerId: appointment.partnerId,
-                    IsSubscriptionBased: appointment.IsSubscriptionBased,
-                    status: appointment.status,
-                    createdAt: appointment.createdAt,
-                    isReportUploaded: appointment.isReportUploaded,
-                    reportName: appointment.reportName,
-                    appointementId: `MH2025D${appointment.id}`,
-                    isPaid: appointment.isPaid,
-                    modeOfPayment: appointment.modeOfPayment,
-                    // Service Info
-                    service: {
-                        serviceId: appointment.service_id,
-                        title: appointment.serviceId.title,
-                        price: appointment.serviceId.price,
-                        bannerUrl: appointment.serviceId.banner_url
-                    },
 
-                    // Address Info
-                    address: {
-                        addressId: appointment.addressId,
-                        area: appointment.address.area,
-                        landmark: appointment.address.landmark,
-                        pincode: appointment.address.pincode,
-                        district: appointment.address.district,
-                        state: appointment.address.state,
-                        lat: appointment.address.lat,
-                        lng: appointment.address.lng
-                    },
-                    // Booked By User Info
-                    bookedBy: {
-                        firstName: appointment.booked_by_user.first_name,
-                        lastName: appointment.booked_by_user.last_name,
-                        phoneNumber: appointment.booked_by_user.phoneNumber
-                    },
-                    // Service Boy Info (if assigned)
-                    serviceBoy: appointment.serviceBoy ? {
-                        firstName: appointment.serviceBoy.first_name,
-                        lastName: appointment.serviceBoy.last_name,
-                        phoneNumber: appointment.serviceBoy.phoneNumber,
-                        email: appointment.serviceBoy.email
-                    } : null
-                }
+        return res.status(200).json({
+            message: "Appointments Fetched Successfully",
+            myAppointments: formattedAppointments
         });
+
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ "error": "Unable To Fetch Appointments Internal Server Error" });
+    }
+} // nos
+
+export const getPartnerAppointments = async (req, res) => {
+    try {
+        const id = req.params.id;
+
+        console.log(req.params.id)
+        const matchedCondition = {
+            partnerId : +id
+        }
+
+        if (!id) {
+            return res.status(400).json({ error: "Id Is Required" });
+        }
+
+
+        if (req.query.status != 'all') {
+            matchedCondition.status = (req.query.status).toUpperCase();
+        }
+
+        if (req.query.status == 'report') {
+            matchedCondition.status = 'COMPLETED'
+            matchedCondition.isReportUploaded = false
+        }
+        
+
+        const myAppointments = await prisma.appointment.findMany({
+            where: matchedCondition,
+            include: {
+                serviceId: true,
+                serviceBoy: {
+                    select : {
+                        id : true,
+                        first_name : true,
+                        last_name : true,
+                        phoneNumber : true,
+                        email : true,
+                        partnerId: true
+                    }
+                },
+                address: true,
+                booked_by_user : true
+            }
+        });
+
+        const formattedAppointments = myAppointments.map((app) => {
+            return { ...convertKeysToCamelCase(app), appointementId: `MH2025D${app.id}` }
+        })
+
+        if (!myAppointments) {
+            return res.status(500).json({ error: "Unable To Fetch Appointments" });
+        }
+
+
 
         return res.status(200).json({
             message: "Appointments Fetched Successfully",
@@ -234,6 +135,7 @@ export const getPersonalAppointments = async (req, res) => {
         return res.status(500).json({ "error": "Unable To Fetch Appointments Internal Server Error" });
     }
 }
+
 
 export const serviceBoyAppointments = async (req, res) => {
     try {
@@ -253,33 +155,19 @@ export const serviceBoyAppointments = async (req, res) => {
 
         const myAppointments = await prisma.appointment.findMany({
             where: matchedCondition,
-            select: {
-                serviceId: {
-                    select: {
-                        title: true,
-                        price: true,
-                        id: true
-                    }
-                },
-                address: {
-                    select: {
-                        state: true,
-                        area: true,
-                        district: true,
-                        landmark: true
-                    }
-                },
-                status: true,
-                createdAt: true,
-                id: true,
-                IsSubscriptionBased : true
+            include : {
+                booked_by_user : true,
+                serviceId : true,
+                address : true
             },
         });
 
         const appointments = myAppointments.map(appointment => ({
-            ...appointment,
-            appointmentId: `MH2025D${appointment.id}`
+             ...convertKeysToCamelCase(appointment),
+            appointementId: `MH2025D${appointment.id}`
         }));
+
+        console.log(appointments)
 
 
         if (!myAppointments) return res.status(500).json({ "error": "Unable To Fetch Appointments" });
@@ -300,51 +188,33 @@ export const getAppointments = async (req, res) => {
             matchedCondition.status = (req.query.status).toUpperCase()
         }
 
-        if (!req.query?.zone) return res.status(400).json({ "error": "Service Boy Zone is Required" });
+        console.log(req.query);
+
+        if (!req.query?.partnerid) return res.status(400).json({ "error": "Partner Id is Required" });
 
 
-        matchedCondition.address = {
-            pincode: req.query?.zone
-        }
+        matchedCondition.partnerId = +(req.query?.partnerid)
 
         console.log(matchedCondition);
 
         const myAppointments = await prisma.appointment.findMany({
             where: matchedCondition,
-            select: {
-                serviceId: {
-                    select: {
-                        title: true,
-                        price: true,
-                        id: true
-                    }
-                },
-                address: {
-                    select: {
-                        state: true,
-                        area: true,
-                        district: true,
-                        landmark: true
-                    }
-                },
-                status: true,
-                createdAt: true,
-                id: true,
-                isPaid: true,
-                IsSubscriptionBased : true
-            }
+            include : {
+                booked_by_user : true,
+                serviceId : true,
+                address : true
+            },
         });
 
-        const appointments = myAppointments.map(appointment => ({
-            ...appointment,
-            appointmentId: `MH2025D${appointment.id}`
-        }));
+        const appointments = myAppointments.map(appointment => {
+            return { ...convertKeysToCamelCase(appointment), appointementId: `MH2025D${appointment.id}` }
+        });
+
+        // console.log(appointments);
 
 
 
-
-
-        if (!myAppointments) return res.status(500).json({ "error": "Unable To Fetch Appointments" });
+        if (!appointments) return res.status(500).json({ "error": "Unable To Fetch Appointments" });
 
         return res.status(200).json({ "message": "Appointments Fetched Sucessfully", myAppointments: appointments });
     } catch (error) {
@@ -352,6 +222,16 @@ export const getAppointments = async (req, res) => {
         return res.status(500).json({ "error": "Unable To Fetch Appointments Internal Server Error" });
     }
 }
+
+
+
+
+
+
+
+
+
+
 
 export const getSpecificAppointment = async (req, res) => {
     try {
@@ -362,23 +242,6 @@ export const getSpecificAppointment = async (req, res) => {
         if (!id) return res.status(400).json({ error: "Id is required" });
 
 
-        if (req.query.usertype == 'partner') {
-            fieldToBeSelected.booked_by_partner = {
-                select: {
-                    hospitalName: true,
-                    phoneNumber: true
-                }
-            };
-        } else {
-            fieldToBeSelected.booked_by_user = {
-                select: {
-                    first_name: true,
-                    last_name: true,
-                    phoneNumber: true
-                }
-            };
-        }
-
         const appointment = await prisma.appointment.findUnique({
             where: {
                 id: +id
@@ -388,7 +251,10 @@ export const getSpecificAppointment = async (req, res) => {
 
         if (!appointment) return res.status(404).json({ error: "No appointment found with this ID" });
 
-        const formattedAppointment = req.query.usertype == 'partner' ? generateFormatedRes(appointment, 'partner') : generateFormatedRes(appointment);
+        const formattedAppointment = {
+            ...convertKeysToCamelCase(appointment),
+            appointementId: `MH2025D${appointment.id}`
+        }
 
         return res.status(200).json({
             message: "Appointment fetched successfully",
@@ -404,120 +270,58 @@ export const getSpecificAppointment = async (req, res) => {
 
 export const getAllAppointments = async (req, res) => {
     try {
-
         const matchedCondition = {}
-        const select = {
-            serviceId: {
-                select: {
-                    title: true,
-                    price: true,
-                    id: true
-                }
-            },
-            address: {
-                select: {
-                    state: true,
-                    area: true,
-                    district: true,
-                    landmark: true
-                }
-            },
-            status: true,
-            createdAt: true,
-            id: true,
-            isPaid: true,
 
-        }
+    
 
-        if (req?.query?.usertype == 'partner') {
-            matchedCondition.userId = null
-            select.booked_by_partner = {
-                select: {
-                    hospitalName: true,
-                    phoneNumber: true,
-                    email: true
-                }
-            }
-        } else {
-            matchedCondition.partnerId = null
-            select.booked_by_user = {
-                select: {
-                    first_name: true,
-                    last_name: true,
-                    phoneNumber: true,
-                    email: true
-                }
-            }
-        }
 
         if (req.query.status != 'all') {
-            matchedCondition.status = (req.query.status).toUpperCase()
+            matchedCondition.status = (req.query.status).toUpperCase();
         }
 
-        if (req.query?.include == 'reports') {
+        if (req.query.status == 'report') {
+            matchedCondition.status = 'COMPLETED'
             matchedCondition.isReportUploaded = false
         }
+        
 
         const myAppointments = await prisma.appointment.findMany({
             where: matchedCondition,
-            select: select
+            include: {
+                serviceId: {
+                    include : {
+                        partner : true
+                    }
+                },
+                serviceBoy: {
+                    select : {
+                        id : true,
+                        first_name : true,
+                        last_name : true,
+                        phoneNumber : true,
+                        email : true,
+                        partnerId: true
+                    }
+                },
+                address: true,
+                booked_by_user : true
+            }
         });
 
+        const formattedAppointments = myAppointments.map((app) => {
+            return { ...convertKeysToCamelCase(app), appointementId: `MH2025D${app.id}` }
+        })
 
-        const allAppointments = myAppointments.map((appt) => {
-            return req.query.usertype == 'partner' ?
-                {
-                    id: appt.id,
-                    status: appt.status,
-                    createdAt: appt.createdAt,
-                    appointementId: `MH2025D${appt.id}`,
-                    service: {
-                        id: appt.serviceId?.id,
-                        title: appt.serviceId?.title,
-                        price: appt.serviceId?.price,
-                    },
-                    address: {
-                        state: appt.address?.state,
-                        area: appt.address?.area,
-                        district: appt.address?.district,
-                        landmark: appt.address?.landmark,
-                    },
-                    bookedBy: {
-                        hospitalName: appt.booked_by_partner?.hospitalName,
-                        phoneNumber: appt.booked_by_partner?.phoneNumber,
-                        email: appt.booked_by_partner?.email,
-                    }
-                }
-                :
-                {
-                    id: appt.id,
-                    status: appt.status,
-                    createdAt: appt.createdAt,
-                    appointementId: `MH2025D${appt.id}`,
-                    service: {
-                        id: appt.serviceId?.id,
-                        title: appt.serviceId?.title,
-                        price: appt.serviceId?.price,
-                    },
-                    address: {
-                        state: appt.address?.state,
-                        area: appt.address?.area,
-                        district: appt.address?.district,
-                        landmark: appt.address?.landmark,
-                    },
-                    bookedBy: {
-                        firstName: appt.booked_by_user?.first_name,
-                        lastName: appt.booked_by_user?.last_name,
-                        phoneNumber: appt.booked_by_user?.phoneNumber,
-                        email: appt.booked_by_user?.email,
-                    }
-                }
+        if (!myAppointments) {
+            return res.status(500).json({ error: "Unable To Fetch Appointments" });
+        }
 
+
+
+        return res.status(200).json({
+            message: "Appointments Fetched Successfully",
+            myAppointments: formattedAppointments
         });
-
-
-        if (!myAppointments) return res.status(500).json({ "error": "Unable To Fetch Appointments" });
-        return res.status(200).json({ "message": "Appointments Fetched Sucessfully", allAppointments: allAppointments });
 
     } catch (error) {
         console.log(error)
@@ -531,6 +335,9 @@ export const acceptAppointment = async (req, res) => {
     try {
         const { serviceBoyId, appointmentId } = req.body
         if (!serviceBoyId, !appointmentId) return res.status(400).json({ "error": "Service Boy ID And Appointment Id is required" });
+
+
+        console.log(req.body);
 
         if (req.query.usertype == 'partner') {
             fieldToBeSelected.booked_by_partner = {
@@ -561,7 +368,13 @@ export const acceptAppointment = async (req, res) => {
             select: fieldToBeSelected
         });
 
-        const formattedAppointment = req.query.usertype == 'partner' ? generateFormatedRes(appointment, 'partner') : generateFormatedRes(appointment);
+
+        console.log(appointment);
+
+        const formattedAppointment = {
+            ...convertKeysToCamelCase(appointment),
+            appointementId: `MH2025D${appointment.id}`
+        }
 
         if (!appointment) return res.status(404).json({ "error": "Appointment Not Found" });
         return res.status(200).json({ "message": "Appointment Accepted Sucessfully", appointment: formattedAppointment });
@@ -606,7 +419,10 @@ export const completeAppointment = async (req, res) => {
             select: fieldToBeSelected
         });
 
-        const formattedAppointment = req.query.usertype == 'partner' ? generateFormatedRes(appointment, 'partner') : generateFormatedRes(appointment);
+        const formattedAppointment = {
+            ...convertKeysToCamelCase(appointment),
+            appointementId: `MH2025D${appointment.id}`
+        }
 
         if (!appointment) return res.status(404).json({ "error": "Internal server error" });
         return res.status(200).json({ "message": "Appointment COMPLETED Sucessfully", appointment: formattedAppointment });
@@ -650,7 +466,10 @@ export const cancleAppointment = async (req, res) => {
             select: fieldToBeSelected
         });
 
-        const formattedAppointment = req.query.usertype == 'partner' ? generateFormatedRes(appointment, 'partner') : generateFormatedRes(appointment);
+        const formattedAppointment = {
+            ...convertKeysToCamelCase(appointment),
+            appointementId: `MH2025D${appointment.id}`
+        }
 
 
         if (!appointment) return res.status(404).json({ "error": "Internal server error" });
@@ -703,7 +522,10 @@ export const updateStatus = async (req, res) => {
             select: fieldToBeSelected
         });
 
-        const formattedAppointment = req.query.usertype == 'partner' ? generateFormatedRes(appointment, 'partner') : generateFormatedRes(appointment);
+        const formattedAppointment = {
+            ...convertKeysToCamelCase(appointment),
+            appointementId: `MH2025D${appointment.id}`
+        }
 
         if (!appointment) return res.status(404).json({ "error": "Appointment Not Found" });
         return res.status(200).json({ "message": "Appointment Accepted Sucessfully", appointment: formattedAppointment });
@@ -722,7 +544,7 @@ export const uploadReport = async (req, res) => {
 
 
 
-        const result = uploadReportFile.single("file")(req, res, async (err) => {
+        const result = uploadReportFile.single("report")(req, res, async (err) => {
             if (err) {
                 if (err) {
                     if (err.code === 'LIMIT_FILE_SIZE') {
@@ -761,7 +583,10 @@ export const uploadReport = async (req, res) => {
                 select: fieldToBeSelected
             });
 
-            const formattedAppointment = req.query.usertype == 'partner' ? generateFormatedRes(appointment, 'partner') : generateFormatedRes(appointment);
+            const formattedAppointment = {
+            ...convertKeysToCamelCase(appointment),
+            appointementId: `MH2025D${appointment.id}`
+        }
 
             if (!appointment) return res.status(404).json({ "error": "Appointment Not Found" });
             return res.status(200).json({ "message": "PDF Uploded Sucessfully", appointment: formattedAppointment });
@@ -789,7 +614,10 @@ export const handleMarkAsPaid = async (req, res) => {
             select: fieldToBeSelected
         });
 
-        const formattedAppointment = req.query.usertype == 'partner' ? generateFormatedRes(appointment, 'partner') : generateFormatedRes(appointment);
+        const formattedAppointment = {
+            ...convertKeysToCamelCase(appointment),
+            appointementId: `MH2025D${appointment.id}`
+        }
 
         if (!appointment) return res.status(404).json({ "error": "Appointment Not Found" });
         return res.status(200).json({ "message": "Appointment Accepted Sucessfully", appointment: formattedAppointment });

@@ -1,5 +1,5 @@
 import express from 'express'
-import { acceptAppointment, cancleAppointment, completeAppointment, deleteAppointment, getAllAppointments, getAppointments, getPersonalAppointments, getSpecificAppointment, handleMarkAsPaid, serviceBoyAppointments, updateStatus, uploadReport } from '../Controller/AppointmentController.js';
+import { acceptAppointment, cancleAppointment, completeAppointment, deleteAppointment, getAllAppointments, getAppointments, getPersonalAppointments, getSpecificAppointment, handleMarkAsPaid, serviceBoyAppointments, updateStatus, uploadReport , getPartnerAppointments } from '../Controller/AppointmentController.js';
 import { addAppointment } from '../Controller/OrderController.js';
 import { checkadmin } from '../Middleware/middleware.js';
 
@@ -7,7 +7,11 @@ export const AppointmentRouter = express.Router();
 
 
 
-AppointmentRouter.get('/myappointement/:id' , getPersonalAppointments);  
+AppointmentRouter.get('/myappointement/:id' , getPersonalAppointments);
+
+
+// get partner appointement
+AppointmentRouter.get('/partnerappointement/:id' , getPartnerAppointments);  
 
 // gtespecfic 
 AppointmentRouter.get('/getSpecificappointment/:id' , getSpecificAppointment);
@@ -27,13 +31,10 @@ AppointmentRouter.patch('/cancleappointement' , cancleAppointment);
 AppointmentRouter.post('/updatestatus' , checkadmin, updateStatus); // admin protected
 
 // upload report
-AppointmentRouter.post('/uploadreport/:id' ,checkadmin, uploadReport); // admin protectd
+AppointmentRouter.post('/uploadreport/:id' , uploadReport); // admin protectd
 
 // mark as paid 
 AppointmentRouter.post('/markaspaid' , handleMarkAsPaid); // for service boy and admin both
-
-
-// not required to chage
 
 
 // creat appointement

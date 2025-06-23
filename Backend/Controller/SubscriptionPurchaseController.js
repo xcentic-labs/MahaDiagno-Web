@@ -1,6 +1,8 @@
 import prisma from "../Utils/prismaclint.js";
 import crypto from 'crypto'
 import Razorpay from "razorpay";
+import getExpiresAt from "../Utils/timeCaluclator.js";
+
 
 const razorpay = new Razorpay({
   key_id: process.env.key_id,
@@ -29,15 +31,51 @@ export const BuySubscription = async (req, res) => {
 
       if (!subscription) return res.status(404).json({ "error": "Invalid Subscription ID" });
 
-      const purchased_subscription = await prisma.subscription_purchase.create({
-        data: {
-          partnersId: partnersId,
-          noOfCouponLeft: subscription.numberOfTimes,
-          serviceId: subscription.serviceId,
+
+      const old_purchased_subscription = await prisma.subscription_purchase.findUnique({
+        where : {
+          partnersId : +partnersId,
         }
       })
 
-      console.log(purchased_subscription);
+      console.log(old_purchased_subscription)
+
+      let purchased_subscription = ''
+
+      if (!old_purchased_subscription) {
+        // buy an new subscription
+        purchased_subscription = await prisma.subscription_purchase.create({
+          data: {
+            partnersId: partnersId,
+            numberOfServiceBoyLeft: subscription.numberOfServiceBoys,
+            expiresAt: getExpiresAt(subscription.timePeriod),
+            purchasedAt: new Date().toISOString(),
+            subscriptionId: subscriptionId
+          }
+        })
+      } else {
+        // renew old subscription
+        purchased_subscription = await prisma.subscription_purchase.updatewe({
+          where: {
+            id: old_purchased_subscription.id
+          },
+          data: {
+            expiresAt: getExpiresAt(subscription.timePeriod), // update the subscription date
+            renewedAt : new Date().toISOString(),
+          }
+        })
+      }
+
+      // await 
+      await prisma.partners.update({
+        where: {
+          id: parseInt(partnersId)
+        },
+        data: {
+          isSubscribed: true
+        }
+      });
+
 
       if (!purchased_subscription) return res.status(500).json({ 'error': "Unable to Purchased Subscription" });
       res.status(200).json({ "message": "Subscription Purchased  Sucessfully", purchased_subscription: purchased_subscription });
@@ -47,94 +85,9 @@ export const BuySubscription = async (req, res) => {
     }
   } catch (error) {
     console.log(error)
-    return res.status(500).json({ "error": "Unable to Purchased Subscription Internal server error" });
+    return res.status(500).json({ "error" : "Unable to Purchased Subscription Internal server error" });
   }
 }
-
-export const useCoupon = async (req, res) => {
-  try {
-    const { purchasedSubscriptionId, partnerId , patientFirstName , patientLastName , patientAge , gender } = req.body;
-
-    console.log(req.body);
-
-    // Validate required IDs
-    if (
-      !Number.isInteger(purchasedSubscriptionId) ||
-      !Number.isInteger(partnerId)
-    ) {
-      return res.status(400).json({
-        error: "partnerId, serviceId, and purchasedSubscriptionId are required and must be integers.",
-      });
-    }
-
-    // Fetch purchased subscription
-    const purchased_subscription = await prisma.subscription_purchase.findUnique({
-      where : {  id : +purchasedSubscriptionId}
-    })
-
-    if (!purchased_subscription) {
-      return res.status(404).json({ error: "No such subscription found" });
-    }
-
-    console.log(purchased_subscription.noOfCouponLeft);
-
-    if (purchased_subscription.noOfCouponLeft <= 0) {
-      console.log("eknaj");
-      return res.status(400).json({ error: "You have claimed the maximum number of coupons" });
-    }
-
-    // Fetch partner (hospital) info
-    const partner = await prisma.partners.findUnique({
-      where: { id: partnerId },
-      include: { address: true },
-    });
-
-    if (!partner) {
-      return res.status(404).json({ error: "Partner (Hospital) not found" });
-    }
-
-    // Create appointment using hospital name as patient name
-    const appointment = await prisma.appointment.create({
-      data: {
-        patient_first_name: patientFirstName,
-        patient_last_name: patientLastName,
-        patient_age: patientAge,
-        gender: gender, 
-        referring_doctor: partner.hospitalName,
-        additional_phone_number: "N/A",
-        IsSubscriptionBased: true,
-        partnerId: partner.id,
-        service_id: purchased_subscription.serviceId,
-        addressId: partner.addressId,
-        isPaid: true,
-        modeOfPayment: 'subscriptionBased',
-        isRecivesByAdmin: true
-      },
-    });
-
-    // Decrement coupon count
-    const updatedSubscription = await prisma.subscription_purchase.update({
-      where: { id: purchasedSubscriptionId },
-      data: {
-        noOfCouponLeft: {
-          decrement: 1,
-        },
-      },
-    });
-
-    return res.status(200).json({
-      message: "Appointment created and coupon claimed successfully.",
-      appointment,
-      subscription: updatedSubscription,
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      error: "Internal server error. Unable to claim coupon and create appointment.",
-    });
-  }
-};
-
 
 export const getMySubscriptions = async (req, res) => {
   try {
@@ -149,17 +102,37 @@ export const getMySubscriptions = async (req, res) => {
     const subscriptions = await prisma.subscription_purchase.findMany({
       where: {
         partnersId: +partnerId,
-        noOfCouponLeft : {
-          gt : 0
-        }
       },
       include: {
-        service: true
-      },
-      orderBy : {
-        purchasedAt : 'desc'
+        subscription: true
       }
     })
+
+
+    const subscriptionsCheckArr = subscriptions.filter((sup) => {
+      return new Date(sup.expiresAt) < new Date()
+    })
+
+
+    if (subscriptionsCheckArr.length == subscriptions.length) {
+      await prisma.partners.update({
+        where: {
+          id: +partnerId
+        },
+        data: {
+          isSubscribed: false,
+        }
+      });
+
+      await prisma.serviceboy.updateMany({
+        where: {
+          partnerId: +partnerId
+        },
+        data: {
+          isActive: false
+        }
+      })
+    }
 
     return res.status(200).json({
       message: "Subscriptions fetched successfully",
