@@ -1,12 +1,12 @@
 import express from "express";
-import { addPaymentMethod, deletePaymentMethod, getAllPaymentMethods, getPaymentMethodByPartnerId } from "../Controller/paymentMethodController";
+import { addPaymentMethod, deletePaymentMethod, getAllPaymentMethods, getPaymentMethodByPartnerId } from "../Controller/paymentMethodController.js";
 
 
-const partnerRouter = express.Router();
+const paymentMethodRouter = express.Router();
 
-partnerRouter.post("/add", addPaymentMethod );
-partnerRouter.delete("/delete/:id", deletePaymentMethod );
-partnerRouter.get("/get/:id", getPaymentMethodByPartnerId );
-partnerRouter.get("/all",  getAllPaymentMethods );
+paymentMethodRouter.post("/add", addPaymentMethod );
+paymentMethodRouter.delete("/delete/:id", deletePaymentMethod );
+paymentMethodRouter.get("/get/:id", getPaymentMethodByPartnerId );
+paymentMethodRouter.get("/all",  getAllPaymentMethods );
 
-export default partnerRouter;
+export default paymentMethodRouter;

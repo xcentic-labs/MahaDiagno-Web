@@ -9,6 +9,26 @@ export const addWithdraw = async (req, res) => {
             return res.status(400).json({ error: "All fields are required" });
         }
 
+        const partner = await prisma.partners.findUnique({
+            where : {
+                id : partnerId
+            }
+        });
+
+
+        if(+amount > +partner.amount) return res.status(402).json({ error: "Insufficient balance" });
+
+        await prisma.partners.update({
+            where : {
+                id : +partnerId
+            },
+            data : {
+                amount :{
+                    decrement : (+amount)
+                }   
+            }
+        })
+
         const withdraw = await prisma.withdraw.create({
             data: {
                 partnerId,
@@ -54,10 +74,12 @@ export const getWithdrawByPartnerId = async (req, res) => {
                 partner: true,
                 paymentMethod: true,
             },
+            orderBy : {
+                createdAt : 'desc'
+            }
         });
 
         if (!withdraw) return res.status(404).json({ error: "Withdraw not found" });
-
         return res.status(200).json(withdraw);
     } catch (error) {
         console.error("Error fetching withdraw:", error);
@@ -69,6 +91,9 @@ export const getWithdrawByPartnerId = async (req, res) => {
 export const getAllWithdraws = async (req, res) => {
     try {
         const withdraws = await prisma.withdraw.findMany({
+            where : {
+                status : String(req.query.status).toUpperCase()
+            },
             include: {
                 partner: true,
                 paymentMethod: true,
@@ -76,7 +101,10 @@ export const getAllWithdraws = async (req, res) => {
             orderBy: { id: "desc" },
         });
 
-        return res.status(200).json(withdraws);
+        return res.status(200).json({
+            message : "Withdraws Request Fetched Sucessfully",
+            withdraw : withdraws
+        });
     } catch (error) {
         console.error("Error fetching withdraws:", error);
         return res.status(500).json({ error: "Internal server error" });
@@ -88,17 +116,33 @@ export const getAllWithdraws = async (req, res) => {
 export const updateWithdrawStatus = async (req, res) => {
     try {
         const { id } = req.params;
-        const { status } = req.body;
+        const { status  , partnerId , amount } = req.body;
+
+        console.log(req.body);
 
         // Validate ID and Status
-        if (!id || !status) {
+        if (!id || !status || !partnerId || !amount) {
             return res.status(400).json({ error: "Withdraw ID and status are required" });
         }
 
         // Optional: Validate allowed statuses
-        const allowedStatuses = ["PENDING", "APPROVED", "REJECTED"];
+        const allowedStatuses = ["PENDING", "SUCCESS", "REJECTED"];
         if (!allowedStatuses.includes(status)) {
             return res.status(400).json({ error: "Invalid status value" });
+        }
+
+
+        if(status == 'REJECTED'){
+            await prisma.partners.update({
+                where : {
+                    id : +partnerId
+                },
+                data : {
+                  amount : {
+                    increment : +amount
+                  }  
+                }
+            })
         }
 
         const updatedWithdraw = await prisma.withdraw.update({

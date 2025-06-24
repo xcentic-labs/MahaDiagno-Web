@@ -57,7 +57,7 @@ model partners {
 
   isSubscribed Boolean @default(false)
 
-  amount Int
+  amount Int @default(0)
 
   subscription_purchase subscription_purchase[]
   // services 
@@ -87,6 +87,7 @@ model withdraw {
   status          withdrawStatus @default(PENDING)
   paymentMethodId Int
   paymentMethod   paymentMethod  @relation(fields: [paymentMethodId], references: [id])
+  createdAt       DateTime       @default(now())
 }
 
 model User {

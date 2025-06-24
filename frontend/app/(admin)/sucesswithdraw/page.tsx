@@ -48,7 +48,7 @@ export default function Withdraw() {
     useEffect(() => {
         const fetchwithdraw = async (): Promise<void> => {
             try {
-                const res = await axiosClient.get<WithdrawResponse>('/withdraw/all?status=pending');
+                const res = await axiosClient.get<WithdrawResponse>('/withdraw/all?status=success');
                 setData(res.data.withdraw);
             } catch (error) {
                 console.error('Error fetching withdrawal requests:', error);

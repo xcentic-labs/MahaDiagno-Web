@@ -61,10 +61,10 @@ export function LoginForm({
   return (
     <form className={cn("flex flex-col gap-6", className)} {...props} onSubmit={(e) => handleLogin(e)}>
       <div className="flex flex-col items-start gap-2 text-center">
-        <h1 className="text-2xl text-left font-bold">Welcom Back Admin</h1>
+        {/* <h1 className="text-2xl text-left font-bold">Welcom Back Admin</h1>
         <p className="text-muted-foreground text-sm text-balance">
           Login to your account
-        </p>
+        </p> */}
       </div>
       <div className="grid gap-6">
         <div className="grid gap-3">

@@ -19,6 +19,7 @@ import cors from 'cors'
 import { createServer } from 'http'
 import { initSocket } from './websocket/locationSocket.js';
 import withdrawRouter from './Router/withdrawRoutes.js';
+import paymentMethodRouter from './Router/paymentMethodRoutes.js';
 
 
 
@@ -59,6 +60,7 @@ app.use('/api/v1/subscription' , SubscriptionRouter);
 app.use('/api/v1/partners' , PartnersRouter);
 app.use('/api/v1/subscriptionpurchase' , SubscriptionPurchaseRouter);
 app.use('/api/v1/withdraw' , withdrawRouter)
+app.use('/api/v1/paymentmethod' , paymentMethodRouter)
 
 
 app.get('/', (req, res) => {

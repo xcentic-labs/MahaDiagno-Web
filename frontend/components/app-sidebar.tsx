@@ -11,7 +11,10 @@ import {
   BadgePlus,
   Upload,
   DollarSign,
-  Banknote
+  Banknote,
+  Clock,
+  CheckCircle,
+  XCircle
 } from "lucide-react";
 import { Bike } from "lucide-react";
 
@@ -28,6 +31,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+
 } from "@/components/ui/sidebar"
 import Image from "next/image"
 import logo from '@/assets/logo.png'
@@ -50,12 +54,12 @@ const data = {
       title: "User",
       url: "/user",
       icon: Users, // more appropriate than Settings2
-    },    
+    },
     {
       title: "Partners",
       url: "/partner",
       icon: Users, // more appropriate than Settings2
-    },    
+    },
     {
       title: "Appointment",
       url: "/appointment/pending",
@@ -80,10 +84,21 @@ const data = {
     // },
     // withdraw
     {
-      title: "Withdraw Request",
+      title: "Pending Withdraw",
       url: "/withdraw",
-      icon: Banknote, // indicates admin/security
+      icon: Clock, // ⏳ Indicates it's waiting for approval
     },
+    {
+      title: "Success Withdraw",
+      url: "/sucesswithdraw",
+      icon: CheckCircle, // ✅ Indicates success
+    },
+    {
+      title: "Rejected Withdraw",
+      url: "/rejectedwithdraw",
+      icon: XCircle, // ❌ Indicates rejection or failure
+    },
+
     {
       title: "Admin",
       url: "/admin",
@@ -104,7 +119,7 @@ const data = {
     //   url: "/serviceboylocation",
     //   icon: Bike,
     // }
-    
+
   ],
 };
 

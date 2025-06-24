@@ -5,6 +5,8 @@ export const addPaymentMethod = async (req, res) => {
     try {
         const { partnerId, bankName, accountNumber, ifscCode, bankeeName } = req.body;
 
+        console.log(req.body)
+
         if (!partnerId || !bankName || !accountNumber || !ifscCode || !bankeeName) {
             return res.status(400).json({ error: "All fields are required" });
         }
@@ -52,7 +54,7 @@ export const getPaymentMethodByPartnerId = async (req, res) => {
         if (!id) return res.status(400).json({ error: "PaymentMethod ID is required" });
 
         const payment = await prisma.paymentMethod.findMany({
-            where: {  partnerId : true },
+            where: {  partnerId : +id },
             include: { partner: true },
         });
 

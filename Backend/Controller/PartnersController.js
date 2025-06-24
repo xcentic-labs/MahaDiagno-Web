@@ -109,7 +109,8 @@ export const getPartners = async (req, res) => {
                 serviceBoy : true,
                 appointment : true,
                 services : true,
-                address : true
+                address : true,
+                paymentMethod : true
             }
         });
 

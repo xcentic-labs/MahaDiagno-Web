@@ -48,6 +48,18 @@ export const addAppointment = async (req, res) => {
 
 
             if (generated_signature === razorpay_signature) {
+                
+                await prisma.partners.update({
+                    where  : {
+                        id : partnerId
+                    },
+                    data  :{
+                        amount : {
+                            increment : (+service.price)
+                        }
+                    }
+                });
+
                 const appointment = await prisma.appointment.create({
                     data: {
                         ...dataToBeSaved,
