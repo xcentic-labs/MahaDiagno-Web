@@ -212,6 +212,11 @@ model subscription_purchase {
   subscription   subscription? @relation(fields: [subscriptionId], references: [id]) // remove the option when its prod
 }
 
+model homeBanner{
+  id Int @unique @default(autoincrement())
+  imageName String
+}
+
 enum Gender {
   Male
   Female

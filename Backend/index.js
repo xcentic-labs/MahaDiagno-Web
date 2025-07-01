@@ -20,6 +20,7 @@ import { createServer } from 'http'
 import { initSocket } from './websocket/locationSocket.js';
 import withdrawRouter from './Router/withdrawRoutes.js';
 import paymentMethodRouter from './Router/paymentMethodRoutes.js';
+import BannerRouter from './Router/BannerRouter.js';
 
 
 
@@ -61,6 +62,7 @@ app.use('/api/v1/partners' , PartnersRouter);
 app.use('/api/v1/subscriptionpurchase' , SubscriptionPurchaseRouter);
 app.use('/api/v1/withdraw' , withdrawRouter)
 app.use('/api/v1/paymentmethod' , paymentMethodRouter)
+app.use('/api/v1/banner' , BannerRouter)
 
 
 app.get('/', (req, res) => {

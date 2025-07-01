@@ -13,3 +13,17 @@ export const deleteBanner = (fileName)=>{
         console.log("Photo delete Sucessfully");
     })
 }
+
+
+export const deletePromotionalBanner = (fileName)=>{
+    console.log(fileName)    
+
+    fs.unlink(`${__dirname}/public/banner/${fileName}` , (error)=>{
+        if(error){
+            console.log(error);
+            return ;
+        }
+
+        console.log("Photo delete Sucessfully");
+    })
+}

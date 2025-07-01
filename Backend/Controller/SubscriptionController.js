@@ -77,3 +77,39 @@ export const getSubscriptions = async (req, res) => {
         return res.status(500).json({ error: "Unable To Fetch Subscriptions - Internal Server Error" });
     }
 };
+
+
+export const updateSubscription = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { subscriptionName, price, timePeriod, numberOfServiceBoys, benefits } = req.body;
+
+    if (!id || !subscriptionName || !price || !benefits || timePeriod == null || numberOfServiceBoys == null) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    const existingSubscription = await prisma.subscription.findUnique({
+      where: { id: parseInt(id) }
+    });
+
+    if (!existingSubscription) {
+      return res.status(404).json({ error: "Subscription not found" });
+    }
+
+    const updated = await prisma.subscription.update({
+      where: { id: parseInt(id) },
+      data: {
+        subscriptionName,
+        price: price,
+        benefits,
+        timePeriod: +timePeriod,
+        numberOfServiceBoys: +numberOfServiceBoys
+      }
+    });
+
+    return res.status(200).json({ message: "Subscription updated successfully", data: updated });
+  } catch (error) {
+    console.error("Update Subscription Error:", error);
+    return res.status(500).json({ error: "Unable to update subscription - internal server error" });
+  }
+};
