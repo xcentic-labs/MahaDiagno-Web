@@ -33,7 +33,7 @@ export default function LoginPage() {
             />
           </div>
           <span className="text-xl font-semibold text-slate-900 dark:text-white">
-            Mahiagno
+            Mahadiagno
           </span>
         </div>
 
