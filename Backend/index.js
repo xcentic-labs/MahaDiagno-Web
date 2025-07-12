@@ -12,7 +12,7 @@ import { AppointmentRouter } from './Router/AppointmentRouter.js';
 import { OrderRouter } from './Router/OrderRouter.js';
 import { SubscriptionRouter } from './Router/SubscriptionRouter.js';
 import { PartnersRouter } from './Router/PartnersRouter.js';
-import { SubscriptionPurchaseRouter } from './Router/subscriptionPurchaseRouter.js';
+import { SubscriptionPurchaseRouter } from './Router/SubscriptionPurchaseRouter.js';
 
 // cros 
 import cors from 'cors'
