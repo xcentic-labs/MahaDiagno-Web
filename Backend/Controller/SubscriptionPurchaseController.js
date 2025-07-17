@@ -2,7 +2,7 @@ import prisma from "../Utils/prismaclint.js";
 import crypto from 'crypto'
 import Razorpay from "razorpay";
 import getExpiresAt from "../Utils/timeCaluclator.js";
-
+import logError from "../Utils/log.js";
 
 const razorpay = new Razorpay({
   key_id: process.env.key_id,
@@ -38,7 +38,7 @@ export const BuySubscription = async (req, res) => {
         }
       })
 
-      console.log(old_purchased_subscription)
+      
 
       let purchased_subscription = ''
 
@@ -84,7 +84,7 @@ export const BuySubscription = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid signature' });
     }
   } catch (error) {
-    console.log(error)
+    logError(error);
     return res.status(500).json({ "error" : "Unable to Purchased Subscription Internal server error" });
   }
 }
@@ -93,7 +93,7 @@ export const getMySubscriptions = async (req, res) => {
   try {
     const partnerId = req.params.id;
 
-    console.log(partnerId);
+    
 
     if (!Number.isInteger(+partnerId)) {
       return res.status(400).json({ error: "Invalid partner ID" });
@@ -139,7 +139,7 @@ export const getMySubscriptions = async (req, res) => {
       subscriptions,
     });
   } catch (error) {
-    console.error("Error fetching subscriptions:", error);
+    logError("Error fetching subscriptions:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 };

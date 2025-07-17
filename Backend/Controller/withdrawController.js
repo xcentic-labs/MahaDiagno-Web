@@ -1,5 +1,5 @@
 import prisma from "../Utils/prismaclint.js";
-
+import logError from "../Utils/log.js";
 // ➕ Add Withdraw
 export const addWithdraw = async (req, res) => {
     try {
@@ -40,7 +40,7 @@ export const addWithdraw = async (req, res) => {
 
         return res.status(201).json(withdraw);
     } catch (error) {
-        console.error("Error creating withdraw:", error);
+        logError(error);
         return res.status(500).json({ error: "Internal server error" });
     }
 };
@@ -58,7 +58,7 @@ export const deleteWithdraw = async (req, res) => {
 
         return res.status(200).json({ message: "Withdraw deleted successfully", deleted });
     } catch (error) {
-        console.error("Error deleting withdraw:", error);
+        logError(error);
         return res.status(500).json({ error: "Internal server error" });
     }
 };
@@ -82,7 +82,7 @@ export const getWithdrawByPartnerId = async (req, res) => {
         if (!withdraw) return res.status(404).json({ error: "Withdraw not found" });
         return res.status(200).json(withdraw);
     } catch (error) {
-        console.error("Error fetching withdraw:", error);
+        logError(error);
         return res.status(500).json({ error: "Internal server error" });
     }
 };
@@ -106,7 +106,7 @@ export const getAllWithdraws = async (req, res) => {
             withdraw : withdraws
         });
     } catch (error) {
-        console.error("Error fetching withdraws:", error);
+        logError(error);
         return res.status(500).json({ error: "Internal server error" });
     }
 };
@@ -118,7 +118,6 @@ export const updateWithdrawStatus = async (req, res) => {
         const { id } = req.params;
         const { status  , partnerId , amount } = req.body;
 
-        console.log(req.body);
 
         // Validate ID and Status
         if (!id || !status || !partnerId || !amount) {
@@ -152,7 +151,7 @@ export const updateWithdrawStatus = async (req, res) => {
 
         return res.status(200).json({ message: "Status updated successfully", data: updatedWithdraw });
     } catch (error) {
-        console.error("Error updating withdraw status:", error);
+        logError(error);
         return res.status(500).json({ error: "Internal server error" });
     }
 };

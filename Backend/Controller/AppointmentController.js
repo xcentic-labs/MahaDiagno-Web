@@ -2,7 +2,7 @@ import prisma from "../Utils/prismaclint.js";
 import { uploadReportFile } from '../Storage/ReportRouter.js';
 import { generateFormatedRes, fieldToBeSelected } from "../Utils/GenerateFormatedRes.js";
 import { convertKeysToCamelCase } from "../Utils/camelCaseConverter.js";
-
+import logError from "../Utils/log.js";
 
 export const deleteAppointment = async (req, res) => {
     try {
@@ -19,9 +19,10 @@ export const deleteAppointment = async (req, res) => {
         if (!appointment) return res.status(404).json({ "error": "Appointment Not Found" });
         return res.status(200).json({ "message": "Appointment Deleted Sucessfully" });
     } catch (error) {
+        logError(error);
         return res.status(500).json({ "error": "Unable to Deleted Appointment Internal Server Error" });
     }
-} // no
+} 
 
 export const getPersonalAppointments = async (req, res) => {
     try {
@@ -35,12 +36,12 @@ export const getPersonalAppointments = async (req, res) => {
             userId: +id
         }
 
-        console.log(req.params.id)
+        
         if (req.query.status) {
             matchedCondition.status = (req.query.status).toUpperCase();
         }
 
-        console.log(matchedCondition)
+        
 
 
         const myAppointments = await prisma.appointment.findMany({
@@ -53,7 +54,7 @@ export const getPersonalAppointments = async (req, res) => {
             }
         });
 
-        console.log(myAppointments)
+        
 
         const formattedAppointments = myAppointments.map((app) => {
             return { ...convertKeysToCamelCase(app), appointementId: `MH2025D${app.id}` }
@@ -71,7 +72,7 @@ export const getPersonalAppointments = async (req, res) => {
         });
 
     } catch (error) {
-        console.log(error)
+        logError(error);
         return res.status(500).json({ "error": "Unable To Fetch Appointments Internal Server Error" });
     }
 } // nos
@@ -80,7 +81,7 @@ export const getPartnerAppointments = async (req, res) => {
     try {
         const id = req.params.id;
 
-        console.log(req.params.id)
+        
         const matchedCondition = {
             partnerId: +id
         }
@@ -135,7 +136,7 @@ export const getPartnerAppointments = async (req, res) => {
         });
 
     } catch (error) {
-        console.log(error)
+        logError(error);
         return res.status(500).json({ "error": "Unable To Fetch Appointments Internal Server Error" });
     }
 }
@@ -147,7 +148,7 @@ export const serviceBoyAppointments = async (req, res) => {
 
         if (!id) return res.status(400).json({ "error": "Id Is Required" });
 
-        console.log(req.query.status);
+        
 
         const matchedCondition = {
             acceptedBy: +id
@@ -171,14 +172,14 @@ export const serviceBoyAppointments = async (req, res) => {
             appointementId: `MH2025D${appointment.id}`
         }));
 
-        console.log(appointments)
+        
 
 
         if (!myAppointments) return res.status(500).json({ "error": "Unable To Fetch Appointments" });
 
         return res.status(200).json({ "message": "Appointments Fetched Sucessfully", myAppointments: appointments });
     } catch (error) {
-        console.log(error)
+        logError(error);
         return res.status(500).json({ "error": "Unable To Fetch Appointments Internal Server Error" });
     }
 }
@@ -192,14 +193,14 @@ export const getAppointments = async (req, res) => {
             matchedCondition.status = (req.query.status).toUpperCase()
         }
 
-        console.log(req.query);
+        
 
         if (!req.query?.partnerid) return res.status(400).json({ "error": "Partner Id is Required" });
 
 
         matchedCondition.partnerId = +(req.query?.partnerid)
 
-        console.log(matchedCondition);
+        
 
         const myAppointments = await prisma.appointment.findMany({
             where: matchedCondition,
@@ -214,7 +215,7 @@ export const getAppointments = async (req, res) => {
             return { ...convertKeysToCamelCase(appointment), appointementId: `MH2025D${appointment.id}` }
         });
 
-        // console.log(appointments);
+        
 
 
 
@@ -222,7 +223,7 @@ export const getAppointments = async (req, res) => {
 
         return res.status(200).json({ "message": "Appointments Fetched Sucessfully", myAppointments: appointments });
     } catch (error) {
-        console.log(error)
+        logError(error);
         return res.status(500).json({ "error": "Unable To Fetch Appointments Internal Server Error" });
     }
 }
@@ -241,7 +242,7 @@ export const getSpecificAppointment = async (req, res) => {
     try {
         const id = req.params.id;
 
-        console.log(req.params.id)
+        
 
         if (!id) return res.status(400).json({ error: "Id is required" });
 
@@ -266,7 +267,7 @@ export const getSpecificAppointment = async (req, res) => {
         });
 
     } catch (error) {
-        console.log(error);
+        logError(error);
         return res.status(500).json({ error: "Internal Server Error" });
     }
 };
@@ -328,7 +329,7 @@ export const getAllAppointments = async (req, res) => {
         });
 
     } catch (error) {
-        console.log(error)
+        logError(error);
         return res.status(500).json({ "error": "Unable To Fetch Appointments Internal Server Error" });
     }
 }
@@ -341,7 +342,7 @@ export const acceptAppointment = async (req, res) => {
         if (!serviceBoyId, !appointmentId) return res.status(400).json({ "error": "Service Boy ID And Appointment Id is required" });
 
 
-        console.log(req.body);
+        
 
         if (req.query.usertype == 'partner') {
             fieldToBeSelected.booked_by_partner = {
@@ -373,7 +374,7 @@ export const acceptAppointment = async (req, res) => {
         });
 
 
-        console.log(appointment);
+        
 
         const formattedAppointment = {
             ...convertKeysToCamelCase(appointment),
@@ -383,7 +384,7 @@ export const acceptAppointment = async (req, res) => {
         if (!appointment) return res.status(404).json({ "error": "Appointment Not Found" });
         return res.status(200).json({ "message": "Appointment Accepted Sucessfully", appointment: formattedAppointment });
     } catch (error) {
-        console.log(error);
+        logError(error);
         return res.status(500).json({ "error": "Unable to Accept Internal server error" })
     }
 }
@@ -431,7 +432,7 @@ export const completeAppointment = async (req, res) => {
         if (!appointment) return res.status(404).json({ "error": "Internal server error" });
         return res.status(200).json({ "message": "Appointment COMPLETED Sucessfully", appointment: formattedAppointment });
     } catch (error) {
-        console.log(error);
+        logError(error);
         return res.status(500).json({ "error": "Unable to Complete Internal server error" })
     }
 }
@@ -439,7 +440,7 @@ export const completeAppointment = async (req, res) => {
 export const cancleAppointment = async (req, res) => {
     try {
         const { serviceBoyId, appointmentId } = req.body
-        console.log(serviceBoyId, appointmentId);
+        
         if (!serviceBoyId, !appointmentId) return res.status(400).json({ "error": "Service Boy ID And Appointment Id is required" });
 
         if (req.query.usertype == 'partner') {
@@ -479,7 +480,7 @@ export const cancleAppointment = async (req, res) => {
         if (!appointment) return res.status(404).json({ "error": "Internal server error" });
         return res.status(200).json({ "message": "Appointment Canclled Sucessfully", appointment: formattedAppointment });
     } catch (error) {
-        console.log(error);
+        logError(error);
         return res.status(500).json({ "error": "Unable to Complete Internal server error" })
     }
 }
@@ -534,7 +535,7 @@ export const updateStatus = async (req, res) => {
         if (!appointment) return res.status(404).json({ "error": "Appointment Not Found" });
         return res.status(200).json({ "message": "Appointment Accepted Sucessfully", appointment: formattedAppointment });
     } catch (error) {
-        console.log(error);
+        logError(error);
         return res.status(500).json({ "error": "Unable to Accept Internal server error" })
     }
 }
@@ -596,7 +597,7 @@ export const uploadReport = async (req, res) => {
             return res.status(200).json({ "message": "PDF Uploded Sucessfully", appointment: formattedAppointment });
         });
     } catch (error) {
-        console.log(error);
+        logError(error);
         return res.status(500).json({ "error": "Unable to Accept Internal server error" })
     }
 }
@@ -626,7 +627,7 @@ export const handleMarkAsPaid = async (req, res) => {
         if (!appointment) return res.status(404).json({ "error": "Appointment Not Found" });
         return res.status(200).json({ "message": "Appointment Accepted Sucessfully", appointment: formattedAppointment });
     } catch (error) {
-        console.log(error);
+        logError(error);
         return res.status(500).json({ "error": "Unable to Accept Internal server error" })
     }
 }

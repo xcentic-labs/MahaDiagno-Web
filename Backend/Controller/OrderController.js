@@ -1,6 +1,7 @@
 import prisma from "../Utils/prismaclint.js";
 import crypto from 'crypto'
 import Razorpay from "razorpay";
+import logError from "../Utils/log.js";
 
 const razorpay = new Razorpay({
     key_id: process.env.key_id,
@@ -12,7 +13,7 @@ const razorpay = new Razorpay({
 // add appointment for users
 export const addAppointment = async (req, res) => {
     try {
-        console.log(req.body)
+
         const { patientFirstName, patientLastName, patientAge, gender, doctorName, AdditionalPhoneNumber, userId, serviceId, addressId, modeOfPayment , partnerId } = req.body
 
         let dataToBeSaved = {
@@ -69,7 +70,7 @@ export const addAppointment = async (req, res) => {
                     },
                 });
 
-                console.log(appointment)
+        
 
                 if (!appointment) return res.status(500).json({ "error": "Unable to Add Appointment" });
                 return res.status(201).json({ "message": "Appointment Added Sucessfully" });
@@ -90,13 +91,13 @@ export const addAppointment = async (req, res) => {
                 },
             });
 
-            console.log(appointment)
+    
 
             if (!appointment) return res.status(500).json({ "error": "Unable to Add Appointment" });
             return res.status(201).json({ "message": "Appointment Added Sucessfully" });
         }
     } catch (error) {
-        console.log(error);
+        logError(error);
         return res.status(500).json({ "error": "Unable to Add Appointment Internal Server Error" });
     }
 }
@@ -112,11 +113,11 @@ export const createOrder = async (req, res) => {
             receipt,
         });
 
-        console.log(order)
+
 
         return res.status(200).json(order);
     } catch (err) {
-        console.log(err);
+        logError(err);
         res.status(500).json({ error: 'Failed to create order', details: err });
     }
 }

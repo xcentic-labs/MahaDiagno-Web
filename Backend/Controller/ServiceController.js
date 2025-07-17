@@ -1,9 +1,10 @@
 import { deleteBanner } from "../Utils/deletebanner.js";
 import prisma from "../Utils/prismaclint.js";
+import logError from "../Utils/log.js";
 
 export const addService = async (req, res) => {
     try {
-        console.log(req.body)
+        
         const fileName = req?.file?.filename;
 
         if (!fileName) return res.status(502).json({ "error": "Unable To Upload Photo" });
@@ -38,12 +39,12 @@ export const addService = async (req, res) => {
             }
         })
 
-        console.log(result);
+        
 
         if (!result) return res.status(500).json({ "error": "Unable to add Service" });
         return res.status(201).json({ "message": "Service Added Sucessfully" });
     } catch (error) {
-        console.log(error)
+        logError(error);
         return res.status(500).json({ "error": "Unable to add Service Internal Server error" });
     }
 }
@@ -76,7 +77,7 @@ export const deleteService = async (req, res) => {
         if (error.code == 'P2025') {
             return res.status(404).json({ "error": "Service Not Found" });
         }
-        console.log(error)
+        logError(error);
         return res.status(500).json({ "error": "Unable to Deleted Service Internal Server error" });
     }
 }
@@ -94,7 +95,7 @@ export const getMyService = async (req, res) => {
         if (!services) return res.status(404).json({ "error": "Unable To Get Services" });
         return res.status(200).json({ "message": "Service Fetched Sucessfully", services: services });
     } catch (error) {
-        console.log(error);
+        logError(error);
         return res.status(500).json({ "error": "Unable to Fetch Services Internal Server error" });
     }
 }
@@ -107,7 +108,7 @@ export const getServiceByPartner = async (req, res) => {
         // if (!services) return res.status(404).json({ "error": "Unable To Get Services" });
         // return res.status(200).json({ "message": "Service Fetched Sucessfully", services: services });
     } catch (error) {
-        console.log(error);
+        logError(error);
         return res.status(500).json({ "error": "Unable to Fetch Services Internal Server error" });
     }
 }
@@ -139,7 +140,7 @@ export const getPartnersByZone = async (req, res) => {
         if (!partner) return res.status(404).json({ "error": "Unable To Get Diagnosis Center" });
         return res.status(200).json({ "message": "Diagnosis Center Fetched Sucessfully", partner: partner });
     } catch (error) {
-        console.log(error);
+        logError(error);
         return res.status(500).json({ "error": "Unable to Fetch Diagnosis Center Internal Server error" });
     }
 }

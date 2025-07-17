@@ -1,15 +1,15 @@
 import prisma from "../Utils/prismaclint.js";
 import { generatePassword, matchedPassword } from "../Utils/password.js";
 import { sentopt, verify2factorOtp } from "../Utils/otp.js";
-
+import logError from "../Utils/log.js";
 
 export const createPartnersAccount = async (req, res) => {
     try {
         const { hospitalName, email, phoneNumber, password, addressId , zoneId } = req.body
 
-        console.log(req.body)
+        
 
-        console.log(req.body)
+        
         if (!hospitalName || !phoneNumber || !email || !password) return res.status(400).json({ "error": "All Fields Are Required" });
 
         const hasedPassword = generatePassword(password);
@@ -25,12 +25,12 @@ export const createPartnersAccount = async (req, res) => {
             }
         })
 
-        console.log(partners)
+        
 
         if (!partners) return res.status(500).json({ "error": "Unable Create Partners Account" });
         return res.status(201).json({ "message": "Partners account Created Sucessfully" });
     } catch (error) {
-        console.log(error)
+        logError(error);
         if (error.code == 'P2002') {
             return res.status(409).json({ "error": "Partners Aleardy Exist" });
         }
@@ -58,7 +58,7 @@ export const deletePartners = async (req, res) => {
 
         return res.status(200).json({ message: "Partner and related data deleted successfully" });
     } catch (error) {
-        console.error(error);
+        logError(error);
         return res.status(500).json({ error: "Unable to delete partner. Internal server error." });
     }
 };
@@ -89,7 +89,7 @@ export const getAllPartners = async (req, res) => {
         if (!partners) return res.status(500).json({ "error": "Unable To Fetch Partners" });
         return res.status(200).json({ "message": "Partners Fetched Sucessfully", partners: partners });
     } catch (error) {
-        console.log(error)
+        logError(error);
         return res.status(500).json({ "error": "Unable To Fetch Partners Internal Server Error" });
     }
 }
@@ -115,12 +115,12 @@ export const getPartners = async (req, res) => {
         });
 
         if (!partners) return res.status(500).json({ "error": "Unable To Get Partner" });
-        console.log(partners);
+        
         return res.status(200).json({
             "message": "Partner Fetched Sucessfully", partner: partners
         });
     } catch (error) {
-        console.log(error)
+        logError(error);
         return res.status(500).json({ "error": "Unable To Get Partner Internal Server Error" });
     }
 }
@@ -163,7 +163,7 @@ export const partnersLogin = async (req, res) => {
             }
         })
 
-        console.log(partners)
+        
 
         if (!partners) return res.status(404).json({ "error": "No User Exist" });
 
@@ -181,7 +181,7 @@ export const partnersLogin = async (req, res) => {
         });
 
     } catch (error) {
-        console.log(error)
+        logError(error);
         return res.status(500).json({ "error": "Unable To LoogedIn Internal Server Error" });
     }
 }
@@ -208,7 +208,7 @@ export const getForgotPasswordOtp = async (req, res) => {
         return res.status(200).json({ "message": "OTP sent Sucessfully", sessionId: isSent.sessionId });
 
     } catch (error) {
-        console.log(error);
+        logError(error);
         return res.status(500).json({ "error": "Unable to sent OTP Internal server error" });
     }
 }
@@ -217,7 +217,7 @@ export const chagePassword = async (req, res)=>{
     try {
         const {otp , password , phoneNumber} = req.body;
 
-        console.log(req.body);
+        
 
         if(otp.length != 6 || !password || !phoneNumber) return res.status(400).json({ "error": "All Fields Are Required" });
 
@@ -239,7 +239,7 @@ export const chagePassword = async (req, res)=>{
         if (!result) return res.status(500).json({ "error": "Unable to Change Password"});
         return res.status(200).json({ "message": "Password chaged sucessfully"});
     } catch (error) {
-        console.log(error);
+        logError(error);
         return res.status(500).json({ "error": "Unable to Change Password internal server error" });
     }
 }

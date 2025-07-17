@@ -1,5 +1,6 @@
 import prisma from "../Utils/prismaclint.js";
 import { sentopt, verify2factorOtp } from "../Utils/otp.js";
+import logError from "../Utils/log.js";
 
 export const getopt = async (req, res) => {
     try {
@@ -31,7 +32,7 @@ export const getopt = async (req, res) => {
 
         return res.status(200).json({ "message": "OTP sent Sucessfully" , sessionId : isSent.sessionId });
     } catch (error) {
-        console.log(error);
+        logError(error);
         return res.status(500).json({ "error": "Unable to sent OTP Internal server error" });
     }
 }
@@ -39,7 +40,7 @@ export const getopt = async (req, res) => {
 export const updateUser = async (req, res) => {
     try {
         const id = req.params.id
-        console.log(req.body);
+        
         const { firstName, lastName, email } = req.body;
 
         if (!firstName || !lastName || !email) return res.json({ "error": "Require All filed for Update" });
@@ -58,7 +59,7 @@ export const updateUser = async (req, res) => {
         if (!user) return res.status(500).json({ "error": "Unable to Update User" });
         return res.status(200).json({ "message": "User Updated Sucessfully" });
     } catch (error) {
-        console.log(error);
+        logError(error);
         return res.status(500).json({ "error": "Unable to Update User Internal server error" });
     }
 }
@@ -82,6 +83,7 @@ export const verifyOtp = async (req, res) => {
 
         return res.status(200).json({ "message": "OTP Matched", user: user });
     } catch (error) {
+        logError(error);
         return res.status(500).json({ "error": "Unable to process OTP internal server error" });
     }
 }
@@ -133,7 +135,7 @@ export const getUser = async (req, res) => {
             "message": "User get sucessfully", userData: userData
         });
     } catch (error) {
-        console.log(error);
+        logError(error);
         return res.status(404).json({ "error": "Unable to get user Internal server error" });
     }
 }
@@ -169,7 +171,7 @@ export const getAllUser = async (req, res) => {
         if (!user) return res.status(404).json({ "error": "Unable To Get User" });
         return res.status(200).json({ "message": "User get sucessfully", userData: allUser });
     } catch (error) {
-        console.log(error);
+        logError(error);
         return res.status(404).json({ "error": "Unable to get user Internal server error" });
     }
 }
@@ -179,8 +181,6 @@ export const deleteUser = async (req, res) => {
         const id = req.params.id;
 
         if (!id) return res.status(400).json({ "error": "All fields Are Required" });
-
-        console.log(id);
 
         await prisma.appointment.deleteMany({
             where: {
@@ -205,7 +205,7 @@ export const deleteUser = async (req, res) => {
         return res.status(200).json({ "message": "User Deleted sucessfully" });
 
     } catch (error) {
-        console.log(error);
+        logError(error);
         return res.status(404).json({ "error": "Unable to get user Internal server error" });
     }
 }

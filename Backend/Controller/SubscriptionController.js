@@ -1,12 +1,12 @@
 import prisma from "../Utils/prismaclint.js";
-
+import logError from "../Utils/log.js";
 
 export const addSubscription = async (req, res) => {
     try {
         const { subscriptionName, price, timePeriod , numberOfServiceBoys , benefits } = req.body;
 
-        console.log(req.body);
-        console.log(typeof(timePeriod))
+        
+        
 
         if (!subscriptionName || !price || !benefits) {
             return res.status(400).json({ error: "All Fields Are Required" });
@@ -31,7 +31,7 @@ export const addSubscription = async (req, res) => {
 
         return res.status(201).json({ message: "Subscription Added Successfully" });
     } catch (error) {
-        console.log(error);
+        logError(error);
         return res.status(500).json({ error: "Unable To Add Subscription - Internal Server Error" });
     }
 };
@@ -56,7 +56,7 @@ export const deleteSubscription = async (req, res) => {
 
         return res.status(200).json({ message: "Subscription Deleted Successfully" });
     } catch (error) {
-        console.log(error);
+        logError(error);
         return res.status(500).json({ error: "Unable To Delete Subscription - Internal Server Error" });
     }
 };
@@ -65,7 +65,7 @@ export const getSubscriptions = async (req, res) => {
     try {
         const result = await prisma.subscription.findMany({
         });
-        console.log(result);
+        
 
         if (!result) {
             return res.status(500).json({ error: "Unable To Fetch Subscriptions" });
@@ -73,7 +73,7 @@ export const getSubscriptions = async (req, res) => {
 
         return res.status(200).json({ message: "Subscriptions Fetched Successfully", subscriptions : result });
     } catch (error) {
-        console.log(error);
+        logError(error);
         return res.status(500).json({ error: "Unable To Fetch Subscriptions - Internal Server Error" });
     }
 };
@@ -109,7 +109,7 @@ export const updateSubscription = async (req, res) => {
 
     return res.status(200).json({ message: "Subscription updated successfully", data: updated });
   } catch (error) {
-    console.error("Update Subscription Error:", error);
+    logError("Update Subscription Error:", error);
     return res.status(500).json({ error: "Unable to update subscription - internal server error" });
   }
 };

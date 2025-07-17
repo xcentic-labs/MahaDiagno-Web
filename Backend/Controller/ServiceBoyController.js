@@ -1,11 +1,12 @@
 import { generatePassword, matchedPassword } from "../Utils/password.js";
 import prisma from "../Utils/prismaclint.js";
 import { convertKeysToCamelCase } from "../Utils/camelCaseConverter.js";
+import logError from "../Utils/log.js";
 
 export const addServiceBoy = async (req, res) => {
     try {
 
-        console.log(req.body)
+        
         const { firstName, lastName, phoneNumber, email, password, partnerId, subscriptionId } = req.body
 
         if (!firstName || !lastName || !phoneNumber || !email || !password) return res.status(400).json({ "error": "All Fields Are Required" });
@@ -49,7 +50,7 @@ export const addServiceBoy = async (req, res) => {
         if (!serviceBoy) return res.status(500).json({ "error": "Unable To Add Service Boy" });
         return res.status(201).json({ "message": "Service Boy Added Sucessfully" });
     } catch (error) {
-        console.log(error)
+        logError(error);
         if (error.code == 'P2002') {
             return res.status(409).json({ "error": "User Aleardy Exist" });
         }
@@ -71,7 +72,7 @@ export const deleteServiceBoy = async (req, res) => {
         if (!serviceBoy) return res.status(500).json({ "error": "Unable To Delete Service Boy" });
         return res.status(200).json({ "message": "Service Boy Deleted Sucessfully" });
     } catch (error) {
-        console.log(error)
+        logError(error);
         return res.status(500).json({ "error": "Unable To Delete Service Boy Internal Server Error" });
     }
 }
@@ -84,7 +85,7 @@ export const UpdatePassword = async (req, res) => {
 
         const { oldPassword, newPassword } = req.body
 
-        console.log(req.body);
+        
 
 
         if (!oldPassword || !newPassword) return res.status(400).json({ "error": "All Fields Are Required" });
@@ -96,9 +97,9 @@ export const UpdatePassword = async (req, res) => {
             }
         })
 
-        console.log(serviceBoy);
+        
 
-        console.log(matchedPassword(oldPassword, serviceBoy.password));
+        
 
         if (!matchedPassword(oldPassword, serviceBoy.password)) return res.status(403).json({ "error": "Old Password Is Incorrect" });
 
@@ -115,17 +116,17 @@ export const UpdatePassword = async (req, res) => {
         return res.status(200).json({ "message": "Password Updated Sucessfully" });
 
     } catch (error) {
-        console.log(error)
+        logError(error);
         return res.status(500).json({ "error": "Unable To Update passwrod of Service Boy Internal Server Error" });
     }
 }
 
 export const serviceBoyLogin = async (req, res) => {
     try {
-        console.log(req.body)
+        
         const { phoneNumber, password } = req.body
 
-        console.log(req.body)
+        
 
         if (!phoneNumber || !password) return res.status(400).json({ "error": "All Fields Are Required" });
 
@@ -152,16 +153,16 @@ export const serviceBoyLogin = async (req, res) => {
             }
         })
 
-        console.log(serviceBoy)
+        
 
         if (!serviceBoy) return res.status(404).json({ "error": "No User Exist" });
 
 
-        console.log(matchedPassword(password, serviceBoy.password));
+        
 
         if (!matchedPassword(password, serviceBoy.password)) return res.status(403).json({ "error": "Password Is Incorrect" });
 
-        console.log(serviceBoy);
+        
 
         return res.status(200).json({
             "message": "LoggedIn Sucessfull", serviceBoy: {
@@ -176,7 +177,7 @@ export const serviceBoyLogin = async (req, res) => {
         });
 
     } catch (error) {
-        console.log(error)
+        logError(error);
         return res.status(500).json({ "error": "Unable To LoogedIn Internal Server Error" });
     }
 }
@@ -185,7 +186,7 @@ export const changeStatus = async (req, res) => {
     try {
         const id = req.params.id
         if (!id) return res.status(400).json({ "error": "Id Is Required" });
-        console.log(req.body)
+        
         const { status } = req.body
 
         if (!(status == false || status == true)) return res.status(400).json({ "error": "Valdi Status Is Required" });
@@ -204,7 +205,7 @@ export const changeStatus = async (req, res) => {
 
         return res.status(200).json({ "message": `Status Marked ${serviceBoy.status ? 'Online' : 'Offline'}`, status: serviceBoy.status });
     } catch (error) {
-        console.log(error);
+        logError(error);
         return res.status(500).json({ "error": "Unable to Update the status" })
     }
 }
@@ -251,7 +252,7 @@ export const getMyServiceBoy = async (req, res) => {
             });
 
 
-            // console.log(cashAppointments);
+            
 
             
             const totalMoney = cashAppointments.reduce((sum, app) => {
@@ -274,7 +275,7 @@ export const getMyServiceBoy = async (req, res) => {
             }
         })
 
-        console.log(formatedServiceBoy);
+        
 
 
         if (!serviceBoy) return res.status(500).json({ "error": "Unable To Get ervice Boy" });
@@ -282,7 +283,7 @@ export const getMyServiceBoy = async (req, res) => {
             "message": "Service Boy Fetched Sucessfully", serviceBoy: formatedServiceBoy
         });
     } catch (error) {
-        console.log(error)
+        logError(error);
         return res.status(500).json({ "error": "Unable To Get Service Boy Internal Server Error" });
     }
 }
@@ -305,7 +306,7 @@ export const getAllServiceBoys = async (req, res) => {
         if (!serviceBoys) return res.status(500).json({ "error": "Unable To Fetch Service Boys" });
         return res.status(200).json({ "message": "Service Boys Fetched Sucessfully", serviceBoys: allServiceBoy });
     } catch (error) {
-        console.log(error)
+        logError(error);
         return res.status(500).json({ "error": "Unable To FetchService Boy Internal Server Error" });
     }
 }
@@ -360,7 +361,7 @@ export const getServiceBoy = async (req, res) => {
             }
         });
     } catch (error) {
-        console.log(error)
+        logError(error);
         return res.status(500).json({ "error": "Unable To Get Service Boy Internal Server Error" });
     }
 }
@@ -443,7 +444,7 @@ export const getSpecficServiceBoy = async (req, res) => {
         res.status(200).json({ "message": "service boy fetched Sucessfully", serviceboy: formatedServiceBoy });
 
     } catch (error) {
-        console.log(error);
+        logError(error);
         return res.status(500).json({ error: "Internal Server Error" });
     }
 }
@@ -469,7 +470,7 @@ export const handleUpdateCashToRecived = async (req, res) => {
         if (!appointments) return res.status(404).json({ error: "No Such appointements" });
         return res.status(200).json({ "message": "Status Updated Sucessfully" });
     } catch (error) {
-        console.log(error);
+        logError(error);
         return res.status(500).json({ error: "Internal Server Error" });
     }
 }

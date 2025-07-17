@@ -1,6 +1,6 @@
 import prisma from '../Utils/prismaclint.js';
 import { deletePromotionalBanner } from '../Utils/deletebanner.js';
-
+import logError from "../Utils/log.js";
 // Upload Banner
 export const uploadBannerImage = async (req, res) => {
   try {
@@ -20,7 +20,7 @@ export const uploadBannerImage = async (req, res) => {
       data: newBanner,
     });
   } catch (error) {
-    console.error("Upload Error:", error);
+    logError(error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
@@ -34,7 +34,7 @@ export const getAllBanners = async (req, res) => {
       data: banners,
     });
   } catch (error) {
-    console.error("Fetch Error:", error);
+    logError(error);
     res.status(500).json({ success: false, message: "Failed to fetch banners" });
   }
 };
@@ -57,7 +57,7 @@ export const deleteBanner = async (req, res) => {
       message: "Banner deleted successfully",
     });
   } catch (error) {
-    console.error("Delete Error:", error);
+    logError(error);
     res.status(500).json({ success: false, message: "Failed to delete banner" });
   }
 };

@@ -18,7 +18,7 @@ export const sentopt = async (phone_number) => {
             }
         }
     } catch (error) {
-        console.log(error);
+        logError(error);
         return {
             status: 500,
             sessionId: null
@@ -45,7 +45,7 @@ export const verify2factorOtp = async (phone_number, OTP) => {
             }
         }
     } catch (error) {
-        console.log(error);
+        logError(error);
         return {
                 status: 500,
                 message : 'OTP Mismatch'
