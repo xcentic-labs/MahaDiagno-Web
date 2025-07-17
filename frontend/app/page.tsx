@@ -60,7 +60,7 @@ export default function LoginPage() {
         {/* Footer */}
         <div className="text-center">
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            © 2024 Mahiagno. All rights reserved.
+            © 2024 Mahadiagno. All rights reserved.
           </p>
         </div>
       </div>
