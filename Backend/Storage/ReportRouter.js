@@ -1,5 +1,6 @@
 import multer from "multer";
-import path from 'path'
+import path from 'path';
+import fs from 'fs';
 
 const fileFilter = (req, file, cb) => {
     if (file.mimetype === "application/pdf") {
@@ -9,17 +10,26 @@ const fileFilter = (req, file, cb) => {
     }
 };
 
+const reportsFolder = './public/reports';
+
 const Storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, './public/reports');
+        // Ensure the folder exists
+        if (!fs.existsSync(reportsFolder)) {
+            fs.mkdirSync(reportsFolder, { recursive: true });
+        }
+        cb(null, reportsFolder);
     },
     filename: function (req, file, cb) {
         const ext = path.extname(file.originalname);
         
-        const baseName = `MH2025D${req.params.id}` || `${Date.now()}_report_unknown`;
+        // Safer fallback in case req.params.id is undefined
+        const id = req.params?.id || `unknown_${Date.now()}`;
+        const baseName = `MH2025D${id}`;
+        
         cb(null, `${baseName}${ext}`);
     },
-})
+});
 
 export const uploadReportFile = multer({
     storage: Storage,
