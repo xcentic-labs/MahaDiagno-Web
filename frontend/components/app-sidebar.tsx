@@ -14,7 +14,8 @@ import {
   Banknote,
   Clock,
   CheckCircle,
-  XCircle
+  XCircle,
+  FilePlus2
 } from "lucide-react";
 import { Bike } from "lucide-react";
 
@@ -49,6 +50,11 @@ const data = {
       title: "Zone",
       url: "/zone",
       icon: Map, // suitable for zones
+    },
+    {
+      title: "Banner",
+      url: "/banner",
+      icon: FilePlus2, // suitable for banners
     },
     {
       title: "User",

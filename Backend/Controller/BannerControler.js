@@ -29,7 +29,7 @@ export const uploadBannerImage = async (req, res) => {
 export const getAllBanners = async (req, res) => {
   try {
     const banners = await prisma.homeBanner.findMany();
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: banners,
     });
@@ -52,7 +52,9 @@ export const deleteBanner = async (req, res) => {
 
     deletePromotionalBanner(banner.imageName)
 
-    res.status(200).json({
+    await prisma.homeBanner.delete({ where: { id: parseInt(id) } });
+
+    return res.status(200).json({
       success: true,
       message: "Banner deleted successfully",
     });
