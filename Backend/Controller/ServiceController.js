@@ -4,7 +4,7 @@ import logError from "../Utils/log.js";
 
 export const addService = async (req, res) => {
     try {
-        
+
         const fileName = req?.file?.filename;
 
         if (!fileName) return res.status(502).json({ "error": "Unable To Upload Photo" });
@@ -39,7 +39,7 @@ export const addService = async (req, res) => {
             }
         })
 
-        
+
 
         if (!result) return res.status(500).json({ "error": "Unable to add Service" });
         return res.status(201).json({ "message": "Service Added Sucessfully" });
@@ -102,7 +102,7 @@ export const getMyService = async (req, res) => {
 
 export const getServiceByPartner = async (req, res) => {
     try {
-        
+
         // const services = await
 
         // if (!services) return res.status(404).json({ "error": "Unable To Get Services" });
@@ -120,26 +120,30 @@ export const getPartnersByZone = async (req, res) => {
             isSubscribed: true
         }
 
-        
-        
+
+
         if (req.query.state) {
             matchedCondition.zone = {
-                state: req.query.state,
-                mode: 'insensitive'
-            }
+                is: {
+                    state: {
+                        equals: req.query.state,
+                        mode: 'insensitive'
+                    }
+                }
+            };
         }
 
 
         console.log(matchedCondition);
 
-        const partner  = await prisma.partners.findMany({
-            where : matchedCondition,
-            select : {
-                id : true,
-                hospitalName : true,
-                services : true,
-                email : true,
-                address : true,
+        const partner = await prisma.partners.findMany({
+            where: matchedCondition,
+            select: {
+                id: true,
+                hospitalName: true,
+                services: true,
+                email: true,
+                address: true,
             }
         })
 
