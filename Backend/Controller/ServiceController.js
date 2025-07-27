@@ -134,7 +134,7 @@ export const getPartnersByZone = async (req, res) => {
         }
 
 
-        console.log(matchedCondition);
+        console.log(matchedCondition.zone);
 
         const partner = await prisma.partners.findMany({
             where: matchedCondition,
@@ -146,6 +146,8 @@ export const getPartnersByZone = async (req, res) => {
                 address: true,
             }
         })
+
+        console.log(partner);
 
         if (!partner) return res.status(404).json({ "error": "Unable To Get Diagnosis Center" });
         return res.status(200).json({ "message": "Diagnosis Center Fetched Sucessfully", partner: partner });
