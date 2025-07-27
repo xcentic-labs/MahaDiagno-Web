@@ -13,7 +13,7 @@ export const addZone =  async (req , res)=>{
             data : {
                 pincode : pincode,
                 district : district,
-                state : state
+                state : state.toUpperCase()
             }
         })
 
