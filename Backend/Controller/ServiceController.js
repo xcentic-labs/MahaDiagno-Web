@@ -124,7 +124,8 @@ export const getPartnersByZone = async (req, res) => {
         
         if (req.query.state) {
             matchedCondition.zone = {
-                state: req.query.state.toUpperCase()
+                state: req.query.state,
+                mode: 'insensitive'
             }
         }
 
