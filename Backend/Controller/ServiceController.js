@@ -119,12 +119,17 @@ export const getPartnersByZone = async (req, res) => {
         const matchedCondition = {
             isSubscribed: true
         }
+
+        
         
         if (req.query.state) {
             matchedCondition.zone = {
                 state: req.query.state.toUpperCase()
             }
         }
+
+
+        console.log(matchedCondition);
 
         const partner  = await prisma.partners.findMany({
             where : matchedCondition,
