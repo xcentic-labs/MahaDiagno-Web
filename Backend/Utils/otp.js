@@ -2,7 +2,7 @@ import axios from 'axios'
 
 export const sentopt = async (phone_number) => {
     try {
-        const res = await axios.get(`https://2factor.in/API/V1/${process.env.OTP_KEY}/SMS/+91${phone_number}/AUTOGEN2`)
+        const res = await axios.get(`https://2factor.in/API/V1/${process.env.OTP_KEY}/SMS/+91${phone_number}/AUTOGEN2/Authentication`)
         console.log(res.data)
 
         if (res.status == 200) {
