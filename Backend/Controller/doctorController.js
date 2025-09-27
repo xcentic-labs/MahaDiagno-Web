@@ -190,6 +190,8 @@ export const getDoctorById = async (req, res) => {
                 experience: true,
                 education: true,
                 timings: true,
+                doctorappointment: true,
+                isVerified: true,
             }
         });
         if (!doctor) {
@@ -468,17 +470,17 @@ export const getDoctorAmountById = async (req, res) => {
             }
         });
 
-        
+
 
         if (!doctor) {
             return res.status(404).json({ error: "Doctor not found" });
         }
 
-        console.log("Doctor amount:", { amount: doctor.amount , history });
+        console.log("Doctor amount:", { amount: doctor.amount, history });
 
-        
+
         res.status(200).json({
-            amount : doctor.amount,
+            amount: doctor.amount,
             history
         });
     } catch (error) {
@@ -487,5 +489,27 @@ export const getDoctorAmountById = async (req, res) => {
     }
 };
 
+
+export const handleVerfify = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const doctor = await prisma.doctor.update({
+            where: { id: Number(id) },
+            data: {
+                isVerified: true
+            }
+        });
+
+        if (!doctor) {
+            return res.status(404).json({ error: "Doctor not found" });
+        }
+        res.status(200).json({ message: "Doctor Verified Successfully", doctor });
+
+    } catch (error) {
+        console.error("Error verifying doctor:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+}
 
 

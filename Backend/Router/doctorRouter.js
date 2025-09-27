@@ -10,7 +10,8 @@ import {
   editProfileImage,
   loginDoctor,
   checkProfileCompletion,
-  getDoctorAmountById
+  getDoctorAmountById,
+  handleVerfify
 } from '../Controller/doctorController.js';
 
 export const doctorRouter = express.Router();
@@ -23,6 +24,8 @@ doctorRouter.get('/getall', getAllDoctors); // admin protected
 
 // Get doctor by ID
 doctorRouter.get('/get/:id', getDoctorById);
+
+doctorRouter.patch('/verify/:id', handleVerfify);
 
 // Delete a doctor
 doctorRouter.delete('/delete/:id', deleteDoctor);
@@ -46,3 +49,4 @@ doctorRouter.get('/checkprofile/:id', checkProfileCompletion);
 
 
 doctorRouter.get('/get/wallet/:id', getDoctorAmountById);
+
