@@ -12,7 +12,8 @@ import {
     createOrder,
     getAppointmentById,
     handleUpload,
-    handleRescheduled
+    handleRescheduled,
+    handleGetAllAppointments
 } from '../Controller/doctorappointmentController.js';
 
 export const doctorappointmentRouter = express.Router();
@@ -35,6 +36,8 @@ doctorappointmentRouter.get('/get/:appointmentId', getAppointmentById);
 
 doctorappointmentRouter.patch('/upload/prescription/:appointmentId', handleUpload);
 doctorappointmentRouter.patch('/reschedule/:appointmentId', handleRescheduled);
+
+doctorappointmentRouter.get('getall', handleGetAllAppointments); // admin protected
 
 
 

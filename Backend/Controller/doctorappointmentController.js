@@ -606,3 +606,19 @@ export const handleRescheduled = async (req, res) => {
         return res.status(500).json({ error: "Internal server error" });
     }
 }
+
+export const handleGetAllAppointments = async (req, res) => {
+    try {
+        const appointments = await prisma.doctorappointment.findMany({
+            include: {
+                doctor: true,
+                bookedBy: true,
+                slot: true
+            }
+        });
+        res.status(200).json(appointments);
+    } catch (error) {
+        console.error("Error fetching all appointments:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+};
