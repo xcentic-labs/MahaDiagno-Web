@@ -6,11 +6,11 @@ import { uploadPartnerBanner } from "../Storage/PartnerBanner.js";
 import multer from "multer";
 export const createPartnersAccount = async (req, res) => {
     try {
-        const { hospitalName, email, phoneNumber, password, addressId , zoneId } = req.body
+        const { hospitalName, email, phoneNumber, password, addressId, zoneId } = req.body
 
-        
 
-        
+
+
         if (!hospitalName || !phoneNumber || !email || !password) return res.status(400).json({ "error": "All Fields Are Required" });
 
         const hasedPassword = generatePassword(password);
@@ -22,11 +22,11 @@ export const createPartnersAccount = async (req, res) => {
                 phoneNumber: phoneNumber,
                 password: hasedPassword,
                 addressId: addressId,
-                zoneId : zoneId
+                zoneId: zoneId
             }
         })
 
-        
+
 
         if (!partners) return res.status(500).json({ "error": "Unable Create Partners Account" });
         return res.status(201).json({ "message": "Partners account Created Sucessfully" });
@@ -45,17 +45,17 @@ export const deletePartners = async (req, res) => {
         if (!id) return res.status(400).json({ error: "Id is required" });
 
         // Check if partner exists
-        const existingPartner = await prisma.partners.findUnique({ where: { id : +id } });
+        const existingPartner = await prisma.partners.findUnique({ where: { id: +id } });
         if (!existingPartner) return res.status(404).json({ error: "Partner not found" });
 
         // Delete dependent records in correct order
-        await prisma.appointment.deleteMany({ where: { partnerId : +id } });
-        await prisma.serviceboy.deleteMany({ where: { partnerId : +id } });
-        await prisma.services.deleteMany({ where: { partnerId : +id } });
-        await prisma.subscription_purchase.deleteMany({ where: {  partnersId : +id} });
+        await prisma.appointment.deleteMany({ where: { partnerId: +id } });
+        await prisma.serviceboy.deleteMany({ where: { partnerId: +id } });
+        await prisma.services.deleteMany({ where: { partnerId: +id } });
+        await prisma.subscription_purchase.deleteMany({ where: { partnersId: +id } });
 
         // Delete the partner
-        await prisma.partners.delete({ where: { id : +id } });
+        await prisma.partners.delete({ where: { id: +id } });
 
         return res.status(200).json({ message: "Partner and related data deleted successfully" });
     } catch (error) {
@@ -74,13 +74,13 @@ export const getAllPartners = async (req, res) => {
                 hospitalName: true,
                 phoneNumber: true,
                 email: true,
-                isSubscribed : true,
+                isSubscribed: true,
                 _count: {
                     select: {
                         subscription_purchase: true,
-                        serviceBoy : true,
-                        appointment : true,
-                        services : true
+                        serviceBoy: true,
+                        appointment: true,
+                        services: true
                     }
                 }
             }
@@ -99,7 +99,7 @@ export const getPartners = async (req, res) => {
     try {
         const id = req.params.id
 
-        
+
 
         if (!id) return res.status(400).json({ "error": "Id Is Required" });
 
@@ -107,18 +107,18 @@ export const getPartners = async (req, res) => {
             where: {
                 id: +id
             },
-            include : {
-                subscription_purchase : true,
-                serviceBoy : true,
-                appointment : true,
-                services : true,
-                address : true,
-                paymentMethod : true,
+            include: {
+                subscription_purchase: true,
+                serviceBoy: true,
+                appointment: true,
+                services: true,
+                address: true,
+                paymentMethod: true,
             }
         });
 
         if (!partners) return res.status(500).json({ "error": "Unable To Get Partner" });
-        
+
         return res.status(200).json({
             "message": "Partner Fetched Sucessfully", partner: partners
         });
@@ -157,18 +157,18 @@ export const partnersLogin = async (req, res) => {
                         lng: true,
                     }
                 },
-                zone : {
-                    select : {
-                        id : true,
-                        district : true,
-                        state :true,
-                        pincode : true
+                zone: {
+                    select: {
+                        id: true,
+                        district: true,
+                        state: true,
+                        pincode: true
                     }
                 }
             }
         })
 
-        
+
 
         if (!partners) return res.status(404).json({ "error": "No User Exist" });
 
@@ -181,7 +181,7 @@ export const partnersLogin = async (req, res) => {
                 email: partners.email,
                 phoneNumber: partners.phoneNumber,
                 hospitalName: partners.hospitalName,
-                zone : partners.zone
+                zone: partners.zone
             }
         });
 
@@ -218,31 +218,42 @@ export const getForgotPasswordOtp = async (req, res) => {
     }
 }
 
-export const chagePassword = async (req, res)=>{
+export const chagePassword = async (req, res) => {
     try {
-        const {otp , password , phoneNumber} = req.body;
+        const { otp, password, phoneNumber, type } = req.body;
 
-        
+        if (otp.length != 6 || !password || !phoneNumber || !type) return res.status(400).json({ "error": "All Fields Are Required" });
 
-        if(otp.length != 6 || !password || !phoneNumber) return res.status(400).json({ "error": "All Fields Are Required" });
+        const isMatched = await verify2factorOtp(phoneNumber, otp)
 
-        const isMatched = await verify2factorOtp(phoneNumber , otp)
-
-        if(isMatched.status != 200) return res.status(400).json({ "error": "Invalid OTP" });
+        if (isMatched.status != 200) return res.status(400).json({ "error": "Invalid OTP" });
 
         const hasedPassword = generatePassword(password);
 
-        const result = await prisma.partners.update({
-            where : {
-                phoneNumber : phoneNumber
-            },
-            data :{
-                password : hasedPassword
-            }
-        });
+        let result;
 
-        if (!result) return res.status(500).json({ "error": "Unable to Change Password"});
-        return res.status(200).json({ "message": "Password chaged sucessfully"});
+        if (type == "partners") {
+            result = await prisma.partners.update({
+                where: {
+                    phoneNumber: phoneNumber
+                },
+                data: {
+                    password: hasedPassword
+                }
+            });
+        } else {
+            result = await prisma.doctor.update({
+                where: {
+                    phoneNumber: phoneNumber
+                },
+                data: {
+                    password: hasedPassword
+                }
+            });
+        }
+
+        if (!result) return res.status(500).json({ "error": "Unable to Change Password" });
+        return res.status(200).json({ "message": "Password chaged sucessfully" });
     } catch (error) {
         logError(error);
         return res.status(500).json({ "error": "Unable to Change Password internal server error" });
