@@ -194,15 +194,19 @@ export const partnersLogin = async (req, res) => {
 
 export const getForgotPasswordOtp = async (req, res) => {
     try {
-        const { phoneNumber } = req.body;
+        const { phoneNumber, type } = req.body;
 
         if (!phoneNumber || phoneNumber.length != 10) return res.status(400).json({ "error": "A Valid PhoneNumber Are Required" });
 
-        const result = await prisma.partners.findUnique({
+        const result = type == "partners" ? await prisma.partners.findUnique({
             where: {
                 phoneNumber: phoneNumber
             }
-        })
+        }) : await prisma.doctor.findUnique({
+            where: {
+                phoneNumber: phoneNumber
+            }
+        });
 
         if (!result) return res.status(404).json({ "error": "User Dosent Exist" });
 
