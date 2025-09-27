@@ -13,6 +13,15 @@ import { OrderRouter } from './Router/OrderRouter.js';
 import { SubscriptionRouter } from './Router/SubscriptionRouter.js';
 import { PartnersRouter } from './Router/PartnersRouter.js';
 import { SubscriptionPurchaseRouter } from './Router/SubscriptionPurchaseRouter.js';
+import { doctorRouter } from './Router/doctorRouter.js';
+import { educationRouter } from './Router/educationRouter.js';
+import { experienceRouter } from './Router/experienceRouter.js';
+import { timingRouter } from './Router/timingRouter.js';
+import { doctorappointmentRouter } from './Router/doctorappointmentRouter.js' 
+import { specializationRouter } from './Router/specializationRouter.js';
+import { symptomRouter } from './Router/symptomRouter.js';
+import { slotRouter } from './Router/slotRouter.js';
+import { patientRouter } from './Router/patientRouter.js';
 
 // cros 
 import cors from 'cors'
@@ -63,7 +72,15 @@ app.use('/api/v1/subscriptionpurchase' , SubscriptionPurchaseRouter);
 app.use('/api/v1/withdraw' , withdrawRouter)
 app.use('/api/v1/paymentmethod' , paymentMethodRouter)
 app.use('/api/v1/banner' , BannerRouter)
-
+app.use('/api/v1/doctor' , doctorRouter);
+app.use('/api/v1/education', educationRouter);
+app.use('/api/v1/experience', experienceRouter);
+app.use('/api/v1/timing', timingRouter);
+app.use('/api/v1/slot' , slotRouter);
+app.use('/api/v1/doctorappointment' , doctorappointmentRouter);
+app.use('/api/v1/specialization', specializationRouter);
+app.use('/api/v1/symptom', symptomRouter);
+app.use('/api/v1/patient', patientRouter);
 
 app.get('/', (req, res) => {
   return res.json({ "message": "Har har Mahadev" });

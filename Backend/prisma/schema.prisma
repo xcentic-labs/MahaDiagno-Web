@@ -27,7 +27,7 @@ model services {
   id                 Int     @unique @default(autoincrement())
   title              String
   price              String
-  banner_url         String
+  banner_url         String?
   isHomeServiceAvail Boolean
 
   // in which zone available
@@ -47,6 +47,7 @@ model partners {
   email        String
   phoneNumber  String @unique
   password     String
+  imageUrl     String?
 
   zoneId Int
   zone   zone @relation(fields: [zoneId], references: [id])
@@ -70,24 +71,37 @@ model partners {
 
 model paymentMethod {
   id            Int        @unique @default(autoincrement())
-  partnerId     Int
-  partner       partners   @relation(fields: [partnerId], references: [id])
+  
   bankName      String
   accountNumber String
   ifscCode      String
   bankeeName    String
   withdraw      withdraw[]
+
+
+  partnerId     Int?
+  partner       partners?   @relation(fields: [partnerId], references: [id])
+
+  doctorId      Int?    @unique
+  doctor        doctor? @relation(fields: [doctorId], references: [id])
 }
 
 model withdraw {
   id              Int            @unique @default(autoincrement())
-  partnerId       Int
-  partner         partners       @relation(fields: [partnerId], references: [id])
+  
   amount          Int
   status          withdrawStatus @default(PENDING)
   paymentMethodId Int
   paymentMethod   paymentMethod  @relation(fields: [paymentMethodId], references: [id])
   createdAt       DateTime       @default(now())
+
+  // partner withdraw 
+  partnerId       Int?
+  partner         partners?       @relation(fields: [partnerId], references: [id])
+
+  // doctor withdraw
+  doctorId Int?
+  doctor   doctor? @relation(fields: [doctorId], references: [id])
 }
 
 model User {
@@ -98,6 +112,9 @@ model User {
   phoneNumber String        @unique
   userId      appointment[]
   address     address[]
+  patient     patient[]
+
+  doctorappointment doctorappointment[]
 }
 
 model appointment {
@@ -217,6 +234,167 @@ model homeBanner{
   imageName String
 }
 
+
+model doctor {
+  id          Int     @unique @default(autoincrement())
+  fName       String
+  lName       String
+  displayName String
+  phoneNumber String  @unique
+  email       String
+  password    String
+  imageUrl    String?
+
+  // specialization
+  specializationId Int
+  specialization   specialization @relation(fields: [specializationId], references: [id])
+
+  // verification details
+  isVerified Boolean @default(false)
+  isfeatured Boolean @default(false)
+
+  // clinic details
+  clinicName    String?
+  clinicAddress String?
+
+  // clinic location
+  lat String?
+  lng String?
+
+  // wallet details
+  amount Float @default(0)
+
+  education     education[]
+  experience    experience[]
+  timings       timings[]
+  paymentMethod paymentMethod?
+  doctorappointment   doctorappointment[]
+  withdraw      withdraw[]
+}
+
+model education {
+  id             Int    @unique @default(autoincrement())
+  courseName     String
+  universityName String
+  yearOfPassing  Int
+
+  doctorId Int
+  doctor   doctor @relation(fields: [doctorId], references: [id])
+}
+
+model experience {
+  id               Int     @unique @default(autoincrement())
+  title            String
+  hospital         String
+  employmentType   String
+  from             String
+  to               String?
+  currentlyWorking Boolean @default(false)
+  doctorId         Int
+  doctor           doctor  @relation(fields: [doctorId], references: [id])
+}
+
+model timings {
+  id          Int     @unique @default(autoincrement())
+  day         String
+  startTime   String? @default("10:00")
+  endTime     String? @default("17:00")
+  isAvailable Boolean @default(true)
+
+  fee Int? @default(0)
+
+  doctorId Int
+  doctor   doctor @relation(fields: [doctorId], references: [id])
+
+  slots slots[]
+}
+
+model slots {
+  id        Int    @unique @default(autoincrement())
+  startTime String @default("10:00")
+  endTime   String @default("17:00")
+
+  timingsId Int
+  timings   timings @relation(fields: [timingsId], references: [id])
+
+  doctorappointment doctorappointment[]
+}
+
+
+
+model doctorappointment {
+  id                 Int    @unique @default(autoincrement())
+  patientFirstName   String
+  patientLastName    String
+  patientAge         Int
+  patientGender      Gender
+  patientPhoneNumber String
+
+  // user details
+  userId   Int
+  bookedBy User @relation(fields: [userId], references: [id])
+
+  // doctor details
+  doctorId Int
+  doctor   doctor @relation(fields: [doctorId], references: [id])
+
+  status DoctorStatus @default(SCHEDULED)
+
+  // payment details
+  rpzOrderId         String? @unique
+  rpzRefundPaymentId String? @unique
+  rpzPaymentId       String? @unique
+
+  // timing details
+  date          String
+  slotId        Int
+  slot          slots   @relation(fields: [slotId], references: [id])
+  isRescheduled Boolean @default(false)
+
+  // additional details
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  // prescription details
+  prescriptionUrl String?
+
+  // video call id
+  videoCallId  String?
+}
+
+model specialization {
+  id       Int    @unique @default(autoincrement())
+  key      String
+  label    String
+  imageUrl String
+
+  doctor   doctor[]
+  symptoms symptom[]
+}
+
+model symptom {
+  id       Int    @unique @default(autoincrement())
+  name     String
+  imageUrl String
+
+  specializationId Int
+  specialization   specialization @relation(fields: [specializationId], references: [id])
+}
+
+
+model patient {
+  id          Int    @unique @default(autoincrement())
+  fname       String
+  lname       String
+  phoneNumber String
+  email       String
+  age         Int
+  gender      Gender
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+}
+
 enum Gender {
   Male
   Female
@@ -226,6 +404,14 @@ enum Gender {
 enum Status {
   SCHEDULED // The appointment is scheduled but not yet confirmed.
   ACCEPTED // The appointment has been confirmed.
+  COMPLETED // The appointment is finished.
+  CANCELLED // The appointment was cancelled.
+}
+
+enum DoctorStatus {
+  SCHEDULED // The appointment is scheduled but not yet confirmed.
+  ACCEPTED // The appointment has been confirmed.
+  IN_PROGRESS // The appointment is currently happening.
   COMPLETED // The appointment is finished.
   CANCELLED // The appointment was cancelled.
 }

@@ -3,40 +3,88 @@ import logError from "../Utils/log.js";
 // ➕ Add Withdraw
 export const addWithdraw = async (req, res) => {
     try {
-        const { partnerId, amount, paymentMethodId } = req.body;
+        const { partnerId, amount, paymentMethodId , doctorId } = req.body;
 
-        if (!partnerId || !amount || !paymentMethodId) {
+
+        if (!amount) {
             return res.status(400).json({ error: "All fields are required" });
         }
 
-        const partner = await prisma.partners.findUnique({
-            where : {
-                id : partnerId
-            }
-        });
+
+        if (partnerId == undefined && doctorId == undefined) {
+            return res.status(400).json({ error: "User Id is required" });
+        }
+
+        let withdraw = null;
+
+        if (partnerId != undefined) {
+            const partner = await prisma.partners.findUnique({
+                where: {
+                    id: partnerId
+                }
+            });
 
 
-        if(+amount > +partner.amount) return res.status(402).json({ error: "Insufficient balance" });
+            if (+amount > +partner.amount) return res.status(402).json({ error: "Insufficient balance" });
 
-        await prisma.partners.update({
-            where : {
-                id : +partnerId
-            },
-            data : {
-                amount :{
-                    decrement : (+amount)
-                }   
-            }
-        })
+            await prisma.partners.update({
+                where: {
+                    id: +partnerId
+                },
+                data: {
+                    amount: {
+                        decrement: (+amount)
+                    }
+                }
+            })
 
-        const withdraw = await prisma.withdraw.create({
-            data: {
-                partnerId,
-                amount,
-                paymentMethodId,
-                status: "PENDING", // default, but can be changed here if needed
-            },
-        });
+            withdraw = await prisma.withdraw.create({
+                data: {
+                    partnerId,
+                    amount,
+                    paymentMethodId,
+                    status: "PENDING", // default, but can be changed here if needed
+                },
+            });
+        }
+
+        if (doctorId != undefined) {
+            const doctor = await prisma.doctor.findUnique({
+                where: {
+                    id: doctorId
+                },
+                include : {
+                    paymentMethod : true
+                }
+            });
+
+            console.log(doctor);
+
+
+            if (+amount > +doctor.amount) return res.status(402).json({ error: "Insufficient balance" });
+
+            await prisma.doctor.update({
+                where: {
+                    id: +doctorId
+                },
+                data: {
+                    amount: {
+                        decrement: (+amount)
+                    }
+                }
+            })
+
+            withdraw = await prisma.withdraw.create({
+                data: {
+                    doctorId,
+                    amount,
+                    paymentMethodId : doctor?.paymentMethod?.id,
+                    status: "PENDING", // default, but can be changed here if needed
+                },
+            });
+        }
+
+
 
         return res.status(201).json(withdraw);
     } catch (error) {
@@ -69,13 +117,14 @@ export const getWithdrawByPartnerId = async (req, res) => {
         const { id } = req.params;
 
         const withdraw = await prisma.withdraw.findMany({
-            where: { partnerId : Number(id) },
+            where: { partnerId: Number(id) },
             include: {
                 partner: true,
                 paymentMethod: true,
+                doctor : true
             },
-            orderBy : {
-                createdAt : 'desc'
+            orderBy: {
+                createdAt: 'desc'
             }
         });
 
@@ -87,23 +136,47 @@ export const getWithdrawByPartnerId = async (req, res) => {
     }
 };
 
+export const getWithdrawByDoctorId = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const withdraw = await prisma.withdraw.findMany({
+            where: { doctorId: Number(id) },
+            include: {
+                doctor: true,
+                paymentMethod: true,
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
+        });
+
+        if (!withdraw) return res.status(404).json({ error: "Withdraw not found" });
+        return res.status(200).json(withdraw);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: "Internal server error" });
+    }
+};
+
 // 📃 Get All Withdraws
 export const getAllWithdraws = async (req, res) => {
     try {
         const withdraws = await prisma.withdraw.findMany({
-            where : {
-                status : String(req.query.status).toUpperCase()
+            where: {
+                status: String(req.query.status).toUpperCase()
             },
             include: {
                 partner: true,
                 paymentMethod: true,
+                doctor : true
             },
             orderBy: { id: "desc" },
         });
 
         return res.status(200).json({
-            message : "Withdraws Request Fetched Sucessfully",
-            withdraw : withdraws
+            message: "Withdraws Request Fetched Sucessfully",
+            withdraw: withdraws
         });
     } catch (error) {
         logError(error);
@@ -116,11 +189,11 @@ export const getAllWithdraws = async (req, res) => {
 export const updateWithdrawStatus = async (req, res) => {
     try {
         const { id } = req.params;
-        const { status  , partnerId , amount } = req.body;
+        const { status, partnerId, amount } = req.body;
 
 
         // Validate ID and Status
-        if (!id || !status || !partnerId || !amount) {
+        if (!id || !status) {
             return res.status(400).json({ error: "Withdraw ID and status are required" });
         }
 
@@ -131,18 +204,31 @@ export const updateWithdrawStatus = async (req, res) => {
         }
 
 
-        if(status == 'REJECTED'){
+        if (status == 'REJECTED' && partnerId != undefined) {
             await prisma.partners.update({
-                where : {
-                    id : +partnerId
+                where: {
+                    id: +partnerId
                 },
-                data : {
-                  amount : {
-                    increment : +amount
-                  }  
+                data: {
+                    amount: {
+                        increment: +amount
+                    }
+                }
+            })
+        }else{
+            await prisma.doctor.update({
+                where: {
+                    id: +partnerId
+                },
+                data: {
+                    amount: {
+                        increment: +amount
+                    }
                 }
             })
         }
+
+
 
         const updatedWithdraw = await prisma.withdraw.update({
             where: { id: Number(id) },

@@ -7,8 +7,6 @@ export const addService = async (req, res) => {
 
         const fileName = req?.file?.filename;
 
-        if (!fileName) return res.status(502).json({ "error": "Unable To Upload Photo" });
-
         const { title, price, partnerId, isHomeServiceAvail } = req.body;
 
         if (!title || !price || !partnerId || !isHomeServiceAvail) {
@@ -28,20 +26,34 @@ export const addService = async (req, res) => {
 
         if (!partner.isSubscribed) return res.status(400).json({ "error": "You have to buy a Subscription" })
 
-        const result = await prisma.services.create({
-            data: {
-                title: title,
-                price: price,
-                banner_url: fileName,
-                zoneId: partner.zoneId,
-                partnerId: partner.id,
-                isHomeServiceAvail: isHomeServiceAvail == 'true'
-            }
-        })
+        let result;
 
+        if (!fileName) {
+            result = await prisma.services.create({
+                data: {
+                    title: title,
+                    price: price,
+                    zoneId: partner.zoneId,
+                    partnerId: partner.id,
+                    isHomeServiceAvail: isHomeServiceAvail == 'true'
+                }
+            });
+        } else {
+            result = await prisma.services.create({
+                data: {
+                    title: title,
+                    price: price,
+                    banner_url: fileName,
+                    zoneId: partner.zoneId,
+                    partnerId: partner.id,
+                    isHomeServiceAvail: isHomeServiceAvail == 'true'
+                }
+            });
+        }
 
 
         if (!result) return res.status(500).json({ "error": "Unable to add Service" });
+
         return res.status(201).json({ "message": "Service Added Sucessfully" });
     } catch (error) {
         logError(error);
@@ -144,6 +156,7 @@ export const getPartnersByZone = async (req, res) => {
                 services: true,
                 email: true,
                 address: true,
+                imageUrl: true,
             }
         })
 

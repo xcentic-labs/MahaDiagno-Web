@@ -2,7 +2,8 @@ import prisma from "../Utils/prismaclint.js";
 import { generatePassword, matchedPassword } from "../Utils/password.js";
 import { sentopt, verify2factorOtp } from "../Utils/otp.js";
 import logError from "../Utils/log.js";
-
+import { uploadPartnerBanner } from "../Storage/PartnerBanner.js";
+import multer from "multer";
 export const createPartnersAccount = async (req, res) => {
     try {
         const { hospitalName, email, phoneNumber, password, addressId , zoneId } = req.body
@@ -98,6 +99,8 @@ export const getPartners = async (req, res) => {
     try {
         const id = req.params.id
 
+        
+
         if (!id) return res.status(400).json({ "error": "Id Is Required" });
 
         const partners = await prisma.partners.findUnique({
@@ -110,7 +113,7 @@ export const getPartners = async (req, res) => {
                 appointment : true,
                 services : true,
                 address : true,
-                paymentMethod : true
+                paymentMethod : true,
             }
         });
 
@@ -128,6 +131,8 @@ export const getPartners = async (req, res) => {
 export const partnersLogin = async (req, res) => {
     try {
         const { phoneNumber, password } = req.body
+
+        console.log(phoneNumber, password);
 
         if (!phoneNumber || !password) return res.status(400).json({ "error": "All Fields Are Required" });
 
@@ -241,5 +246,54 @@ export const chagePassword = async (req, res)=>{
     } catch (error) {
         logError(error);
         return res.status(500).json({ "error": "Unable to Change Password internal server error" });
+    }
+}
+
+
+export const uploadBanner = async (req, res) => {
+    uploadPartnerBanner(req, res, async function (err) {
+        if (err instanceof multer.MulterError) {
+            // A Multer error occurred when uploading.
+            return res.status(400).json({ error: err.message });
+        }
+        else if (err) {
+            // An unknown error occurred when uploading.
+            return res.status(500).json({ error: "Internal Server Error" });
+        }
+        // Everything went fine.
+        if (!req.files || !req.files.image) {
+            return res.status(400).json({ error: "Image file is required" });
+        }
+
+        const imageUrl = req.files?.image ? req.files.image[0].filename : null;
+        const result = await prisma.partners.update({
+            where: {
+                id: +req.params.id
+            },
+            data: {
+                imageUrl: `${imageUrl}`
+            }
+        });
+        return res.status(200).json({ message: "Image uploaded successfully", imageUrl: imageUrl });
+    });
+}
+
+export const getBanner = async (req, res) => {
+    try {
+        const partner = await prisma.partners.findUnique({
+            where: {
+                id: +req.params.id
+            },
+            select: {
+                imageUrl: true
+            }
+        });
+
+        if (!partner) return res.status(404).json({ "error": "Partner Not Found" });
+
+        return res.status(200).json({ "imageUrl": partner.imageUrl });
+    } catch (error) {
+        logError(error);
+        return res.status(500).json({ "error": "Unable to Retrieve Banner Internal Server Error" });
     }
 }
