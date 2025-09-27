@@ -37,7 +37,7 @@ doctorappointmentRouter.get('/get/:appointmentId', getAppointmentById);
 doctorappointmentRouter.patch('/upload/prescription/:appointmentId', handleUpload);
 doctorappointmentRouter.patch('/reschedule/:appointmentId', handleRescheduled);
 
-doctorappointmentRouter.get('getall', handleGetAllAppointments); // admin protected
+doctorappointmentRouter.get('/getall', handleGetAllAppointments); // admin protected
 
 
 
