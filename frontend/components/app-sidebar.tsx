@@ -67,6 +67,11 @@ const data = {
       icon: Users, // more appropriate than Settings2
     },
     {
+      title: "Doctors",
+      url: "/doctor",
+      icon: Users, // more appropriate than Settings2
+    },
+    {
       title: "Appointment",
       url: "/appointment/pending",
       icon: CalendarClock, // perfect for appointments
@@ -76,6 +81,11 @@ const data = {
         { title: "Completed", url: "/appointment/completed" },
         { title: "Cancelled", url: "/appointment/cancelled" },
       ],
+    },
+    {
+      title: "Consultation",
+      url: "/doctorappointment",
+      icon: CalendarClock, // perfect for consultations
     },
     // {
     //   title: "Partner Appointment",

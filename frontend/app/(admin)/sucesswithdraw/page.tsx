@@ -1,7 +1,7 @@
 "use client"
 import { axiosClient } from "@/lib/axiosClient";
 import { useEffect, useState } from "react"
-import { CheckCircle, XCircle, Clock, Building2, CreditCard, Phone, Mail, Eye, EyeOff } from "lucide-react";
+import { CheckCircle, XCircle, Clock, Building2, CreditCard, Phone, Mail, Eye, EyeOff, Stethoscope, User } from "lucide-react";
 import { toast } from "react-toastify";
 
 // Type definitions
@@ -10,6 +10,29 @@ interface Partner {
     hospitalName: string;
     phoneNumber: string;
     email: string;
+    imageUrl?: string;
+    zoneId: number;
+    addressId: number;
+    isSubscribed: boolean;
+    amount: number;
+}
+
+interface Doctor {
+    id: number;
+    fName: string;
+    lName: string;
+    displayName: string;
+    phoneNumber: string;
+    email: string;
+    imageUrl?: string;
+    specializationId: number;
+    isVerified: boolean;
+    isfeatured: boolean;
+    clinicName: string;
+    clinicAddress: string;
+    lat: string;
+    lng: string;
+    amount: number;
 }
 
 interface PaymentMethod {
@@ -18,17 +41,21 @@ interface PaymentMethod {
     accountNumber: string;
     ifscCode: string;
     bankeeName: string;
+    partnerId?: number;
+    doctorId?: number;
 }
 
 interface WithdrawRequest {
     id: number;
     amount: number;
     status: "PENDING" | "SUCCESS" | "REJECTED";
-    partnerId: number;
+    partnerId?: number;
+    doctorId?: number;
     paymentMethodId: number;
     createdAt: string;
-    updatedAt: string;
-    partner: Partner;
+    updatedAt?: string;
+    partner?: Partner;
+    doctor?: Doctor;
     paymentMethod: PaymentMethod;
 }
 
@@ -59,14 +86,23 @@ export default function Withdraw() {
         fetchwithdraw();
     }, []);
 
-    const handleStatusChange = async (id: number, status: StatusType , partnerId : number | string , amount : number): Promise<void> => {
+    const handleStatusChange = async (id: number, status: StatusType, request: WithdrawRequest): Promise<void> => {
         setProcessingId(id);
         try {
-            await axiosClient.patch(`/withdraw/updatestatus/${id}`, {
-                status ,
-                partnerId,
-                amount
-            });
+            const updateData: any = {
+                status,
+                amount: request.amount
+            };
+            
+            // Include partnerId or doctorId based on the request type
+            if (request.partnerId) {
+                updateData.partnerId = request.partnerId;
+            }
+            if (request.doctorId) {
+                updateData.doctorId = request.doctorId;
+            }
+
+            await axiosClient.patch(`/withdraw/updatestatus/${id}`, updateData);
             
             // Update local state
             setData(prevData => 
@@ -75,7 +111,7 @@ export default function Withdraw() {
                 )
             );
 
-            toast.success("Approved Sucessfully");
+            toast.success("Approved Successfully");
         } catch (error) {
             console.error('Error updating status:', error);
             toast.error("Failed to update status. Please try again.");
@@ -149,7 +185,7 @@ export default function Withdraw() {
             <div className="max-w-7xl mx-auto">
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">Withdrawal Requests</h1>
-                    <p className="text-gray-600">Manage and process withdrawal requests from partners</p>
+                    <p className="text-gray-600">Manage and process withdrawal requests from partners and doctors</p>
                 </div>
 
                 {data.length === 0 ? (
@@ -158,7 +194,7 @@ export default function Withdraw() {
                             <CreditCard className="w-16 h-16 mx-auto" />
                         </div>
                         <h3 className="text-lg font-medium text-gray-900 mb-2">No withdrawal requests</h3>
-                        <p className="text-gray-500">There are no withdrawal requests at the moment.</p>
+                        <p className="text-gray-500">There are no withdrawal requests from partners or doctors at the moment.</p>
                     </div>
                 ) : (
                     <div className="grid gap-6">
@@ -189,28 +225,79 @@ export default function Withdraw() {
                                     </div>
 
                                     <div className="grid md:grid-cols-2 gap-6 mb-6">
-                                        {/* Partner Information */}
+                                        {/* Partner or Doctor Information */}
                                         <div className="space-y-4">
-                                            <h4 className="font-semibold text-gray-900 flex items-center">
-                                                <Building2 className="w-4 h-4 mr-2" />
-                                                Partner Details
-                                            </h4>
-                                            <div className="bg-gray-50 rounded-lg p-4 space-y-3">
-                                                <div>
-                                                    <p className="text-sm text-gray-500">Hospital Name</p>
-                                                    <p className="font-medium text-gray-900">{request.partner.hospitalName}</p>
-                                                </div>
-                                                <div className="flex items-center space-x-4">
-                                                    <div className="flex items-center space-x-2">
-                                                        <Phone className="w-4 h-4 text-gray-400" />
-                                                        <span className="text-sm text-gray-600">{request.partner.phoneNumber}</span>
+                                            {request.partner ? (
+                                                <>
+                                                    <h4 className="font-semibold text-gray-900 flex items-center">
+                                                        <Building2 className="w-4 h-4 mr-2" />
+                                                        Partner Details
+                                                    </h4>
+                                                    <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                                                        <div>
+                                                            <p className="text-sm text-gray-500">Hospital Name</p>
+                                                            <p className="font-medium text-gray-900">{request.partner.hospitalName}</p>
+                                                        </div>
+                                                        <div className="flex items-center space-x-4">
+                                                            <div className="flex items-center space-x-2">
+                                                                <Phone className="w-4 h-4 text-gray-400" />
+                                                                <span className="text-sm text-gray-600">{request.partner.phoneNumber}</span>
+                                                            </div>
+                                                            <div className="flex items-center space-x-2">
+                                                                <Mail className="w-4 h-4 text-gray-400" />
+                                                                <span className="text-sm text-gray-600">{request.partner.email}</span>
+                                                            </div>
+                                                        </div>
+                                                        {request.partner.isSubscribed && (
+                                                            <div className="flex items-center space-x-2">
+                                                                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                                                <span className="text-sm text-green-600">Subscribed</span>
+                                                            </div>
+                                                        )}
                                                     </div>
-                                                    <div className="flex items-center space-x-2">
-                                                        <Mail className="w-4 h-4 text-gray-400" />
-                                                        <span className="text-sm text-gray-600">{request.partner.email}</span>
+                                                </>
+                                            ) : request.doctor ? (
+                                                <>
+                                                    <h4 className="font-semibold text-gray-900 flex items-center">
+                                                        <Stethoscope className="w-4 h-4 mr-2" />
+                                                        Doctor Details
+                                                    </h4>
+                                                    <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                                                        <div>
+                                                            <p className="text-sm text-gray-500">Doctor Name</p>
+                                                            <p className="font-medium text-gray-900">{request.doctor.displayName}</p>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-sm text-gray-500">Clinic Name</p>
+                                                            <p className="font-medium text-gray-900">{request.doctor.clinicName}</p>
+                                                        </div>
+                                                        <div className="flex items-center space-x-4">
+                                                            <div className="flex items-center space-x-2">
+                                                                <Phone className="w-4 h-4 text-gray-400" />
+                                                                <span className="text-sm text-gray-600">{request.doctor.phoneNumber}</span>
+                                                            </div>
+                                                            <div className="flex items-center space-x-2">
+                                                                <Mail className="w-4 h-4 text-gray-400" />
+                                                                <span className="text-sm text-gray-600">{request.doctor.email}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center space-x-4">
+                                                            {request.doctor.isVerified && (
+                                                                <div className="flex items-center space-x-2">
+                                                                    <CheckCircle className="w-4 h-4 text-green-500" />
+                                                                    <span className="text-sm text-green-600">Verified</span>
+                                                                </div>
+                                                            )}
+                                                            {request.doctor.isfeatured && (
+                                                                <div className="flex items-center space-x-2">
+                                                                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                                                    <span className="text-sm text-blue-600">Featured</span>
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </div>
+                                                </>
+                                            ) : null}
                                         </div>
 
                                         {/* Payment Method Information */}
@@ -261,7 +348,7 @@ export default function Withdraw() {
                                     {request.status === 'PENDING' && (
                                         <div className="flex space-x-3 pt-4 border-t border-gray-200">
                                             <button
-                                                onClick={() => handleStatusChange(request.id, 'SUCCESS' , request.partnerId , request.amount)}
+                                                onClick={() => handleStatusChange(request.id, 'SUCCESS', request)}
                                                 disabled={processingId === request.id}
                                                 className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                                             >
@@ -269,7 +356,7 @@ export default function Withdraw() {
                                                 <span>{processingId === request.id ? 'Processing...' : 'Approve'}</span>
                                             </button>
                                             <button
-                                                onClick={() => handleStatusChange(request.id, 'REJECTED' , request.partnerId , request.amount)}
+                                                onClick={() => handleStatusChange(request.id, 'REJECTED', request)}
                                                 disabled={processingId === request.id}
                                                 className="flex items-center space-x-2 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                                             >
