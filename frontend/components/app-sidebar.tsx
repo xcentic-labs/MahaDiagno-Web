@@ -15,7 +15,8 @@ import {
   Clock,
   CheckCircle,
   XCircle,
-  FilePlus2
+  FilePlus2,
+  Stethoscope
 } from "lucide-react";
 import { Bike } from "lucide-react";
 
@@ -70,6 +71,11 @@ const data = {
       title: "Doctors",
       url: "/doctor",
       icon: Users, // more appropriate than Settings2
+    },
+    {
+      title: "Specializations",
+      url: "/specialization",
+      icon: Stethoscope, // perfect for medical specializations
     },
     {
       title: "Appointment",
