@@ -11,7 +11,8 @@ import {
   loginDoctor,
   checkProfileCompletion,
   getDoctorAmountById,
-  handleVerfify
+  handleVerfify,
+  getopt
 } from '../Controller/doctorController.js';
 
 export const doctorRouter = express.Router();
@@ -44,6 +45,7 @@ doctorRouter.put('/update/profile-image/:id', editProfileImage);
 
 // doctor login
 doctorRouter.post('/login', loginDoctor);
+doctorRouter.post('/getotp', getopt);
 
 doctorRouter.get('/checkprofile/:id', checkProfileCompletion);
 

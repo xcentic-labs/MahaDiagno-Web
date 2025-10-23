@@ -4,6 +4,7 @@ import { generatePassword, matchedPassword } from "../Utils/password.js";
 import deleteImage from "../Utils/deleteImage.js";
 import addTimingDetails from "../Utils/createTiming.js";
 import { sortDays } from "../Utils/SortDays.js";
+import { sentopt, verify2factorOtp } from '../Utils/otp.js';
 
 
 
@@ -338,23 +339,29 @@ export const editProfileImage = async (req, res) => {
 
 // login doctor
 export const loginDoctor = async (req, res) => {
-    const { phoneNumber, password } = req.body;
+    const { phoneNumber, otp } = req.body;
+
+    if (!phoneNumber || !otp) {
+        return res.status(400).json({ error: "Phone number and OTP are required" });
+    }
+
+
+
+
     try {
+        const isMatched = await verify2factorOtp(phoneNumber, otp)
+
+        if (isMatched.status != 200) return res.status(400).json({ "error": "Invalid OTP" });
+
         const doctor = await prisma.doctor.findUnique({
             where: { phoneNumber },
             include: {
                 specialization: true
             }
-
         });
 
         if (!doctor) {
             return res.status(404).json({ error: "Doctor not found" });
-        }
-
-
-        if (!matchedPassword(password, doctor.password)) {
-            return res.status(400).json({ error: "Invalid password" });
         }
 
         res.status(200).json({
@@ -378,6 +385,38 @@ export const loginDoctor = async (req, res) => {
         res.status(500).json({ error: "Internal server error" });
     }
 }
+
+export const getopt = async (req, res) => {
+    try {
+        const { phoneNumber } = req.body;
+
+        if (!phoneNumber) return res.status(400).json({ "error": "Phone Number is Required" });
+        if (phoneNumber.length != 10) return res.status(400).json({ "error": "Require Valid Phone Number" });
+
+        const doctor = await prisma.doctor.findUnique({
+            where: { phoneNumber }
+        });
+
+        console.log("Doctor found for OTP:", doctor);
+
+
+        if (!doctor) {
+            const errorMessage = "Doctor with this phone number does not exist.";
+            console.log(errorMessage);
+            return res.status(404).json({ "error": errorMessage });
+        }
+
+        const isSent = await sentopt(phoneNumber);
+
+        if (isSent.status != 200) return res.status(502).json({ "error": "Unable to sent OTP" });
+
+        return res.status(200).json({ "message": "OTP sent Sucessfully", sessionId: isSent.sessionId });
+    } catch (error) {
+        logError(error);
+        return res.status(500).json({ "error": "Unable to sent OTP Internal server error" });
+    }
+}
+
 
 
 export const checkProfileCompletion = async (req, res) => {
