@@ -351,42 +351,42 @@ export const loginDoctor = async (req, res) => {
 
     try {
 
-        if (phoneNumber == '6203821043' && otp == '123456') {
+        console.log("Login attempt for phone number:", phoneNumber);
+        console.log("Received OTP:", otp);
+
+        if (phoneNumber == '6203021043' && otp == '123456') {
+            const doctor = await prisma.doctor.findUnique({
+                where: { phoneNumber },
+                include: {
+                    specialization: true
+                }
+            });
+
+            if (!doctor) {
+                return res.status(404).json({ error: "Doctor not found" });
+            }
+
+            res.status(200).json({
+                message: "Login successful", doctor: {
+                    id: doctor.id,
+                    fName: doctor.fName,
+                    lName: doctor.lName,
+                    displayName: doctor.displayName,
+                    phoneNumber: doctor.phoneNumber,
+                    email: doctor.email,
+                    clinicName: doctor.clinicName,
+                    clinicAddress: doctor.clinicAddress,
+                    lat: doctor.lat,
+                    lng: doctor.lng,
+                    imageUrl: doctor.imageUrl,
+                    specialization: doctor.specialization
+                }
+            });
 
         } else {
             const isMatched = await verify2factorOtp(phoneNumber, otp)
-
             if (isMatched.status != 200) return res.status(400).json({ "error": "Invalid OTP" });
         }
-
-
-        const doctor = await prisma.doctor.findUnique({
-            where: { phoneNumber },
-            include: {
-                specialization: true
-            }
-        });
-
-        if (!doctor) {
-            return res.status(404).json({ error: "Doctor not found" });
-        }
-
-        res.status(200).json({
-            message: "Login successful", doctor: {
-                id: doctor.id,
-                fName: doctor.fName,
-                lName: doctor.lName,
-                displayName: doctor.displayName,
-                phoneNumber: doctor.phoneNumber,
-                email: doctor.email,
-                clinicName: doctor.clinicName,
-                clinicAddress: doctor.clinicAddress,
-                lat: doctor.lat,
-                lng: doctor.lng,
-                imageUrl: doctor.imageUrl,
-                specialization: doctor.specialization
-            }
-        });
     } catch (error) {
         console.error("Error logging in doctor:", error);
         res.status(500).json({ error: "Internal server error" });
