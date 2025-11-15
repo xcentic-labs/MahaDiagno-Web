@@ -31,8 +31,8 @@ model services {
   isHomeServiceAvail Boolean
 
   // in which zone available
-  zoneId Int
-  zone   zone @relation(fields: [zoneId], references: [id])
+  zoneId Int?
+  zone   zone? @relation(fields: [zoneId], references: [id])
 
   // diagnosis id / partner id
   partnerId Int
@@ -49,8 +49,8 @@ model partners {
   password     String
   imageUrl     String?
 
-  zoneId Int
-  zone   zone @relation(fields: [zoneId], references: [id])
+  zoneId Int?
+  zone   zone? @relation(fields: [zoneId], references: [id])
 
   // address
   addressId Int
@@ -163,22 +163,22 @@ model appointment {
   updatedAt DateTime @default(now())
 }
 
-model address {
-  id       Int    @unique @default(autoincrement())
-  area     String
-  landmark String
-  pincode  String
-  district String
-  state    String
-  lat      String
-  lng      String
+  model address {
+    id       Int    @unique @default(autoincrement())
+    area     String
+    landmark String
+    pincode  String
+    district String
+    state    String
+    lat      String
+    lng      String
 
-  userId      Int?
-  affilatedTo User? @relation(fields: [userId], references: [id])
+    userId      Int?
+    affilatedTo User? @relation(fields: [userId], references: [id])
 
-  address              appointment[]
-  address_subscription partners[]
-}
+    address              appointment[]
+    address_subscription partners[]
+  }
 
 model serviceboy {
   id          Int     @unique @default(autoincrement())

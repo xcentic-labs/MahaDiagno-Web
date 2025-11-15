@@ -7,6 +7,8 @@ export const addService = async (req, res) => {
 
         const fileName = req?.file?.filename;
 
+        console.log(req.body);
+
         const { title, price, partnerId, isHomeServiceAvail } = req.body;
 
         if (!title || !price || !partnerId || !isHomeServiceAvail) {
@@ -33,7 +35,6 @@ export const addService = async (req, res) => {
                 data: {
                     title: title,
                     price: price,
-                    zoneId: partner.zoneId,
                     partnerId: partner.id,
                     isHomeServiceAvail: isHomeServiceAvail == 'true'
                 }
@@ -132,6 +133,10 @@ export const getPartnersByZone = async (req, res) => {
             isSubscribed: true
         }
 
+        console.log(req.query);
+
+        const userLat = parseFloat(req.query.latitude);
+        const userLng = parseFloat(req.query.longitude);
 
 
         if (req.query.state) {
@@ -146,10 +151,12 @@ export const getPartnersByZone = async (req, res) => {
         }
 
 
-        console.log(matchedCondition.zone);
+        const distance = 100; // 100 km radius
 
-        const partner = await prisma.partners.findMany({
-            where: matchedCondition,
+        const partners = await prisma.partners.findMany({
+            where: {
+                isSubscribed: true,
+            },
             select: {
                 id: true,
                 hospitalName: true,
@@ -158,13 +165,45 @@ export const getPartnersByZone = async (req, res) => {
                 address: true,
                 imageUrl: true,
             }
-        })
+        });
 
-        console.log(partner);
+        const toRad = (value) => (value * Math.PI) / 180;
 
-        if (!partner) return res.status(404).json({ "error": "Unable To Get Diagnosis Center" });
-        return res.status(200).json({ "message": "Diagnosis Center Fetched Sucessfully", partner: partner });
+        function getDistance(lat1, lng1, lat2, lng2) {
+            const R = 6371; // Earth's radius in KM
+
+            const dLat = toRad(lat2 - lat1);
+            const dLng = toRad(lng2 - lng1);
+
+            const a =
+                Math.sin(dLat / 2) ** 2 +
+                Math.cos(toRad(lat1)) *
+                Math.cos(toRad(lat2)) *
+                Math.sin(dLng / 2) ** 2;
+
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+            return R * c; // Distance in KM
+        }
+
+        // Step 3: Filter partners within 100 KM
+        const nearbyPartners = partners.filter(p => {
+            const dist = getDistance(
+                userLat,
+                userLng,
+                p.address.lat,
+                p.address.lng
+            );
+            return dist <= 100;
+        });
+
+
+        console.log(nearbyPartners);
+
+        if (!partners) return res.status(404).json({ "error": "Unable To Get Diagnosis Center" });
+        return res.status(200).json({ "message": "Diagnosis Center Fetched Sucessfully", partner: nearbyPartners });
     } catch (error) {
+        console.log(error);
         logError(error);
         return res.status(500).json({ "error": "Unable to Fetch Diagnosis Center Internal Server error" });
     }

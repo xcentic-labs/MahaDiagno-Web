@@ -345,10 +345,6 @@ export const loginDoctor = async (req, res) => {
         return res.status(400).json({ error: "Phone number and OTP are required" });
     }
 
-
-
-
-
     try {
 
         console.log("Login attempt for phone number:", phoneNumber);

@@ -4,9 +4,11 @@ import { sentopt, verify2factorOtp } from "../Utils/otp.js";
 import logError from "../Utils/log.js";
 import { uploadPartnerBanner } from "../Storage/PartnerBanner.js";
 import multer from "multer";
+
+
 export const createPartnersAccount = async (req, res) => {
     try {
-        const { hospitalName, email, phoneNumber, password, addressId, zoneId } = req.body
+        const { hospitalName, email, phoneNumber, password, addressId } = req.body
 
 
 
@@ -22,7 +24,6 @@ export const createPartnersAccount = async (req, res) => {
                 phoneNumber: phoneNumber,
                 password: hasedPassword,
                 addressId: addressId,
-                zoneId: zoneId
             }
         })
 
@@ -67,7 +68,6 @@ export const deletePartners = async (req, res) => {
 
 export const getAllPartners = async (req, res) => {
     try {
-
         const partners = await prisma.partners.findMany({
             select: {
                 id: true,
@@ -99,7 +99,7 @@ export const getPartners = async (req, res) => {
     try {
         const id = req.params.id
 
-
+        console.log(id);
 
         if (!id) return res.status(400).json({ "error": "Id Is Required" });
 
