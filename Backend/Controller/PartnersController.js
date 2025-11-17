@@ -10,8 +10,7 @@ export const createPartnersAccount = async (req, res) => {
     try {
         const { hospitalName, email, phoneNumber, password, addressId } = req.body
 
-
-
+        console.log(req.body);
 
         if (!hospitalName || !phoneNumber || !email || !password) return res.status(400).json({ "error": "All Fields Are Required" });
 
@@ -25,13 +24,12 @@ export const createPartnersAccount = async (req, res) => {
                 password: hasedPassword,
                 addressId: addressId,
             }
-        })
-
-
+        });
 
         if (!partners) return res.status(500).json({ "error": "Unable Create Partners Account" });
         return res.status(201).json({ "message": "Partners account Created Sucessfully" });
     } catch (error) {
+        console.log(error);
         logError(error);
         if (error.code == 'P2002') {
             return res.status(409).json({ "error": "Partners Aleardy Exist" });
