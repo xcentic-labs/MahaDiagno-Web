@@ -47,11 +47,11 @@ const data = {
       icon: LayoutDashboard, // better match than SquareTerminal
       isActive: true,
     },
-    {
-      title: "Zone",
-      url: "/zone",
-      icon: Map, // suitable for zones
-    },
+    // {
+    //   title: "Zone",
+    //   url: "/zone",
+    //   icon: Map, // suitable for zones
+    // },
     {
       title: "Banner",
       url: "/banner",

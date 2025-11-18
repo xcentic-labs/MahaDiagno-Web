@@ -25,9 +25,15 @@ export default function DashBoard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axiosClient.get("/admin/getdashboarddata") 
+        const response = await axiosClient.get("/admin/getdashboarddata")
         setData(response.data)
-      } catch (error : any) {
+      } catch (error: any) {
+        if (error.status === 401) {
+          if (typeof window === "undefined") return
+          localStorage.removeItem("authInfo")
+          // Optionally, reload or redirect
+          window.location.href = "/"  // or use your preferred route
+        }
         toast.error(error.response.data.error);
       }
     }
@@ -54,16 +60,16 @@ export default function DashBoard() {
   )
 }
 
-const Card = ({ name , url} : {name : string , url : string}) => {
-    const route = useRouter()
-    return (
-        <div className="p-2 flex justify-between items-center @container/card border-[1px] border-gray-200 shadow-sm  rounded-xl px-4 py-4 cursor-pointer" onClick={()=> route.push(url)}>
-            <div>
-                <h4>{name}</h4>
-            </div>
-            <div className="p-2 bg-gray-200 rounded-full">
-                <ChevronRight size={18} />
-            </div>
-        </div>
-    )
+const Card = ({ name, url }: { name: string, url: string }) => {
+  const route = useRouter()
+  return (
+    <div className="p-2 flex justify-between items-center @container/card border-[1px] border-gray-200 shadow-sm  rounded-xl px-4 py-4 cursor-pointer" onClick={() => route.push(url)}>
+      <div>
+        <h4>{name}</h4>
+      </div>
+      <div className="p-2 bg-gray-200 rounded-full">
+        <ChevronRight size={18} />
+      </div>
+    </div>
+  )
 }
