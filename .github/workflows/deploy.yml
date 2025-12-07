@@ -21,14 +21,14 @@ jobs:
 
       - name: Deploy to VPS
         run: |
-          ssh -o StrictHostKeyChecking=no root@93.127.172.251 << 'EOF'
-            cd /var/www/MahaDiagno-Web
+          ssh -o StrictHostKeyChecking=no root@72.61.214.128 << 'EOF'
+            cd /root/MahaDiagno-Web
             git pull
             cd Backend
             npm install
-            pm2 restart MHBACK
+            pm2 restart 0
             cd ../frontend
             npm install
             npm run build
-            pm2 restart 2
+            pm2 restart 1
           EOF
