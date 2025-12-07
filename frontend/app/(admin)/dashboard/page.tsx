@@ -39,12 +39,13 @@ export default function DashBoard() {
     <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6 p-5">
       <h1 className="font-bold text-xl tracking-wider">Statics</h1>
       <SectionCards
-        data={data ? [
-          { title: "Total Users", label: "Total Users", data: 0 },
-          { title: "Total Services", label: "Total Services", data: 0 },
-          { title: "Total Service Boys", label: "Total Service Boys", data: 0 },
-          { title: "Total Zones", label: "Total Zones", data: 0 },
-        ] : []}
+        data={!data ? [
+          { title: "user", label: 'Total Users', data: 0 },
+          { title: "service", label: 'Total Services', data: 0 },
+          { title: "serviceBoy", label: 'Total Service Boys', data: 0 },
+          { title: "doctor", label: 'Total Doctors', data: 0 },
+          { title: "partners", label: 'Total Partners', data: 0 },
+        ] : data}
       />
       <h1 className="font-bold text-xl tracking-wider">Quick Access Appointments</h1>
       <div className="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-5">
