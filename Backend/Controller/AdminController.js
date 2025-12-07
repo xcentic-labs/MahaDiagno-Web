@@ -135,11 +135,11 @@ export const dashboardData = async (req, res) => {
         ]);
 
         const data = [
-            { title : "user" ,label: 'Total Users', count: user },
-            { title : "service" ,label: 'Total Services', count: service },
-            { title : "serviceBoy" ,label: 'Total Service Boys', count: serviceBoy },
-            { title : "doctor" ,label: 'Total Doctors', count: doctor },
-            { title : "partners" ,label: 'Total Partners', count: partners },
+            { title : "user" ,label: 'Total Users', data: user },
+            { title : "service" ,label: 'Total Services', data: service },
+            { title : "serviceBoy" ,label: 'Total Service Boys', data: serviceBoy },
+            { title : "doctor" ,label: 'Total Doctors', data: doctor },
+            { title : "partners" ,label: 'Total Partners', data: partners },
         ]
 
 
