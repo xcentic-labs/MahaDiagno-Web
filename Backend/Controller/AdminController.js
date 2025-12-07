@@ -143,7 +143,7 @@ export const dashboardData = async (req, res) => {
         ]
 
 
-        res.status(200).json({ data });
+        res.status(200).json(data);
     } catch (error) {
         logError(error);
         res.status(500).json({ error: 'Internal server error' });
