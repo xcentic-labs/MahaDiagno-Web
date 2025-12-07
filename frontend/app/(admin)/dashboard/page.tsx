@@ -15,12 +15,7 @@ const quick = [
 ]
 
 export default function DashBoard() {
-  const [data, setData] = useState({
-    totalUsers: 0,
-    totalServiceBoy: 0,
-    totalZones: 0,
-    totalServices: 0,
-  })
+  const [data, setData] = useState()
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,7 +32,6 @@ export default function DashBoard() {
         toast.error(error.response.data.error);
       }
     }
-
     fetchData()
   }, [])
 
@@ -45,10 +39,12 @@ export default function DashBoard() {
     <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6 p-5">
       <h1 className="font-bold text-xl tracking-wider">Statics</h1>
       <SectionCards
-        totalServiceBoy={data.totalServiceBoy}
-        totalServices={data.totalServices}
-        totalUsers={data.totalUsers}
-        totalZones={data.totalZones}
+        data={data ? [
+          { title: "Total Users", label: "Total Users", data: 0 },
+          { title: "Total Services", label: "Total Services", data: 0 },
+          { title: "Total Service Boys", label: "Total Service Boys", data: 0 },
+          { title: "Total Zones", label: "Total Zones", data: 0 },
+        ] : []}
       />
       <h1 className="font-bold text-xl tracking-wider">Quick Access Appointments</h1>
       <div className="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-5">

@@ -126,20 +126,24 @@ export const adminLogin = async (req, res) => {
 
 export const dashboardData = async (req, res) => {
     try {
-        const [userCount, zoneCount, serviceCount, serviceBoyCount] = await Promise.all([
+        const [user , service, serviceBoy, doctor, partners] = await Promise.all([
             prisma.user.count(),
-            prisma.zone.count(),
             prisma.services.count(),
-            prisma.serviceboy.count()
+            prisma.serviceboy.count(),
+            prisma.doctor.count(),
+            prisma.partners.count(),
         ]);
 
+        const data = [
+            { title : "user" ,label: 'Total Users', count: user },
+            { title : "service" ,label: 'Total Services', count: service },
+            { title : "serviceBoy" ,label: 'Total Service Boys', count: serviceBoy },
+            { title : "doctor" ,label: 'Total Doctors', count: doctor },
+            { title : "partners" ,label: 'Total Partners', count: partners },
+        ]
 
-        res.status(200).json({
-            totalUsers: userCount,
-            totalServiceBoy: serviceBoyCount,
-            totalZones: zoneCount,
-            totalServices: serviceCount,
-        });
+
+        res.status(200).json({ data });
     } catch (error) {
         logError(error);
         res.status(500).json({ error: 'Internal server error' });
