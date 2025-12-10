@@ -414,6 +414,7 @@ enum DoctorStatus {
   IN_PROGRESS // The appointment is currently happening.
   COMPLETED // The appointment is finished.
   CANCELLED // The appointment was cancelled.
+  REJECTED // The appointment was rejected by the doctor.
 }
 
 enum Mode {
