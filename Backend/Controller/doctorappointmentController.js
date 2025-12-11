@@ -151,11 +151,11 @@ export const cancelAppointment = async (req, res) => {
 
 export const acceptAppointment = async (req, res) => {
     const { appointmentId, doctorId } = req.params;
-    const { videoCallId } = req.body
+    // const { videoCallId } = req.body
 
-    if(!videoCallId){
-        return res.status(400).json({ error: "Video Call ID is required" });
-    }
+    // if(!videoCallId){
+    //     return res.status(400).json({ error: "Video Call ID is required" });
+    // }
 
     // Validate required fields
     if (!appointmentId || !doctorId) {

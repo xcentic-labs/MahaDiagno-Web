@@ -73,7 +73,7 @@ export default function RootLayout({ children, }: Readonly<{ children: React.Rea
                             </Breadcrumb>
                         </div>
                     </header>
-                    <div className="w-full h-[88vh] p-2 overflow-y-scroll scrollbarhidden">
+                    <div className="w-full h-[88vh] p-2 scrollbarhidden">
                         {children}
                     </div>
                 </SidebarInset>

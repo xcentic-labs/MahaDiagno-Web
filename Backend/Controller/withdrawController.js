@@ -3,8 +3,7 @@ import logError from "../Utils/log.js";
 // ➕ Add Withdraw
 export const addWithdraw = async (req, res) => {
     try {
-        const { partnerId, amount, paymentMethodId , doctorId } = req.body;
-
+        const { partnerId, amount, paymentMethodId, doctorId } = req.body;
 
         if (!amount) {
             return res.status(400).json({ error: "All fields are required" });
@@ -53,8 +52,8 @@ export const addWithdraw = async (req, res) => {
                 where: {
                     id: doctorId
                 },
-                include : {
-                    paymentMethod : true
+                include: {
+                    paymentMethod: true
                 }
             });
 
@@ -78,7 +77,7 @@ export const addWithdraw = async (req, res) => {
                 data: {
                     doctorId,
                     amount,
-                    paymentMethodId : doctor?.paymentMethod?.id,
+                    paymentMethodId: doctor?.paymentMethod?.id,
                     status: "PENDING", // default, but can be changed here if needed
                 },
             });
@@ -121,7 +120,7 @@ export const getWithdrawByPartnerId = async (req, res) => {
             include: {
                 partner: true,
                 paymentMethod: true,
-                doctor : true
+                doctor: true
             },
             orderBy: {
                 createdAt: 'desc'
@@ -169,7 +168,7 @@ export const getAllWithdraws = async (req, res) => {
             include: {
                 partner: true,
                 paymentMethod: true,
-                doctor : true
+                doctor: true
             },
             orderBy: { id: "desc" },
         });
@@ -189,7 +188,7 @@ export const getAllWithdraws = async (req, res) => {
 export const updateWithdrawStatus = async (req, res) => {
     try {
         const { id } = req.params;
-        const { status, partnerId, amount } = req.body;
+        const { status, partnerId, amount, doctorId } = req.body;
 
 
         // Validate ID and Status
@@ -203,30 +202,34 @@ export const updateWithdrawStatus = async (req, res) => {
             return res.status(400).json({ error: "Invalid status value" });
         }
 
-
-        if (status == 'REJECTED' && partnerId != undefined) {
-            await prisma.partners.update({
-                where: {
-                    id: +partnerId
-                },
-                data: {
-                    amount: {
-                        increment: +amount
+        if (status === "REJECTED") {
+            if (partnerId != undefined) {
+                await prisma.partners.update({
+                    where: {
+                        id: +partnerId
+                    },
+                    data: {
+                        amount: {
+                            increment: +amount
+                        }
                     }
-                }
-            })
-        }else{
-            await prisma.doctor.update({
-                where: {
-                    id: +partnerId
-                },
-                data: {
-                    amount: {
-                        increment: +amount
+                })
+            } else {
+                await prisma.doctor.update({
+                    where: {
+                        id: +doctorId
+                    },
+                    data: {
+                        amount: {
+                            increment: +amount
+                        }
                     }
-                }
-            })
+                })
+            }
         }
+
+
+
 
 
 
