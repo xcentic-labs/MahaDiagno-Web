@@ -42,10 +42,10 @@ model services {
 }
 
 model partners {
-  id           Int    @unique @default(autoincrement())
+  id           Int     @unique @default(autoincrement())
   hospitalName String
   email        String
-  phoneNumber  String @unique
+  phoneNumber  String  @unique
   password     String
   imageUrl     String?
 
@@ -70,25 +70,27 @@ model partners {
 }
 
 model paymentMethod {
-  id            Int        @unique @default(autoincrement())
-  
+  id Int @unique @default(autoincrement())
+
   bankName      String
   accountNumber String
   ifscCode      String
   bankeeName    String
   withdraw      withdraw[]
 
+  partnerId Int?
+  partner   partners? @relation(fields: [partnerId], references: [id])
 
-  partnerId     Int?
-  partner       partners?   @relation(fields: [partnerId], references: [id])
+  doctorId Int?    @unique
+  doctor   doctor? @relation(fields: [doctorId], references: [id])
 
-  doctorId      Int?    @unique
-  doctor        doctor? @relation(fields: [doctorId], references: [id])
+  pharmacyVendorId Int?            @unique
+  pharmacyVendor   pharmacyVendor? @relation(fields: [pharmacyVendorId], references: [id])
 }
 
 model withdraw {
-  id              Int            @unique @default(autoincrement())
-  
+  id Int @unique @default(autoincrement())
+
   amount          Int
   status          withdrawStatus @default(PENDING)
   paymentMethodId Int
@@ -96,12 +98,15 @@ model withdraw {
   createdAt       DateTime       @default(now())
 
   // partner withdraw 
-  partnerId       Int?
-  partner         partners?       @relation(fields: [partnerId], references: [id])
+  partnerId Int?
+  partner   partners? @relation(fields: [partnerId], references: [id])
 
   // doctor withdraw
   doctorId Int?
   doctor   doctor? @relation(fields: [doctorId], references: [id])
+
+  pharmacyVendorId Int?
+  pharmacyVendor   pharmacyVendor? @relation(fields: [pharmacyVendorId], references: [id])
 }
 
 model User {
@@ -115,6 +120,7 @@ model User {
   patient     patient[]
 
   doctorappointment doctorappointment[]
+  order             order[]
 }
 
 model appointment {
@@ -163,22 +169,24 @@ model appointment {
   updatedAt DateTime @default(now())
 }
 
-  model address {
-    id       Int    @unique @default(autoincrement())
-    area     String
-    landmark String
-    pincode  String
-    district String
-    state    String
-    lat      String
-    lng      String
+model address {
+  id       Int    @unique @default(autoincrement())
+  area     String
+  landmark String
+  pincode  String
+  district String
+  state    String
+  lat      String
+  lng      String
 
-    userId      Int?
-    affilatedTo User? @relation(fields: [userId], references: [id])
+  userId      Int?
+  affilatedTo User? @relation(fields: [userId], references: [id])
 
-    address              appointment[]
-    address_subscription partners[]
-  }
+  address              appointment[]
+  address_subscription partners[]
+  pharmacyVendor       pharmacyVendor[]
+  order                order[]
+}
 
 model serviceboy {
   id          Int     @unique @default(autoincrement())
@@ -229,11 +237,10 @@ model subscription_purchase {
   subscription   subscription? @relation(fields: [subscriptionId], references: [id]) // remove the option when its prod
 }
 
-model homeBanner{
-  id Int @unique @default(autoincrement())
+model homeBanner {
+  id        Int    @unique @default(autoincrement())
   imageName String
 }
-
 
 model doctor {
   id          Int     @unique @default(autoincrement())
@@ -264,12 +271,12 @@ model doctor {
   // wallet details
   amount Float @default(0)
 
-  education     education[]
-  experience    experience[]
-  timings       timings[]
-  paymentMethod paymentMethod?
-  doctorappointment   doctorappointment[]
-  withdraw      withdraw[]
+  education         education[]
+  experience        experience[]
+  timings           timings[]
+  paymentMethod     paymentMethod?
+  doctorappointment doctorappointment[]
+  withdraw          withdraw[]
 }
 
 model education {
@@ -320,8 +327,6 @@ model slots {
   doctorappointment doctorappointment[]
 }
 
-
-
 model doctorappointment {
   id                 Int    @unique @default(autoincrement())
   patientFirstName   String
@@ -359,7 +364,7 @@ model doctorappointment {
   prescriptionUrl String?
 
   // video call id
-  videoCallId  String?
+  videoCallId String?
 }
 
 model specialization {
@@ -381,7 +386,6 @@ model symptom {
   specialization   specialization @relation(fields: [specializationId], references: [id])
 }
 
-
 model patient {
   id          Int    @unique @default(autoincrement())
   fname       String
@@ -393,6 +397,124 @@ model patient {
 
   userId Int
   user   User @relation(fields: [userId], references: [id])
+}
+
+// pharmacy models
+
+model pharmacyVendor {
+  id          Int     @unique @default(autoincrement())
+  name        String
+  email       String
+  phoneNumber String  @unique
+  shopName    String
+  imageUrl    String?
+
+  isVerified Boolean @default(false)
+  isActive   Boolean @default(true)
+
+  amount Float @default(0)
+
+  addressId Int
+  address   address @relation(fields: [addressId], references: [id])
+
+  medicine      medicine[]
+  paymentMethod paymentMethod?
+  withdraw      withdraw[]
+  order         order[]
+}
+
+model medicineCategory {
+  id       Int     @unique @default(autoincrement())
+  name     String
+  imageUrl String
+  isActive Boolean @default(true)
+
+  medicineSubCategory medicineSubCategory[]
+  medicine            medicine[]
+}
+
+model medicineSubCategory {
+  id       Int     @unique @default(autoincrement())
+  name     String
+  imageUrl String
+  isActive Boolean @default(true)
+
+  medicineCategoryId Int
+  medicineCategory   medicineCategory @relation(fields: [medicineCategoryId], references: [id])
+
+  medicine medicine[]
+}
+
+model medicine {
+  id          Int    @unique @default(autoincrement())
+  name        String
+  brand       String
+  description String
+
+  price      Float
+  finalPrice Float
+
+  imageUrl            String
+  quantityDescription String
+
+  isActive Boolean @default(true)
+
+  medicineCategoryId Int
+  medicineCategory   medicineCategory @relation(fields: [medicineCategoryId], references: [id])
+
+  medicineSubCategoryId Int
+  medicineSubCategory   medicineSubCategory @relation(fields: [medicineSubCategoryId], references: [id])
+
+  pharmacyVendorId Int
+  pharmacyVendor   pharmacyVendor @relation(fields: [pharmacyVendorId], references: [id])
+
+
+  orderItem orderItem[]
+
+
+}
+
+model order {
+  id            Int      @unique @default(autoincrement())
+
+
+  totalAmount   Float
+  isPaid        Boolean  @default(false)
+  modeOfPayment Mode     @default(cash)
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  pharmacyVendorId Int
+  pharmacyVendor   pharmacyVendor @relation(fields: [pharmacyVendorId], references: [id])
+
+
+  addressId Int
+  address   address @relation(fields: [addressId], references: [id])
+
+  orderstatus medicineorderStatus @default(PLACED)
+
+  orderItem orderItem[]
+
+  razorpayOrderId   String? @unique
+  razorpayPaymentId String? @unique
+  razorpaySignature String?
+  razorpayRefundId  String? @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model orderItem {
+  id        Int     @unique @default(autoincrement())
+  quantity  Int
+  price     Float
+
+  orderId Int
+  order   order @relation(fields: [orderId], references: [id])
+
+  medicineId Int
+  medicine   medicine @relation(fields: [medicineId], references: [id])
 }
 
 enum Gender {
@@ -427,4 +549,11 @@ enum withdrawStatus {
   PENDING
   SUCCESS
   REJECTED
+}
+
+enum medicineorderStatus {
+  PLACED
+  DISPATCHED
+  DELIVERED
+  CANCELLED
 }

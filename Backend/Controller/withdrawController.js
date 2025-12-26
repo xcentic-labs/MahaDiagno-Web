@@ -1,5 +1,6 @@
 import prisma from "../Utils/prismaclint.js";
 import logError from "../Utils/log.js";
+import { withdrawalfordoctor, withdrawalforpatner, withdrawalforvendor } from "../Utils/withdrawal.js";
 // ➕ Add Withdraw
 export const addWithdraw = async (req, res) => {
     try {
@@ -158,6 +159,29 @@ export const getWithdrawByDoctorId = async (req, res) => {
     }
 };
 
+export const getWithdrawBypharmacyVendorId = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const withdraw = await prisma.withdraw.findMany({
+            where: { pharmacyVendorId: Number(id) },
+            include: {
+                pharmacyVendor: true,
+                paymentMethod: true,
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
+        });
+
+        if (!withdraw) return res.status(404).json({ error: "Withdraw not found" });
+        return res.status(200).json(withdraw);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: "Internal server error" });
+    }
+};
+
 // 📃 Get All Withdraws
 export const getAllWithdraws = async (req, res) => {
     try {
@@ -168,7 +192,8 @@ export const getAllWithdraws = async (req, res) => {
             include: {
                 partner: true,
                 paymentMethod: true,
-                doctor: true
+                doctor: true,
+                pharmacyVendor: true
             },
             orderBy: { id: "desc" },
         });
@@ -184,7 +209,7 @@ export const getAllWithdraws = async (req, res) => {
 };
 
 
-// ✅ Update Withdraw Status
+// ✅ Update Withdraw Status -> to be updated
 export const updateWithdrawStatus = async (req, res) => {
     try {
         const { id } = req.params;
@@ -202,44 +227,87 @@ export const updateWithdrawStatus = async (req, res) => {
             return res.status(400).json({ error: "Invalid status value" });
         }
 
-        if (status === "REJECTED") {
-            if (partnerId != undefined) {
-                await prisma.partners.update({
-                    where: {
-                        id: +partnerId
-                    },
-                    data: {
-                        amount: {
-                            increment: +amount
-                        }
-                    }
-                })
-            } else {
-                await prisma.doctor.update({
-                    where: {
-                        id: +doctorId
-                    },
-                    data: {
-                        amount: {
-                            increment: +amount
-                        }
-                    }
-                })
-            }
+        let updatedWithdraw = null;
+
+        const caseOfWithdraw = partnerId != undefined ? 'PARTNER' : doctorId != undefined ? 'DOCTOR' : 'PHARMACYVENDOR';
+
+        switch (caseOfWithdraw) {
+            case 'PARTNER':
+                updatedWithdraw = await withdrawalforpatner(status, id, partnerId, amount);
+                break;
+            case 'DOCTOR':
+                updatedWithdraw = await withdrawalfordoctor(status, id, doctorId, amount);
+                break;
+            case 'PHARMACYVENDOR':
+                updatedWithdraw = await withdrawalforvendor(status, id, req.body.pharmacyVendorId, amount);
+                break;
+            default:
+                return res.status(400).json({ error: "Invalid withdraw case" });
         }
 
 
-
-
-
-
-        const updatedWithdraw = await prisma.withdraw.update({
-            where: { id: Number(id) },
-            data: { status },
-        });
-
         return res.status(200).json({ message: "Status updated successfully", data: updatedWithdraw });
     } catch (error) {
+        logError(error);
+        return res.status(500).json({ error: "Internal server error" });
+    }
+};
+
+
+export const addWithdrawOfPharmacyVendor = async (req, res) => {
+    try {
+        const { amount, pharmacyVendorId } = req.body;
+
+        if (!amount) {
+            return res.status(400).json({ error: "All fields are required" });
+        }
+
+
+        if (pharmacyVendorId == undefined) {
+            return res.status(400).json({ error: "User Id is required" });
+        }
+
+        let withdraw = null;
+
+
+        const vendor = await prisma.pharmacyVendor.findUnique({
+            where: {
+                id: pharmacyVendorId
+            },
+            include: {
+                paymentMethod: true
+            }
+        });
+
+        console.log(vendor);
+
+
+        if (+amount > +vendor.amount) return res.status(402).json({ error: "Insufficient balance" });
+
+        await prisma.pharmacyVendor.update({
+            where: {
+                id: +pharmacyVendorId
+            },
+            data: {
+                amount: {
+                    decrement: (+amount)
+                }
+            }
+        })
+
+        withdraw = await prisma.withdraw.create({
+            data: {
+                pharmacyVendorId,
+                amount,
+                paymentMethodId: vendor?.paymentMethod?.id,
+                status: "PENDING", // default, but can be changed here if needed
+            },
+        });
+        return res.status(201).json(withdraw);
+
+
+    } catch (error) {
+        console.error(error);
         logError(error);
         return res.status(500).json({ error: "Internal server error" });
     }

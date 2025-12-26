@@ -3,7 +3,7 @@ import logError from "../Utils/log.js";
 // ➕ Add a Payment Method
 export const addPaymentMethod = async (req, res) => {
     try {
-        const { partnerId, bankName, accountNumber, ifscCode, bankeeName , doctorId } = req.body;
+        const { partnerId, bankName, accountNumber, ifscCode, bankeeName , doctorId , pharmacyVendorId } = req.body;
 
         console.log(req.body);
         
@@ -12,7 +12,7 @@ export const addPaymentMethod = async (req, res) => {
             return res.status(400).json({ error: "All fields are required" });
         }
 
-        if(partnerId == undefined && doctorId == undefined){
+        if(partnerId == undefined && doctorId == undefined && pharmacyVendorId == undefined){
             return res.status(400).json({ error: "User Id is required" });
         }
 
@@ -30,6 +30,10 @@ export const addPaymentMethod = async (req, res) => {
 
         if(doctorId != undefined){
             data.doctorId = doctorId
+        }
+
+        if(pharmacyVendorId != undefined){
+            data.pharmacyVendorId = pharmacyVendorId
         }
 
         
@@ -109,6 +113,26 @@ export const getPaymentMethodByDoctorId = async (req, res) => {
         const payment = await prisma.paymentMethod.findUnique({
             where: { doctorId: +id },
             include: { doctor: true },
+        });
+
+        if (!payment) return res.status(404).json({ error: "Payment method not found" });
+
+        return res.status(200).json(payment);
+    } catch (error) {
+        logError("Error fetching payment method:", error);
+        return res.status(500).json({ error: "Internal server error" });
+    }
+};
+
+export const getPaymentMethodByPharmacyVendorId = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        if (!id) return res.status(400).json({ error: "PaymentMethod ID is required" });
+
+        const payment = await prisma.paymentMethod.findUnique({
+            where: { pharmacyVendorId: +id },
+            include: { pharmacyVendor: true },
         });
 
         if (!payment) return res.status(404).json({ error: "Payment method not found" });

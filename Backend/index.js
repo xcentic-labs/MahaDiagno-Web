@@ -22,7 +22,10 @@ import { specializationRouter } from './Router/specializationRouter.js';
 import { symptomRouter } from './Router/symptomRouter.js';
 import { slotRouter } from './Router/slotRouter.js';
 import { patientRouter } from './Router/patientRouter.js';
-
+import { MedicineRouter } from './Router/pharmacy/medicine/MedicineRouter.js';
+import { MedicineCategoryRouter } from './Router/pharmacy/medicineCategory/MedicineCategoryRouter.js';
+import { PharmacyVendorRouter } from './Router/pharmacy/pharmacyVendor/PharmacyVendorRouter.js';
+import { MedicineOrderRouter } from './Router/pharmacy/order/OrderRouter.js';
 // cros 
 import cors from 'cors'
 import { createServer } from 'http'
@@ -81,6 +84,11 @@ app.use('/api/v1/doctorappointment' , doctorappointmentRouter);
 app.use('/api/v1/specialization', specializationRouter);
 app.use('/api/v1/symptom', symptomRouter);
 app.use('/api/v1/patient', patientRouter);
+app.use('/api/v1/pharmacy/medicine', MedicineRouter);
+app.use('/api/v1/pharmacy/medicinecategory', MedicineCategoryRouter);
+app.use('/api/v1/pharmacy/pharmacyvendor', PharmacyVendorRouter);
+app.use('/api/v1/pharmacy/order', MedicineOrderRouter);
+
 
 app.get('/', (req, res) => {
   return res.json({ "message": "Har har Mahadev" });
