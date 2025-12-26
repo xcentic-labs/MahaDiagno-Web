@@ -21,3 +21,21 @@ export interface CreateSpecializationRequest {
     key: string;
     label: string;
 }
+
+export interface MedicineCategory {
+    id: number;
+    name: string;
+    imageUrl: string;
+}
+
+export interface MedicineCategoryResponse {
+    success: boolean;
+    message: string;
+    data: MedicineCategory[];
+}
+
+export interface SingleMedicineCategoryResponse {
+    success: boolean;
+    message: string;
+    data: MedicineCategory;
+}

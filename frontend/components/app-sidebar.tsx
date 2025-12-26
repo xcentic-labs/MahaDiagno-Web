@@ -38,6 +38,7 @@ import {
 import Image from "next/image"
 import logo from '@/assets/logo.png'
 import { useGetUser, useIsLoggedIn } from "@/hooks/use-isloogedIn";
+import { title } from "process";
 
 const data = {
   navMain: [
@@ -76,6 +77,21 @@ const data = {
       title: "Specializations",
       url: "/specialization",
       icon: Stethoscope, // perfect for medical specializations
+    },
+    {
+      title : "Medicine Category",
+      url : "/medicinecategory",
+      icon : Layers, // suitable for categories
+    },
+    {
+      title : "Phayrmacy Vendor",
+      url : "/pharmacyvendors",
+      icon : Users, // more appropriate than Settings2
+    },
+    {
+      title : "Orders",
+      url : "/orders",
+      icon : Banknote, // suitable for orders and transactions
     },
     {
       title: "Appointment",

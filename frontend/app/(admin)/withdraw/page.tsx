@@ -1,7 +1,7 @@
 "use client"
 import { axiosClient } from "@/lib/axiosClient";
 import { useEffect, useState } from "react"
-import { CheckCircle, XCircle, Clock, Building2, CreditCard, Phone, Mail, Eye, EyeOff, Stethoscope, User } from "lucide-react";
+import { CheckCircle, XCircle, Clock, Building2, CreditCard, Phone, Mail, Eye, EyeOff, Stethoscope, User, Store } from "lucide-react";
 import { toast } from "react-toastify";
 
 // Type definitions
@@ -35,6 +35,19 @@ interface Doctor {
     amount: number;
 }
 
+interface PharmacyVendor {
+    id: number;
+    name: string;
+    email: string;
+    phoneNumber: string;
+    shopName: string;
+    imageUrl?: string;
+    isVerified: boolean;
+    isActive: boolean;
+    amount: number;
+    addressId: number;
+}
+
 interface PaymentMethod {
     id: number;
     bankName: string;
@@ -43,6 +56,7 @@ interface PaymentMethod {
     bankeeName: string;
     partnerId?: number;
     doctorId?: number;
+    pharmacyVendorId?: number;
 }
 
 interface WithdrawRequest {
@@ -51,11 +65,13 @@ interface WithdrawRequest {
     status: "PENDING" | "SUCCESS" | "REJECTED";
     partnerId?: number;
     doctorId?: number;
+    pharmacyVendorId?: number;
     paymentMethodId: number;
     createdAt: string;
     updatedAt?: string;
     partner?: Partner;
     doctor?: Doctor;
+    pharmacyVendor?: PharmacyVendor;
     paymentMethod: PaymentMethod;
 }
 
@@ -94,12 +110,15 @@ export default function Withdraw() {
                 amount: request.amount
             };
             
-            // Include partnerId or doctorId based on the request type
+            // Include partnerId, doctorId, or pharmacyVendorId based on the request type
             if (request.partnerId) {
                 updateData.partnerId = request.partnerId;
             }
             if (request.doctorId) {
                 updateData.doctorId = request.doctorId;
+            }
+            if (request.pharmacyVendorId) {
+                updateData.pharmacyVendorId = request.pharmacyVendorId;
             }
 
             await axiosClient.patch(`/withdraw/updatestatus/${id}`, updateData);
@@ -185,7 +204,7 @@ export default function Withdraw() {
             <div className="max-w-7xl mx-auto">
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">Withdrawal Requests</h1>
-                    <p className="text-gray-600">Manage and process withdrawal requests from partners and doctors</p>
+                    <p className="text-gray-600">Manage and process withdrawal requests from partners, doctors, and pharmacy vendors</p>
                 </div>
 
                 {data.length === 0 ? (
@@ -194,7 +213,7 @@ export default function Withdraw() {
                             <CreditCard className="w-16 h-16 mx-auto" />
                         </div>
                         <h3 className="text-lg font-medium text-gray-900 mb-2">No withdrawal requests</h3>
-                        <p className="text-gray-500">There are no withdrawal requests from partners or doctors at the moment.</p>
+                        <p className="text-gray-500">There are no withdrawal requests from partners, doctors, or pharmacy vendors at the moment.</p>
                     </div>
                 ) : (
                     <div className="grid gap-6">
@@ -225,7 +244,7 @@ export default function Withdraw() {
                                     </div>
 
                                     <div className="grid md:grid-cols-2 gap-6 mb-6">
-                                        {/* Partner or Doctor Information */}
+                                        {/* Partner, Doctor, or Pharmacy Vendor Information */}
                                         <div className="space-y-4">
                                             {request.partner ? (
                                                 <>
@@ -292,6 +311,47 @@ export default function Withdraw() {
                                                                 <div className="flex items-center space-x-2">
                                                                     <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                                                                     <span className="text-sm text-blue-600">Featured</span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </>
+                                            ) : request.pharmacyVendor ? (
+                                                <>
+                                                    <h4 className="font-semibold text-gray-900 flex items-center">
+                                                        <Store className="w-4 h-4 mr-2" />
+                                                        Pharmacy Vendor Details
+                                                    </h4>
+                                                    <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                                                        <div>
+                                                            <p className="text-sm text-gray-500">Vendor Name</p>
+                                                            <p className="font-medium text-gray-900">{request.pharmacyVendor.name}</p>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-sm text-gray-500">Shop Name</p>
+                                                            <p className="font-medium text-gray-900">{request.pharmacyVendor.shopName}</p>
+                                                        </div>
+                                                        <div className="flex items-center space-x-4">
+                                                            <div className="flex items-center space-x-2">
+                                                                <Phone className="w-4 h-4 text-gray-400" />
+                                                                <span className="text-sm text-gray-600">{request.pharmacyVendor.phoneNumber}</span>
+                                                            </div>
+                                                            <div className="flex items-center space-x-2">
+                                                                <Mail className="w-4 h-4 text-gray-400" />
+                                                                <span className="text-sm text-gray-600">{request.pharmacyVendor.email}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center space-x-4">
+                                                            {request.pharmacyVendor.isVerified && (
+                                                                <div className="flex items-center space-x-2">
+                                                                    <CheckCircle className="w-4 h-4 text-green-500" />
+                                                                    <span className="text-sm text-green-600">Verified</span>
+                                                                </div>
+                                                            )}
+                                                            {request.pharmacyVendor.isActive && (
+                                                                <div className="flex items-center space-x-2">
+                                                                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                                                    <span className="text-sm text-blue-600">Active</span>
                                                                 </div>
                                                             )}
                                                         </div>
