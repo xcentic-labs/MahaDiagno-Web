@@ -77,8 +77,8 @@ export const getMyPharmacyVendorProfile = async (req, res) => {
             where: { id: parseInt(id) },
             include: {
                 address: true,
-                order : true,
-                medicine : true
+                order: true,
+                medicine: true
             }
         });
         if (!vendor) {
@@ -235,12 +235,12 @@ export const getPharmacyVendorsDashboard = async (req, res) => {
     try {
         const { id } = req.params;
         // count medicine order(with different status)
-        const [ medicine , placed , dispatched , delivered , cancelled ] = await Promise.all([
+        const [medicine, placed, dispatched, delivered, cancelled] = await Promise.all([
             prisma.medicine.count({
                 where: { pharmacyVendorId: parseInt(id) }
             }),
             prisma.order.count({
-                where: { pharmacyVendorId: parseInt(id), orderstatus : 'PLACED' }
+                where: { pharmacyVendorId: parseInt(id), orderstatus: 'PLACED' }
             }),
             prisma.order.count({
                 where: { pharmacyVendorId: parseInt(id), orderstatus: 'DISPATCHED' }
@@ -255,7 +255,7 @@ export const getPharmacyVendorsDashboard = async (req, res) => {
 
         return res.status(200).json({
             data: {
-                totalMedicine: medicine,    
+                totalMedicine: medicine,
                 totalOrders: {
                     placed,
                     dispatched,
@@ -269,4 +269,22 @@ export const getPharmacyVendorsDashboard = async (req, res) => {
         console.error("Error fetching pharmacy vendors dashboard:", error);
         return res.status(500).json({ error: "Internal server error" });
     }
+
+
+
 };
+
+
+export const verifyPharmacyVendor = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const vendor = await prisma.pharmacyVendor.update({
+            where: { id: parseInt(id) },
+            data: { isVerified: true }
+        });
+        return res.status(200).json({ message: "Pharmacy Vendor verified successfully", data: vendor });
+    } catch (error) {
+        console.error("Error verifying pharmacy vendor:", error);
+        return res.status(500).json({ error: "Internal server error" });
+    }
+}
