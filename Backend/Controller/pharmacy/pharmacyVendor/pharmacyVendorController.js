@@ -76,7 +76,9 @@ export const getMyPharmacyVendorProfile = async (req, res) => {
         const vendor = await prisma.pharmacyVendor.findUnique({
             where: { id: parseInt(id) },
             include: {
-                address: true
+                address: true,
+                order : true,
+                medicine : true
             }
         });
         if (!vendor) {
