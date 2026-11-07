@@ -1,6 +1,5 @@
 import prisma from "../Utils/prismaclint.js";
-import { sentopt, verify2factorOtp } from "../Utils/otp.js";
-import logError from "../Utils/log.js";
+import { sentopt, verify2factorOtp, isTestOtp } from "../Utils/otp.js";
 
 export const getopt = async (req, res) => {
     try {
@@ -32,7 +31,7 @@ export const getopt = async (req, res) => {
 
         return res.status(200).json({ "message": "OTP sent Sucessfully", sessionId: isSent.sessionId });
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({ "error": "Unable to sent OTP Internal server error" });
     }
 }
@@ -59,7 +58,7 @@ export const updateUser = async (req, res) => {
         if (!user) return res.status(500).json({ "error": "Unable to Update User" });
         return res.status(200).json({ "message": "User Updated Sucessfully" });
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({ "error": "Unable to Update User Internal server error" });
     }
 }
@@ -71,7 +70,7 @@ export const verifyOtp = async (req, res) => {
 
         if (!otp || !phoneNumber) return res.status(400).json({ "error": "All fields Are Required" });
 
-        if (phoneNumber == '6203821043' && otp == '123456') {
+        if (isTestOtp(phoneNumber, otp)) {
             const user = await prisma.user.findUnique({
                 where: {
                     phoneNumber: phoneNumber
@@ -92,7 +91,7 @@ export const verifyOtp = async (req, res) => {
 
         return res.status(200).json({ "message": "OTP Matched", user: user });
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({ "error": "Unable to process OTP internal server error" });
     }
 }
@@ -144,7 +143,7 @@ export const getUser = async (req, res) => {
             "message": "User get sucessfully", userData: userData
         });
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(404).json({ "error": "Unable to get user Internal server error" });
     }
 }
@@ -180,7 +179,7 @@ export const getAllUser = async (req, res) => {
         if (!user) return res.status(404).json({ "error": "Unable To Get User" });
         return res.status(200).json({ "message": "User get sucessfully", userData: allUser });
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(404).json({ "error": "Unable to get user Internal server error" });
     }
 }
@@ -214,7 +213,7 @@ export const deleteUser = async (req, res) => {
         return res.status(200).json({ "message": "User Deleted sucessfully" });
 
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(404).json({ "error": "Unable to get user Internal server error" });
     }
 }

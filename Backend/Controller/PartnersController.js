@@ -1,7 +1,6 @@
 import prisma from "../Utils/prismaclint.js";
 import { generatePassword, matchedPassword } from "../Utils/password.js";
 import { sentopt, verify2factorOtp } from "../Utils/otp.js";
-import logError from "../Utils/log.js";
 import { uploadPartnerBanner } from "../Storage/PartnerBanner.js";
 import multer from "multer";
 
@@ -30,7 +29,7 @@ export const createPartnersAccount = async (req, res) => {
         return res.status(201).json({ "message": "Partners account Created Sucessfully" });
     } catch (error) {
         console.log(error);
-        logError(error);
+        console.log(error);
         if (error.code == 'P2002') {
             return res.status(409).json({ "error": "Partners Aleardy Exist" });
         }
@@ -58,7 +57,7 @@ export const deletePartners = async (req, res) => {
 
         return res.status(200).json({ message: "Partner and related data deleted successfully" });
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({ error: "Unable to delete partner. Internal server error." });
     }
 };
@@ -88,7 +87,7 @@ export const getAllPartners = async (req, res) => {
         if (!partners) return res.status(500).json({ "error": "Unable To Fetch Partners" });
         return res.status(200).json({ "message": "Partners Fetched Sucessfully", partners: partners });
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({ "error": "Unable To Fetch Partners Internal Server Error" });
     }
 }
@@ -121,7 +120,7 @@ export const getPartners = async (req, res) => {
             "message": "Partner Fetched Sucessfully", partner: partners
         });
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({ "error": "Unable To Get Partner Internal Server Error" });
     }
 }
@@ -184,7 +183,7 @@ export const partnersLogin = async (req, res) => {
         });
 
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({ "error": "Unable To LoogedIn Internal Server Error" });
     }
 }
@@ -215,7 +214,7 @@ export const getForgotPasswordOtp = async (req, res) => {
         return res.status(200).json({ "message": "OTP sent Sucessfully", sessionId: isSent.sessionId });
 
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({ "error": "Unable to sent OTP Internal server error" });
     }
 }
@@ -257,7 +256,7 @@ export const chagePassword = async (req, res) => {
         if (!result) return res.status(500).json({ "error": "Unable to Change Password" });
         return res.status(200).json({ "message": "Password chaged sucessfully" });
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({ "error": "Unable to Change Password internal server error" });
     }
 }
@@ -306,7 +305,7 @@ export const getBanner = async (req, res) => {
 
         return res.status(200).json({ "imageUrl": partner.imageUrl });
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({ "error": "Unable to Retrieve Banner Internal Server Error" });
     }
 }

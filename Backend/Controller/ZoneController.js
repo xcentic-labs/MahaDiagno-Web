@@ -1,5 +1,4 @@
 import prisma from "../Utils/prismaclint.js";
-import logError from "../Utils/log.js";
 
 export const addZone =  async (req , res)=>{
     try {
@@ -20,7 +19,7 @@ export const addZone =  async (req , res)=>{
         if(!result) return res.status(500).json({"error" : "Unable to add the Zone"});
         return res.status(201).json({"message"  : "Zone Added Sucessfully"});
     } catch (error) {
-        logError(error);
+        console.log(error);
         if(error.code == 'P2002') return res.status(409).json({"error" : "Zone Already Exist"});
         return res.status(500).json({"error" : "Unable to add the Zone Internal Server error"});
     }
@@ -50,7 +49,7 @@ export const deleteZone = async (req , res)=>{
         if(!result) return res.status(404).json({"error" : "Zone not found"});
         return res.status(200).json({"error" : "Zone Deleted Sucessfully"});
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({"error" : "Unable to delete the Zone Internal Server error"});     
     }
 }
@@ -65,7 +64,7 @@ export const getZone = async (req , res)=>{
         return res.status(200).json({"message" : "Zone Data" , ZoneData : result});
 
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({"error" : "Unable to get Zones Internal Server error"});
     }
 }
@@ -91,7 +90,7 @@ export const checkPincode = async (req , res) =>{
         return res.status(200).json({"message" : "Pincode Matched" , ZoneData : result});
 
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({"error" : "Unable to get Zone Internal Server error"});
     }
 }

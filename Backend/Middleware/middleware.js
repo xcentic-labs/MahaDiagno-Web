@@ -1,5 +1,4 @@
 import { verifyToken } from "../Utils/jwt.js"
-import logError from "../Utils/log.js"
 
 export const checkadmin = (req, res, next) => {
     try {
@@ -13,7 +12,7 @@ export const checkadmin = (req, res, next) => {
             return res.status(401).json({ error: "Not an Admin" })
         }
     } catch (e) {
-        logError(e);
+        console.log(e);
         return res.status(401).json({ error: "Not an Admin Token Modified" })
     }
 }

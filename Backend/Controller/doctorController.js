@@ -4,7 +4,7 @@ import { generatePassword, matchedPassword } from "../Utils/password.js";
 import deleteImage from "../Utils/deleteImage.js";
 import addTimingDetails from "../Utils/createTiming.js";
 import { sortDays } from "../Utils/SortDays.js";
-import { sentopt, verify2factorOtp } from '../Utils/otp.js';
+import { sentopt, verify2factorOtp, isTestOtp } from '../Utils/otp.js';
 
 
 
@@ -350,7 +350,7 @@ export const loginDoctor = async (req, res) => {
         console.log("Login attempt for phone number:", phoneNumber);
         console.log("Received OTP:", otp);
 
-        if (phoneNumber == '6203021043' && otp == '123456') {
+        if (isTestOtp(phoneNumber, otp)) {
             const doctor = await prisma.doctor.findUnique({
                 where: { phoneNumber },
                 include: {
@@ -443,7 +443,7 @@ export const getopt = async (req, res) => {
 
         return res.status(200).json({ "message": "OTP sent Sucessfully", sessionId: isSent.sessionId });
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({ "error": "Unable to sent OTP Internal server error" });
     }
 }

@@ -1,7 +1,6 @@
 import prisma from "../Utils/prismaclint.js";
 import { generatePassword, matchedPassword } from "../Utils/password.js";
 import { generateToken } from "../Utils/jwt.js";
-import logError from "../Utils/log.js";
 
 export const addAdmin = async (req, res) => {
     try {
@@ -23,7 +22,7 @@ export const addAdmin = async (req, res) => {
         if (!admin) return res.status(500).json({ "error": "Unable To Add Admin" });
         return res.status(201).json({ "message": "Admin Added Sucessfully" });
     } catch (error) {
-        logError(error);
+        console.log(error);
         if (error.code == 'P2002') {
             return res.status(409).json({ "error": "Amdin With this e-mail Aleardy Exist" });
         }
@@ -45,7 +44,7 @@ export const deleteAdmin = async (req, res) => {
         if (!admin) return res.status(500).json({ "error": "Unable To Delete  Admin" });
         return res.status(200).json({ "message": "Admin Deleted Sucessfully" });
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({ "error": "Unable To Delete Admin Internal Server Error" });
     }
 }
@@ -77,7 +76,7 @@ export const getAdmins = async (req, res) => {
         return res.status(200).json({ "message": "Admin Data fetched Sucessfully", admins: admins });
 
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({ "error": "Unable to get Admins Internal Server error" });
     }
 }
@@ -119,7 +118,7 @@ export const adminLogin = async (req, res) => {
         });
 
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({ "error": "Unable To LoogedIn Internal Server Error" });
     }
 }
@@ -145,7 +144,7 @@ export const dashboardData = async (req, res) => {
 
         res.status(200).json(data);
     } catch (error) {
-        logError(error);
+        console.log(error);
         res.status(500).json({ error: 'Internal server error' });
     }
 };

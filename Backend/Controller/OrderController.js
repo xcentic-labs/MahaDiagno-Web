@@ -1,7 +1,6 @@
 import prisma from "../Utils/prismaclint.js";
 import crypto from 'crypto'
 import Razorpay from "razorpay";
-import logError from "../Utils/log.js";
 
 const razorpay = new Razorpay({
     key_id: process.env.key_id,
@@ -97,7 +96,7 @@ export const addAppointment = async (req, res) => {
             return res.status(201).json({ "message": "Appointment Added Sucessfully" });
         }
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({ "error": "Unable to Add Appointment Internal Server Error" });
     }
 }
@@ -117,7 +116,7 @@ export const createOrder = async (req, res) => {
 
         return res.status(200).json(order);
     } catch (err) {
-        logError(err);
+        console.log(err);
         res.status(500).json({ error: 'Failed to create order', details: err });
     }
 }

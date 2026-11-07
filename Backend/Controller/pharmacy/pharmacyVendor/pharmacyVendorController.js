@@ -1,6 +1,6 @@
 import prisma from '../../../Utils/prismaclint.js'
 import { uploadPharmacyVendorImage } from '../../../Storage/pharmacyStorage/pharmacyVendor.js'
-import { sentopt, verify2factorOtp } from '../../../Utils/otp.js';
+import { sentopt, verify2factorOtp, isTestOtp } from '../../../Utils/otp.js';
 
 // ====================== Pharmacy Vendor ======================
 export const addPharmacyVendor = async (req, res) => {
@@ -146,7 +146,7 @@ export const pharmacyVendorLogin = async (req, res) => {
         console.log("Login attempt for vendor- phone number:", phoneNumber);
         console.log("Received OTP:", otp);
 
-        if (phoneNumber == '6203821043' && otp == '123456') {
+        if (isTestOtp(phoneNumber, otp)) {
             const vendor = await prisma.pharmacyVendor.findUnique({
                 where: { phoneNumber },
                 include: {

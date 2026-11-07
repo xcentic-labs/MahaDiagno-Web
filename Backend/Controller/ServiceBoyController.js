@@ -1,7 +1,6 @@
 import { generatePassword, matchedPassword } from "../Utils/password.js";
 import prisma from "../Utils/prismaclint.js";
 import { convertKeysToCamelCase } from "../Utils/camelCaseConverter.js";
-import logError from "../Utils/log.js";
 
 export const addServiceBoy = async (req, res) => {
     try {
@@ -50,7 +49,7 @@ export const addServiceBoy = async (req, res) => {
         if (!serviceBoy) return res.status(500).json({ "error": "Unable To Add Service Boy" });
         return res.status(201).json({ "message": "Service Boy Added Sucessfully" });
     } catch (error) {
-        logError(error);
+        console.log(error);
         if (error.code == 'P2002') {
             return res.status(409).json({ "error": "User Aleardy Exist" });
         }
@@ -72,7 +71,7 @@ export const deleteServiceBoy = async (req, res) => {
         if (!serviceBoy) return res.status(500).json({ "error": "Unable To Delete Service Boy" });
         return res.status(200).json({ "message": "Service Boy Deleted Sucessfully" });
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({ "error": "Unable To Delete Service Boy Internal Server Error" });
     }
 }
@@ -116,7 +115,7 @@ export const UpdatePassword = async (req, res) => {
         return res.status(200).json({ "message": "Password Updated Sucessfully" });
 
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({ "error": "Unable To Update passwrod of Service Boy Internal Server Error" });
     }
 }
@@ -177,7 +176,7 @@ export const serviceBoyLogin = async (req, res) => {
         });
 
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({ "error": "Unable To LoogedIn Internal Server Error" });
     }
 }
@@ -205,7 +204,7 @@ export const changeStatus = async (req, res) => {
 
         return res.status(200).json({ "message": `Status Marked ${serviceBoy.status ? 'Online' : 'Offline'}`, status: serviceBoy.status });
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({ "error": "Unable to Update the status" })
     }
 }
@@ -283,7 +282,7 @@ export const getMyServiceBoy = async (req, res) => {
             "message": "Service Boy Fetched Sucessfully", serviceBoy: formatedServiceBoy
         });
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({ "error": "Unable To Get Service Boy Internal Server Error" });
     }
 }
@@ -306,7 +305,7 @@ export const getAllServiceBoys = async (req, res) => {
         if (!serviceBoys) return res.status(500).json({ "error": "Unable To Fetch Service Boys" });
         return res.status(200).json({ "message": "Service Boys Fetched Sucessfully", serviceBoys: allServiceBoy });
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({ "error": "Unable To FetchService Boy Internal Server Error" });
     }
 }
@@ -361,7 +360,7 @@ export const getServiceBoy = async (req, res) => {
             }
         });
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({ "error": "Unable To Get Service Boy Internal Server Error" });
     }
 }
@@ -444,7 +443,7 @@ export const getSpecficServiceBoy = async (req, res) => {
         res.status(200).json({ "message": "service boy fetched Sucessfully", serviceboy: formatedServiceBoy });
 
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({ error: "Internal Server Error" });
     }
 }
@@ -470,7 +469,7 @@ export const handleUpdateCashToRecived = async (req, res) => {
         if (!appointments) return res.status(404).json({ error: "No Such appointements" });
         return res.status(200).json({ "message": "Status Updated Sucessfully" });
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({ error: "Internal Server Error" });
     }
 }

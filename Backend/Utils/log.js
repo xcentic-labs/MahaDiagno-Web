@@ -15,7 +15,7 @@ const logError = (error) => {
     // Append the error message to the log file
     fs.appendFile(logFilePath, errorMessage, (err) => {
         if (err) {
-            logError('Failed to write to log file:', err);
+            console.error('Failed to write to log file:', err);
         }
     });
 }

@@ -1,5 +1,4 @@
 import prisma from "../Utils/prismaclint.js";
-import logError from "../Utils/log.js";
 
 export const addSubscription = async (req, res) => {
     try {
@@ -31,7 +30,7 @@ export const addSubscription = async (req, res) => {
 
         return res.status(201).json({ message: "Subscription Added Successfully" });
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({ error: "Unable To Add Subscription - Internal Server Error" });
     }
 };
@@ -56,7 +55,7 @@ export const deleteSubscription = async (req, res) => {
 
         return res.status(200).json({ message: "Subscription Deleted Successfully" });
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({ error: "Unable To Delete Subscription - Internal Server Error" });
     }
 };
@@ -73,7 +72,7 @@ export const getSubscriptions = async (req, res) => {
 
         return res.status(200).json({ message: "Subscriptions Fetched Successfully", subscriptions : result });
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({ error: "Unable To Fetch Subscriptions - Internal Server Error" });
     }
 };
@@ -109,7 +108,7 @@ export const updateSubscription = async (req, res) => {
 
     return res.status(200).json({ message: "Subscription updated successfully", data: updated });
   } catch (error) {
-    logError("Update Subscription Error:", error);
+    console.log("Update Subscription Error:", error);
     return res.status(500).json({ error: "Unable to update subscription - internal server error" });
   }
 };

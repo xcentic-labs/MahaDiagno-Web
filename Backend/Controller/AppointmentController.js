@@ -2,7 +2,6 @@ import prisma from "../Utils/prismaclint.js";
 import { uploadReportFile } from '../Storage/ReportRouter.js';
 import { generateFormatedRes, fieldToBeSelected } from "../Utils/GenerateFormatedRes.js";
 import { convertKeysToCamelCase } from "../Utils/camelCaseConverter.js";
-import logError from "../Utils/log.js";
 
 export const deleteAppointment = async (req, res) => {
     try {
@@ -19,7 +18,7 @@ export const deleteAppointment = async (req, res) => {
         if (!appointment) return res.status(404).json({ "error": "Appointment Not Found" });
         return res.status(200).json({ "message": "Appointment Deleted Sucessfully" });
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({ "error": "Unable to Deleted Appointment Internal Server Error" });
     }
 } 
@@ -72,7 +71,7 @@ export const getPersonalAppointments = async (req, res) => {
         });
 
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({ "error": "Unable To Fetch Appointments Internal Server Error" });
     }
 } // nos
@@ -136,7 +135,7 @@ export const getPartnerAppointments = async (req, res) => {
         });
 
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({ "error": "Unable To Fetch Appointments Internal Server Error" });
     }
 }
@@ -179,7 +178,7 @@ export const serviceBoyAppointments = async (req, res) => {
 
         return res.status(200).json({ "message": "Appointments Fetched Sucessfully", myAppointments: appointments });
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({ "error": "Unable To Fetch Appointments Internal Server Error" });
     }
 }
@@ -223,7 +222,7 @@ export const getAppointments = async (req, res) => {
 
         return res.status(200).json({ "message": "Appointments Fetched Sucessfully", myAppointments: appointments });
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({ "error": "Unable To Fetch Appointments Internal Server Error" });
     }
 }
@@ -267,7 +266,7 @@ export const getSpecificAppointment = async (req, res) => {
         });
 
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({ error: "Internal Server Error" });
     }
 };
@@ -329,7 +328,7 @@ export const getAllAppointments = async (req, res) => {
         });
 
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({ "error": "Unable To Fetch Appointments Internal Server Error" });
     }
 }
@@ -384,7 +383,7 @@ export const acceptAppointment = async (req, res) => {
         if (!appointment) return res.status(404).json({ "error": "Appointment Not Found" });
         return res.status(200).json({ "message": "Appointment Accepted Sucessfully", appointment: formattedAppointment });
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({ "error": "Unable to Accept Internal server error" })
     }
 }
@@ -432,7 +431,7 @@ export const completeAppointment = async (req, res) => {
         if (!appointment) return res.status(404).json({ "error": "Internal server error" });
         return res.status(200).json({ "message": "Appointment COMPLETED Sucessfully", appointment: formattedAppointment });
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({ "error": "Unable to Complete Internal server error" })
     }
 }
@@ -480,7 +479,7 @@ export const cancleAppointment = async (req, res) => {
         if (!appointment) return res.status(404).json({ "error": "Internal server error" });
         return res.status(200).json({ "message": "Appointment Canclled Sucessfully", appointment: formattedAppointment });
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({ "error": "Unable to Complete Internal server error" })
     }
 }
@@ -535,7 +534,7 @@ export const updateStatus = async (req, res) => {
         if (!appointment) return res.status(404).json({ "error": "Appointment Not Found" });
         return res.status(200).json({ "message": "Appointment Accepted Sucessfully", appointment: formattedAppointment });
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({ "error": "Unable to Accept Internal server error" })
     }
 }
@@ -597,7 +596,7 @@ export const uploadReport = async (req, res) => {
             return res.status(200).json({ "message": "PDF Uploded Sucessfully", appointment: formattedAppointment });
         });
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({ "error": "Unable to Accept Internal server error" })
     }
 }
@@ -627,7 +626,7 @@ export const handleMarkAsPaid = async (req, res) => {
         if (!appointment) return res.status(404).json({ "error": "Appointment Not Found" });
         return res.status(200).json({ "message": "Appointment Accepted Sucessfully", appointment: formattedAppointment });
     } catch (error) {
-        logError(error);
+        console.log(error);
         return res.status(500).json({ "error": "Unable to Accept Internal server error" })
     }
 }

@@ -1,5 +1,4 @@
 import prisma from "../Utils/prismaclint.js";
-import logError from "../Utils/log.js";
 // ➕ Add a Payment Method
 export const addPaymentMethod = async (req, res) => {
     try {
@@ -44,7 +43,7 @@ export const addPaymentMethod = async (req, res) => {
         return res.status(201).json(newPayment);
     } catch (error) {
         console.error("Error adding payment method:", error);
-        logError("Error adding payment method:", error);
+        console.log("Error adding payment method:", error);
         return res.status(500).json({ error: "Internal server error" });
     }
 };
@@ -62,7 +61,7 @@ export const deletePaymentMethod = async (req, res) => {
 
         return res.status(200).json({ message: "Payment Method deleted successfully", deleted });
     } catch (error) {
-        logError("Error deleting payment method:", error);
+        console.log("Error deleting payment method:", error);
         return res.status(500).json({ error: "Internal server error" });
     }
 };
@@ -83,7 +82,7 @@ export const getPaymentMethodByPartnerId = async (req, res) => {
 
         return res.status(200).json(payment);
     } catch (error) {
-        logError("Error fetching payment method:", error);
+        console.log("Error fetching payment method:", error);
         return res.status(500).json({ error: "Internal server error" });
     }
 };
@@ -98,7 +97,7 @@ export const getAllPaymentMethods = async (req, res) => {
 
         return res.status(200).json(payments);
     } catch (error) {
-        logError("Error fetching payment methods:", error);
+        console.log("Error fetching payment methods:", error);
         return res.status(500).json({ error: "Internal server error" });
     }
 };
@@ -119,7 +118,7 @@ export const getPaymentMethodByDoctorId = async (req, res) => {
 
         return res.status(200).json(payment);
     } catch (error) {
-        logError("Error fetching payment method:", error);
+        console.log("Error fetching payment method:", error);
         return res.status(500).json({ error: "Internal server error" });
     }
 };
@@ -139,7 +138,7 @@ export const getPaymentMethodByPharmacyVendorId = async (req, res) => {
 
         return res.status(200).json(payment);
     } catch (error) {
-        logError("Error fetching payment method:", error);
+        console.log("Error fetching payment method:", error);
         return res.status(500).json({ error: "Internal server error" });
     }
 };
