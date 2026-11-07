@@ -3,6 +3,8 @@ import { Server } from "socket.io";
 
 export function initSocket(server) {
   const io = new Server(server, {
+    // other upgrades (e.g. /api/v1/ai/voice-agent) are handled by websocket/aiVoiceAgent.js
+    destroyUpgrade: false,
     cors: {
       origin: "*",
       credentials: true,

@@ -26,10 +26,12 @@ import { MedicineRouter } from './Router/pharmacy/medicine/MedicineRouter.js';
 import { MedicineCategoryRouter } from './Router/pharmacy/medicineCategory/MedicineCategoryRouter.js';
 import { PharmacyVendorRouter } from './Router/pharmacy/pharmacyVendor/PharmacyVendorRouter.js';
 import { MedicineOrderRouter } from './Router/pharmacy/order/OrderRouter.js';
+import { aiRouter } from './Router/aiRouter.js';
 // cros 
 import cors from 'cors'
 import { createServer } from 'http'
 import { initSocket } from './websocket/locationSocket.js';
+import { initVoiceAgentSocket } from './websocket/aiVoiceAgent.js';
 import withdrawRouter from './Router/withdrawRoutes.js';
 import paymentMethodRouter from './Router/paymentMethodRoutes.js';
 import BannerRouter from './Router/BannerRouter.js';
@@ -41,6 +43,7 @@ const app = express();
 
 export const server = createServer(app);
 initSocket(server); 
+initVoiceAgentSocket(server);
 
 
 
@@ -88,6 +91,7 @@ app.use('/api/v1/pharmacy/medicine', MedicineRouter);
 app.use('/api/v1/pharmacy/medicinecategory', MedicineCategoryRouter);
 app.use('/api/v1/pharmacy/pharmacyvendor', PharmacyVendorRouter);
 app.use('/api/v1/pharmacy/order', MedicineOrderRouter);
+app.use('/api/v1/ai', aiRouter);
 
 
 app.get('/', (req, res) => {

@@ -16,3 +16,12 @@ export const generateToken = (email, id)=>{
 export const verifyToken = (token)=>{
     return jwt.verify(token , KEY)
 }
+
+// user (app) token — used by /api/v1/ai/*
+export const generateUserToken = (user) => {
+    return jwt.sign({
+        id: user.id,
+        phoneNumber: user.phoneNumber,
+        role: 'USER'
+    }, KEY, { expiresIn: '30d' })
+}

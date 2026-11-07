@@ -1,5 +1,6 @@
 import prisma from "../Utils/prismaclint.js";
 import { sentopt, verify2factorOtp, isTestOtp } from "../Utils/otp.js";
+import { generateUserToken } from "../Utils/jwt.js";
 
 export const getopt = async (req, res) => {
     try {
@@ -76,7 +77,7 @@ export const verifyOtp = async (req, res) => {
                     phoneNumber: phoneNumber
                 }
             });
-             return res.status(200).json({ "message": "OTP Matched", user: user });
+             return res.status(200).json({ "message": "OTP Matched", user: user, token: user?.id ? generateUserToken(user) : null });
         }
 
         const isMatched = await verify2factorOtp(phoneNumber, otp)
@@ -89,7 +90,7 @@ export const verifyOtp = async (req, res) => {
             }
         })
 
-        return res.status(200).json({ "message": "OTP Matched", user: user });
+        return res.status(200).json({ "message": "OTP Matched", user: user, token: user?.id ? generateUserToken(user) : null });
     } catch (error) {
         console.log(error);
         return res.status(500).json({ "error": "Unable to process OTP internal server error" });
