@@ -18,7 +18,9 @@ export const createOrder = async (req, res) => {
             receipt,
         });
 
-        return res.status(200).json(order);
+        // Send the public key id with the order so clients don't hardcode it.
+        // Only the key id is sent; the key secret stays on the server.
+        return res.status(200).json({ ...order, key: process.env.key_id });
     } catch (err) {
         console.error("Error creating order:", err);
         res.status(500).json({ error: 'Failed to create order', details: err });
