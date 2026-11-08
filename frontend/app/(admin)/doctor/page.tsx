@@ -42,6 +42,8 @@ export default function Doctors() {
   const [isButtonLoading, setIsButtonLoading] = useState<boolean>(false);
   
   // Form states
+  const [fName, setFName] = useState<string>('');
+  const [lName, setLName] = useState<string>('');
   const [displayName, setDisplayName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [phoneNumber, setPhoneNumber] = useState<string>('');
@@ -60,7 +62,7 @@ export default function Doctors() {
 
   // Handle add doctor
   const handleAddDoctor = async () => {
-    if (!displayName || !email || !phoneNumber || !clinicName || !clinicAddress || !lat || !lng || !specializationId) {
+    if (!fName || !lName || !displayName || !email || !phoneNumber || !clinicName || !clinicAddress || !lat || !lng || !specializationId) {
       toast.error("All fields are required");
       return;
     }
@@ -73,6 +75,10 @@ export default function Doctors() {
     setIsButtonLoading(true);
 
     const doctorData = {
+      fName,
+      lName,
+      // Doctors log in with OTP, but the backend still requires a password field
+      password: crypto.randomUUID(),
       displayName,
       email,
       phoneNumber,
@@ -86,7 +92,7 @@ export default function Doctors() {
     };
 
     try {
-      const res = await axiosClient.post('/doctor/create', doctorData);
+      const res = await axiosClient.post('/doctor/add', doctorData);
 
       if (res.status === 201) {
         toast.success("Doctor Added Successfully");
@@ -100,9 +106,9 @@ export default function Doctors() {
       } else {
         toast.error("Unable To Add Doctor");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.warn(error);
-      toast.error("Unable To Add Doctor");
+      toast.error(error?.response?.data?.error || "Unable To Add Doctor");
     } finally {
       setIsButtonLoading(false);
     }
@@ -124,6 +130,8 @@ export default function Doctors() {
     }
   };
   const resetForm = () => {
+    setFName('');
+    setLName('');
     setDisplayName('');
     setEmail('');
     setPhoneNumber('');
@@ -402,7 +410,33 @@ export default function Doctors() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Doctor Name *
+                    First Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={fName}
+                    onChange={(e) => setFName(e.target.value)}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    placeholder="First name"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Last Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={lName}
+                    onChange={(e) => setLName(e.target.value)}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    placeholder="Last name"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Display Name *
                   </label>
                   <input
                     type="text"

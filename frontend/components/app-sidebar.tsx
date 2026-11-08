@@ -18,7 +18,7 @@ import {
   FilePlus2,
   Stethoscope
 } from "lucide-react";
-import { Bike } from "lucide-react";
+import { Bike, Thermometer, Pill } from "lucide-react";
 
 import Link from "next/link";
 import { NavMain } from "@/components/nav-main"
@@ -48,11 +48,11 @@ const data = {
       icon: LayoutDashboard, // better match than SquareTerminal
       isActive: true,
     },
-    // {
-    //   title: "Zone",
-    //   url: "/zone",
-    //   icon: Map, // suitable for zones
-    // },
+    {
+      title: "Zone",
+      url: "/zone",
+      icon: Map, // partners pick a zone when they register
+    },
     {
       title: "Banner",
       url: "/banner",
@@ -79,12 +79,22 @@ const data = {
       icon: Stethoscope, // perfect for medical specializations
     },
     {
+      title: "Symptoms",
+      url: "/symptom",
+      icon: Thermometer,
+    },
+    {
       title : "Medicine Category",
       url : "/medicinecategory",
       icon : Layers, // suitable for categories
     },
     {
-      title : "Phayrmacy Vendor",
+      title : "Medicines",
+      url : "/medicines",
+      icon : Pill,
+    },
+    {
+      title : "Pharmacy Vendor",
       url : "/pharmacyvendors",
       icon : Users, // more appropriate than Settings2
     },
